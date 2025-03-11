@@ -2,8 +2,8 @@
     <v-container>
         <div class="d-flex justify-center">
             <h1> Bem vindo ao Home Manager</h1>
-            <p>{{ message }}</p>
         </div>
+        <p>{{ message }}</p>
     </v-container>
 </template>
 
