@@ -1,21 +1,13 @@
 const express = require('express')
-const userController = require('../controllers/userController')
+const UserController = require('../controllers/userController')
+const authMiddleware = require("../middleware/authMiddleware")
 
 const router = express.Router()
 
-// Criar um novo usuário
-router.post("/users", userController.createUser)
-
-// Obter todos os usuários
-router.get("/users", userController.getAllUsers)
-
-// Obter um usuário pelo ID
-router.get("/users/:id", userController.getUserById)
-
-// Atualizar um usuário pelo ID
-router.put("/users/:id", userController.updateUser)
-
-// Deletar um usuário pelo ID
-router.delete("/users/:id", userController.deleteUser)
+/**Rotas protegidas */
+router.get("/", authMiddleware, UserController.getUsers)          // Obter todos os usuários
+router.get("/:id", authMiddleware, UserController.getUserById)    // Obter um usuário pelo ID
+router.put("/:id", authMiddleware, UserController.updateUser)     // Atualizar um usuário pelo ID
+router.delete("/id", authMiddleware, UserController.deleteUser)   // Deletar um usuário pelo ID
 
 module.exports = router
