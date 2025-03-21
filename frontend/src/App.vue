@@ -1,18 +1,16 @@
 <template>
   <v-app>
-    <ToolbarDefault />
+    <ToolbarDefault v-if="authStore.isAuthenticated" />
+    
     <v-main>
       <router-view />
     </v-main>
   </v-app>
 </template>
 
-<script>
-import ToolbarDefault from '@/components/ToolbarDefault.vue'
+<script setup>
+import { useAuthStore } from "@/stores/authStore"
+import ToolbarDefault from "@/components/ToolbarDefault.vue"
 
-export default {
-  components: {
-    ToolbarDefault
-  }
-}
+const authStore = useAuthStore()
 </script>

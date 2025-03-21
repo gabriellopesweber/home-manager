@@ -58,25 +58,27 @@
   <v-app-bar title="HomeManager">
     <v-spacer />
     <v-list>
-      <v-list-item 
-        subtitle="teste@google.com"
-        title="Test"
-      >
-        <template #append>
-          <v-btn 
-            icon="mdi-menu-down"
-            size="small"
-            rounded="circular"
-            variant="text" 
-          />
-        </template>
+      <v-list-item>
+        <v-btn
+          v-if="authStore.isAuthenticated"
+          @click="logout"
+        >
+          Sair
+        </v-btn>
       </v-list-item>
     </v-list>
   </v-app-bar>
 </template>
 
-<script>
-export default {
-  name: "ToolbarDefault"
+<script setup>
+import { useAuthStore } from "@/stores/authStore"
+import { useRouter } from "vue-router"
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+const logout = () => {
+  authStore.logout()
+  router.push("/login")
 }
 </script>

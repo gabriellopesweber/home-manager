@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import api from "@/api"
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 
 export default {
@@ -38,18 +37,6 @@ export default {
       message: "",
       loading: false
     }
-  },
-  async created() {
-    try {
-      this.loading = true
-      const response = await api.get("/home")
-      this.message = response.data
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error)
-      this.message = "Erro ao carregar a página"
-    } finally {
-      this.loading = false
-    }
-  },
+  }
 }
 </script>
