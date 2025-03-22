@@ -18,6 +18,9 @@ export default createVuetify({
     },
     VBtn: {
       rounded: 'lg'
+    },
+    VTextField: {
+      rounded: 'lg'
     }
   },
 })

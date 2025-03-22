@@ -9,10 +9,11 @@
       <v-list-item>
         <template #title>
           <div class="d-flex align-center justify-center">
-            <v-icon>
-              mdi-currency-usd
-            </v-icon>
-            <span> Home Manager </span>
+            <img
+              class="mx-auto"
+              :src="myLogo"
+              style="height: 75px; width: 200px;"
+            >
           </div>
         </template>
       </v-list-item>
@@ -21,14 +22,14 @@
         <v-list-item 
           link
           prepend-icon="mdi-view-dashboard"
-          active-color="primary"
+          color="primary"
           title="Dashboard"
           :to="{ name: 'dashboard' }"
         />
         <v-list-group
           value="reports"
           prepend-icon="mdi-file-document"
-          active-color="primary"
+          color="primary"
         >
           <template #activator="{ props }">
             <v-list-item
@@ -73,12 +74,17 @@
 <script setup>
 import { useAuthStore } from "@/stores/authStore"
 import { useRouter } from "vue-router"
+import { ref } from "vue"
 
 const authStore = useAuthStore()
 const router = useRouter()
 
+const myLogo = ref("/img/HM-Black.svg")
+
 const logout = () => {
   authStore.logout()
-  router.push("/login")
+  router.push({
+    name: 'login'
+  })
 }
 </script>

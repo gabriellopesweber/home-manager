@@ -9,7 +9,6 @@
       justify="center"
     >
       <BaseMaterialCard
-        elevation="5"
         width="500"
       >
         <template #title>
@@ -20,14 +19,25 @@
               style="height: 75px; width: 200px;"
             >
             <div>
-              Seja bem vindo
+              Crie uma conta
             </div>
           </div>
         </template>
-        <v-form
+        <v-form 
           ref="form"
           v-model="valid"
         >
+          <v-row dense>
+            <v-col class="d-flex align-center justify-center">
+              <v-text-field
+                v-model="name"
+                variant="outlined"
+                label="Seu nome"
+                clearable
+                :rules="[() => $validation('required', name)]"
+              />
+            </v-col>
+          </v-row>
           <v-row dense>
             <v-col class="d-flex align-center justify-center">
               <v-text-field
@@ -45,34 +55,28 @@
                 v-model="password"
                 type="password"
                 variant="outlined"
-                clearable
                 label="Senha"
-                :rules="[() => $validation('required', password)]"
+                clearable
+                :rules="[() => $validation('required', password), () => $validation('passwordStrength', password)]"
               />
             </v-col>
           </v-row>
           <v-row dense>
-            <v-col class="d-flex justify-center">
+            <v-col class="d-flex justify-space-evenly">
               <v-btn
-                color="primary"
-                :loading="loading"
-                @click="login"
-              >
-                Entrar
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex align-center flex-column mt-2">
-              É seu primeiro acesso? 
-              <v-btn
-                class="mx-4"
-                variant="text"
+                variant="outlined"
                 :to="{
-                  name: 'register'
+                  name: 'login'
                 }"
               >
-                Registre-se
+                Voltar
+              </v-btn>
+              <v-btn
+                color="success"
+                :loading="loading"
+                @click="register"
+              >
+                Cadastrar
               </v-btn>
             </v-col>
           </v-row>
@@ -94,10 +98,12 @@ export default {
   setup () {
     const authStore = useAuthStore()
     const router = useRouter()
+
     return { authStore, router }
   },
-  data () {
+  data() {
     return {
+      name: "",
       email: "",
       password: "",
       valid: false,
@@ -106,22 +112,23 @@ export default {
     }
   },
   methods: {
-    async login () {
+    async register() {
       try {
         this.loading = true
         this.$refs.form.validate()
         if (this.valid) {
-          await this.authStore.login(this.email, this.password)
+          await this.authStore.register(this.name, this.email, this.password)
           this.router.push({
-            name: 'dashboard'
+            name: 'login'
           })
+          this.$showMessage("Usuario cadastrado com sucesso!", "success")
         }
       } catch {
-        this.$showMessage("Ocorreu um problema ao fazer o login!", "error")
+        this.$showMessage("Ocorreu um problema ao cadastrar o usuario!", "error")
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>

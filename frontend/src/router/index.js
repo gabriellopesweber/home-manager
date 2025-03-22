@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from "@/stores/authStore"
 import DashboardIndex from '@/views/DashboardIndex.vue'
 import LoginView from "@/views/auth/LoginView.vue"
+import RegisterView from "@/views/auth/RegisterView.vue"
 import ReportRevenueIndex from '@/views/report/ReportRevenueIndex.vue'
 import ReportExpenseIndex from '@/views/report/ReportExpenseIndex.vue'
 
@@ -10,6 +11,11 @@ const routes = [
     path: '/login',
     name: "login",
     component: LoginView
+  },
+  {
+    path: '/register',
+    name: "register",
+    component: RegisterView
   },
   {
     path: '/',

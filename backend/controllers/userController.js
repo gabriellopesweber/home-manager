@@ -1,6 +1,6 @@
 const User = require("../models/User")
 const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs")
+const bcryptjs = require("bcryptjs")
 
 const UserController = {
   async register(req, res) {
@@ -11,11 +11,7 @@ const UserController = {
       const existingUser = await User.findOne({ email })
       if (existingUser) return res.status(400).json({ message: "E-mail já cadastrado!" })
 
-      // Criptografa a senha antes de salvar
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
-
-      const newUser = await User.create({ name, email, password: hashedPassword })
+      const newUser = await User.create({ name, email, password })
 
       res.status(201).json({ message: "Usuário cadastrado com sucesso!", user: newUser })
     } catch (error) {
@@ -32,7 +28,7 @@ const UserController = {
       if (!user) return res.status(400).json({ message: "Usuário não encontrado!" })
 
       // Compara a senha fornecida com a senha criptografada no banco
-      const isMatch = await bcrypt.compare(password, user.password)
+      const isMatch = await bcryptjs.compare(password, user.password)
       if (!isMatch) return res.status(400).json({ message: "Senha incorreta!" })
 
       // Gera o token JWT

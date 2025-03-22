@@ -1,15 +1,16 @@
 <template>
   <v-card
+    v-bind="$attrs"
     :title="title"
     :subtitle="subtitle"
   >
-    <template 
+    <template
       v-if="$slots.title"
       #title
     >
       <slot name="title" />
     </template>
-    <template 
+    <template
       v-if="$slots.subtitle"
       #subtitle
     >
@@ -20,7 +21,7 @@
       <slot name="default" />
     </template>
 
-    <template 
+    <template
       v-if="$slots.actions"
       #actions
     >
@@ -35,12 +36,12 @@ export default {
   props: {
     title: {
       type: String,
-      default: ''
+      default: "",
     },
     subtitle: {
       type: String,
-      default: ''
-    }
-  }
+      default: "",
+    },
+  },
 }
 </script>
