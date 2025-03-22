@@ -36,6 +36,7 @@
                 label="E-mail"
                 clearable
                 :rules="[() => $validation('required', email), () => $validation('email', email)]"
+                @keyup.enter="login"
               />
             </v-col>
           </v-row>
@@ -48,6 +49,7 @@
                 clearable
                 label="Senha"
                 :rules="[() => $validation('required', password)]"
+                @keyup.enter="login"
               />
             </v-col>
           </v-row>

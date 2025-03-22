@@ -5,7 +5,7 @@
     
     <v-main>
       <router-view v-slot="{ Component }">
-        <v-scroll-x-transition>
+        <v-scroll-x-transition mode="out-in">
           <component :is="Component" />
         </v-scroll-x-transition>
       </router-view>
