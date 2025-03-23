@@ -17,46 +17,77 @@
           </div>
         </template>
       </v-list-item>
-      <v-divider />
-      <div class="mt-2">
-        <v-list-item 
-          link
-          prepend-icon="mdi-view-dashboard"
-          color="primary"
-          title="Dashboard"
-          :to="{ name: 'dashboard' }"
-        />
-        <v-list-group
-          value="reports"
-          prepend-icon="mdi-file-document"
-          color="primary"
-        >
-          <template #activator="{ props }">
-            <v-list-item
-              v-bind="props"
-              link
-              
-              title="Relatórios"
-            />
-          </template>
-
+      <v-divider class="mb-2" />
+      <v-list-item 
+        link
+        prepend-icon="mdi-view-dashboard"
+        color="primary"
+        title="Dashboard"
+        :to="{ name: 'dashboard' }"
+      />
+      <v-list-group
+        value="reports"
+        prepend-icon="mdi-receipt-text-outline"
+        color="primary"
+      >
+        <template #activator="{ props }">
           <v-list-item
+            v-bind="props"
             link
-            title="Relatorio de Entradas"
-            :to="{ name: 'relatorio.receitas' }"
+            color="primary"
+            title="Relatórios"
           />
+        </template>
+
+        <v-list-item
+          prepend-icon="mdi-receipt-text-arrow-right-outline"
+          title="Entradas"
+          color="primary"
+          link
+          :to="{ name: 'relatorio.receitas' }"
+        />
         
+        <v-list-item
+          link 
+          prepend-icon="mdi-receipt-text-arrow-left-outline"
+          title="Saidas"
+          color="primary"
+          :to="{ name: 'relatorio.saidas' }"
+        />
+      </v-list-group>
+      <v-list-group
+        value="mananger"
+        prepend-icon="mdi-cash-multiple"
+        color="primary"
+      >
+        <template #activator="{ props }">
           <v-list-item
-            link 
-            title="Relatorio de Saidas"
-            :to="{ name: 'relatorio.saidas' }"
+            v-bind="props"
+            title="Gerenciamento"
+            color="primary"
+            link
           />
-        </v-list-group>
-      </div>
+        </template>
+
+        <v-list-item
+          title="Receitas"
+          prepend-icon="mdi-arrow-right-thick"
+          color="primary"
+          link
+          :to="{ name: 'manager.receitas' }"
+        />
+        <v-list-item
+          prepend-icon="mdi-arrow-left-thick"
+          title="Saidas"
+          color="primary"
+          link
+          :to="{ name: 'manager.saidas' }"
+        />
+      </v-list-group>
     </v-list>
   </v-navigation-drawer>
 
-  <v-app-bar title="HomeManager">
+  <v-app-bar>
     <v-spacer />
     <v-list>
       <v-list-item>
@@ -71,20 +102,28 @@
   </v-app-bar>
 </template>
 
-<script setup>
+<script>
 import { useAuthStore } from "@/stores/authStore"
 import { useRouter } from "vue-router"
-import { ref } from "vue"
 
-const authStore = useAuthStore()
-const router = useRouter()
-
-const myLogo = ref("/img/HM-Black.svg")
-
-const logout = () => {
-  authStore.logout()
-  router.push({
-    name: 'login'
-  })
+export default {
+  setup () {
+    const authStore = useAuthStore()
+    const router = useRouter()
+    return { authStore, router }
+  },
+  data () {
+    return {
+      myLogo: "/img/HM-Black.svg"
+    }
+  },
+  methods: {
+    logout () {
+      this.authStore.logout()
+      this.router.push({
+        name: 'login'
+      })
+    }
+  }
 }
 </script>

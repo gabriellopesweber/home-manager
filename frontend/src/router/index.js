@@ -41,6 +41,22 @@ const routes = [
       requiresAuth: true
     }
   },
+  {
+    path: '/gerenciamento/receitas',
+    name: "manager.receitas",
+    component: ReportRevenueIndex,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/gerenciamento/saidas',
+    name: "manager.saidas",
+    component: ReportExpenseIndex,
+    meta: {
+      requiresAuth: true
+    }
+  },
 ]
 
 const router = createRouter({
