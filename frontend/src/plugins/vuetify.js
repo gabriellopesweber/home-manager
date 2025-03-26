@@ -20,7 +20,8 @@ export default createVuetify({
       rounded: 'lg'
     },
     VTextField: {
-      rounded: 'lg'
+      rounded: 'lg',
+      density: 'comfortable'
     }
   },
 })

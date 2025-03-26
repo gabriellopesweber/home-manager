@@ -17,9 +17,9 @@
       <slot name="subtitle" />
     </template>
 
-    <template #text>
+    <v-card-text class="pb-0">
       <slot name="default" />
-    </template>
+    </v-card-text>
 
     <template
       v-if="$slots.actions"

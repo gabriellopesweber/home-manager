@@ -16,7 +16,11 @@ export const useAuthStore = defineStore("authorization", {
         this.token = response.data.token
         localStorage.setItem("token", this.token)
       } catch (error) {
-        throw error.response.data
+        if (error.response) {
+          const { data, status } = error.response
+          throw { data, status }
+        }
+        throw error
       }
     },
 
@@ -24,7 +28,35 @@ export const useAuthStore = defineStore("authorization", {
       try {
         await axios.post("/authorization/register", { name, email, password })
       } catch (error) {
-        throw error.response.data
+        if (error.response) {
+          const { data, status } = error.response
+          throw { data, status }
+        }
+        throw error
+      }
+    },
+
+    async resetPassword(token, newPassword) {
+      try {
+        await axios.post("/authorization/reset-password", { token, newPassword })
+      } catch (error) {
+        if (error.response) {
+          const { data, status } = error.response
+          throw { data, status }
+        }
+        throw error
+      }
+    },
+
+    async forgotPassword(email) {
+      try {
+        await axios.post("/authorization/forgot-password", { email })
+      } catch (error) {
+        if (error.response) {
+          const { data, status } = error.response
+          throw { data, status }
+        }
+        throw error
       }
     },
 
@@ -32,6 +64,6 @@ export const useAuthStore = defineStore("authorization", {
       this.token = ""
       this.user = null
       localStorage.removeItem("token")
-    },
-  },
+    }
+  }
 })

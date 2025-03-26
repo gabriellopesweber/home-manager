@@ -9,7 +9,6 @@
       justify="center"
     >
       <BaseMaterialCard
-        elevation="5"
         width="500"
       >
         <template #title>
@@ -20,71 +19,44 @@
               style="height: 75px; width: 200px;"
             >
             <div>
-              Seja bem vindo
+              Esqueceu sua senha?
             </div>
           </div>
         </template>
-        <v-form
+
+        <template #subtitle>
+          <div class="text-center">
+            <span> Informe o seu e-mail </span>
+          </div>
+        </template>
+        <v-form 
           ref="form"
           v-model="valid"
         >
           <v-row dense>
-            <v-col class="d-flex align-center justify-center">
+            <v-col class="d-flex justify-center">
               <v-text-field
                 v-model="email"
                 variant="outlined"
+                density="comfortable"
                 label="E-mail"
                 clearable
                 :rules="[() => $validation('required', email), () => $validation('email', email)]"
-                @keyup.enter="login"
+                @keyup.enter="updatePass"
               />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex justify-center">
-              <v-text-field
-                v-model="password"
-                type="password"
-                variant="outlined"
-                clearable
-                label="Senha"
-                :rules="[() => $validation('required', password)]"
-                @keyup.enter="login"
-              />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex justify-center">
-              <v-btn
-                color="primary"
-                :loading="loading"
-                @click="login"
-              >
-                Entrar
-              </v-btn>
             </v-col>
           </v-row>
         </v-form>
         <template #actions>
           <v-row dense>
-            <v-col class="d-flex align-center justify-center">
+            <v-col class="d-flex justify-space-evenly">
               <v-btn
-                class="mx-4"
-                variant="text"
-                :to="{
-                  name: 'register'
-                }"
+                class="bg-primary"
+                type="submite"
+                :loading="loading"
+                @click="updatePass"
               >
-                Registre-se
-              </v-btn>
-              <v-btn
-                class="mx-4"
-                variant="text"
-                :to="{
-                  name: 'forgotPassword'
-                }"
-              >
-                Esqueceu a senha?
+                Solicitar redefinição
               </v-btn>
             </v-col>
           </v-row>
@@ -106,30 +78,35 @@ export default {
   setup () {
     const authStore = useAuthStore()
     const router = useRouter()
+
     return { authStore, router }
   },
-  data () {
+  data() {
     return {
       email: "",
-      password: "",
       valid: false,
       loading: false,
       myLogo: "/img/HomeManager-Black.svg",
     }
   },
   methods: {
-    async login () {
+    async updatePass() {
       try {
         this.loading = true
         this.$refs.form.validate()
         if (this.valid) {
-          await this.authStore.login(this.email, this.password)
+          await this.authStore.forgotPassword(this.email)
           this.router.push({
-            name: 'dashboard'
+            name: 'login'
           })
+          this.$showMessage("E-mail enviado com sucesso!", "success")
         }
-      } catch {
-        this.$showMessage("Ocorreu um problema ao fazer o login!", "error")
+      } catch (e) {
+        if (e.status === 400) {
+          this.$showMessage("E-mail não encontrado!", "error")
+          return 
+        }
+        this.$showMessage("Ocorreu um problema ao enviar o e-mail!", "error")
       } finally {
         this.loading = false
       }

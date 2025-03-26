@@ -109,7 +109,6 @@ const UserController = {
         process.env.JWT_SECRET,
         { expiresIn: "15m" }
       )
-      // const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" })
 
       // Configuração do transporte de e-mail (Gmail, SMTP, etc.)
       const transporter = nodemailer.createTransport({

@@ -3,14 +3,14 @@
     class="d-flex justify-center fill-height"
     fluid
   >
-    <v-row
-      dense
-      align="center"
-      justify="center"
+    <v-form 
+      ref="form"
+      v-model="valid"
     >
-      <v-form 
-        ref="form"
-        v-model="valid"
+      <v-row
+        dense
+        align="center"
+        justify="center"
       >
         <BaseMaterialCard
           width="500"
@@ -23,73 +23,63 @@
                 style="height: 75px; width: 200px;"
               >
               <div>
-                Crie uma conta
+                Redefinição de senha
               </div>
             </div>
           </template>
         
+          <template #subtitle>
+            <div class="text-center">
+              <span> Informe a nova senha </span>
+            </div>
+          </template>
+
           <v-row dense>
-            <v-col class="d-flex align-center justify-center">
+            <v-col class="d-flex justify-center">
               <v-text-field
-                v-model="name"
+                v-model="newPassword"
+                type="password"
                 variant="outlined"
-                label="Seu nome"
+                label="Nova senha"
                 clearable
-                :rules="[() => $validation('required', name)]"
-                @keyup.enter="register"
-              />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex align-center justify-center">
-              <v-text-field
-                v-model="email"
-                variant="outlined"
-                label="E-mail"
-                clearable
-                :rules="[() => $validation('required', email), () => $validation('email', email)]"
-                @keyup.enter="register"
+                :rules="[() => $validation('required', newPassword), () => $validation('passwordStrength', newPassword)]"
+                @keyup.enter="validateAndUpdate"
               />
             </v-col>
           </v-row>
           <v-row dense>
             <v-col class="d-flex justify-center">
               <v-text-field
-                v-model="password"
+                v-model="confirmationPassword"
                 type="password"
                 variant="outlined"
-                label="Senha"
+                label="Confirme sua senha"
                 clearable
-                :rules="[() => $validation('required', password), () => $validation('passwordStrength', password)]"
-                @keyup.enter="register"
+                :rules="[
+                  () => $validation('required', confirmationPassword), 
+                  () => $validation('passwordIsSomeIqual', newPassword, confirmationPassword),
+                  () => $validation('passwordStrength', confirmationPassword)
+                ]"
+                @keyup.enter="validateAndUpdate"
               />
             </v-col>
           </v-row>
-        
           <template #actions>
             <v-row dense>
               <v-col class="d-flex justify-space-evenly">
                 <v-btn
-                  variant="outlined"
-                  :to="{
-                    name: 'login'
-                  }"
-                >
-                  Voltar
-                </v-btn>
-                <v-btn
                   class="bg-success"
                   :loading="loading"
-                  @click="register"
+                  @click="validateAndUpdate"
                 >
-                  Cadastrar
+                  Atualizar
                 </v-btn>
               </v-col>
             </v-row>
           </template>
         </BaseMaterialCard>
-      </v-form>
-    </v-row>
+      </v-row>
+    </v-form>
   </v-container>
 </template>
 
@@ -110,31 +100,40 @@ export default {
   },
   data() {
     return {
-      name: "",
-      email: "",
-      password: "",
+      token: "",
+      newPassword: "",
+      confirmationPassword: "",
       valid: false,
       loading: false,
       myLogo: "/img/HomeManager-Black.svg",
     }
   },
+  created () {
+    this.token = this.$route.query.token || ''
+  },
   methods: {
-    async register() {
+    async validateAndUpdate () {
       try {
         this.loading = true
         this.$refs.form.validate()
+
         if (this.valid) {
-          await this.authStore.register(this.name, this.email, this.password)
-          this.router.push({
-            name: 'login'
-          })
-          this.$showMessage("Usuario cadastrado com sucesso!", "success")
+          if (this.newPassword === this.confirmationPassword) {
+            await this.updatePass()
+          }
         }
       } catch {
-        this.$showMessage("Ocorreu um problema ao cadastrar o usuario!", "error")
+        this.$showMessage("Ocorreu um problema ao atualizar a senha!", "error")
       } finally {
         this.loading = false
       }
+    },
+    async updatePass () {
+      await this.authStore.resetPassword(this.token, this.confirmationPassword)
+      this.router.push({
+        name: 'login'
+      })
+      this.$showMessage("Senha atualizada com sucesso!", "success")
     },
   },
 }
