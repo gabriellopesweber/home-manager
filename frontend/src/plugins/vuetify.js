@@ -8,6 +8,17 @@ import { pt } from 'vuetify/locale'
 export default createVuetify({
   components,
   directives,
+  theme: {
+    defaultTheme: 'light',
+    themes: {
+      light: {
+        fonts: {
+          body: 'Poppins, sans-serif',
+          heading: 'Poppins, sans-serif'
+        }
+      }
+    }
+  },
   locale: {
     locale: 'pt', // Define o idioma padrão como português
     messages: { pt }, // Carrega as traduções para português

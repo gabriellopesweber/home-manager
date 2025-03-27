@@ -6,6 +6,7 @@ import router from './router/index'
 import vuetify from './plugins/vuetify'
 import validationPlugin from "@/plugins/validationPlugin"
 import messagePlugin from "@/plugins/messagePlugin"
+import '@/assets/global.css'
 
 const app = createApp(App)
 
