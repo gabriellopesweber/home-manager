@@ -1,4 +1,4 @@
-const User = require("../models/User")
+const User = require("@/models/User")
 const jwt = require("jsonwebtoken")
 const bcryptjs = require("bcryptjs")
 const nodemailer = require("nodemailer")

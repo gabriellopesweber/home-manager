@@ -1,8 +1,5 @@
 function formatCurrencyBR(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value)
+  return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 }
 
 export { formatCurrencyBR }

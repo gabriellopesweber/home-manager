@@ -33,7 +33,7 @@
               :key="index"
             >
               <v-list-item-title>{{ transacao.descricao }}</v-list-item-title>
-              <v-list-item-subtitle>{{ transacao.valor }}</v-list-item-subtitle>
+              <v-list-item-subtitle>{{ formatMoney(transacao.valor) }}</v-list-item-subtitle>
             </v-list-item>
           </v-list>
         </BaseMaterialCard>
@@ -144,13 +144,25 @@ export default {
       // Simulação de carregamento de dados (iremos substituir pela API real)
       this.saldoAtual = 5000
       this.ultimasTransacoes = [
-        { descricao: 'Salário', valor: '+R$ 3000' },
-        { descricao: 'Aluguel', valor: '-R$ 1200' },
-        { descricao: 'Supermercado', valor: '-R$ 400' },
+        { descricao: 'Salário', valor: '3000' },
+        { descricao: 'Aluguel', valor: '-1200' },
+        { descricao: 'Supermercado', valor: '400' },
       ]
       this.graficoSaldo = {
         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        datasets: [{ label: 'Saldo', data: [3000, 3500, 2800, 3200, 5000] }],
+        datasets: [{
+          label: 'Saldo',
+          data: [3000, 3500, 2800, 3200, 5000],
+          borderColor: 'blue'
+        }, { 
+          label: 'Despesas',
+          data: [1200, 1500, 1300, 1700, 2500],
+          borderColor: 'red'
+        }, { 
+          label: 'Receitas',
+          data: [4000, 5000, 4500, 5200, 6000],
+          borderColor: 'green'
+        }]
       }
       this.resumo = { receitas: 6000, despesas: 2500, investimentos: 1500 }
     }
