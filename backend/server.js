@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js'
 import expenseRoutes from './routes/expenseRouter.js'
 import incomeRouter from './routes/incomeRouter.js'
 import categoryRouter from './routes/categoryRouter.js'
+import accountRouter from './routes/accountRouter.js'
 
 const app = express()
 const port = process.env.PORT || 5002
@@ -23,6 +24,7 @@ app.use('/authorization', authRoutes)
 app.use('/expense', expenseRoutes)
 app.use('/income', incomeRouter)
 app.use('/category', categoryRouter)
+app.use('/account', accountRouter)
 
 app.get("/", (req, res) => {
   res.send("🔥 API rodando com MongoDB!")

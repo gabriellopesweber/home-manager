@@ -32,7 +32,8 @@ const IncomeSchema = new mongoose.Schema({
     type: String
   },
   account: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
     required: true
   }
 })
@@ -56,19 +57,40 @@ const ExpenseSchema = new mongoose.Schema({
     type: String
   },
   account: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
     required: true
+  }
+})
+
+// Modelo de Conta
+const AccountSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  balance: {
+    type: Number,
+    required: true
+  },
+  updateDate: {
+    type: Date,
+    required: false,
+    default: ''
   }
 })
 
 // Modelo de Transferência
 const TransferSchema = new mongoose.Schema({
   originAccount: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
     required: true
   },
   destinationAccount: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
     required: true
   },
   value: {
@@ -88,5 +110,6 @@ const Category = mongoose.model('Category', CategorySchema)
 const Income = mongoose.model('Income', IncomeSchema)
 const Expense = mongoose.model('Expense', ExpenseSchema)
 const Transfer = mongoose.model('Transfer', TransferSchema)
+const Account = mongoose.model('Account', AccountSchema)
 
-export { Category, Income, Expense, Transfer }
+export { Category, Income, Expense, Transfer, Account }
