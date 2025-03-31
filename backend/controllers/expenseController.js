@@ -1,34 +1,36 @@
-const { Expense } = require('@/models/Finance')
-const { categoryIsRegistered } = require('@/utils/utilsCategory')
+import { Expense } from '../models/Finance.js'
+import { categoryIsRegistered, formattedCategoryById } from '../utils/utilsCategory.js'
 
 const ExpenseController = {
   // Criar uma nova despesa
   async create(req, res) {
     try {
-      const { categoria, valor, data, descricao, conta } = req.body
+      const { category, value, date: stringDate, description, account } = req.body
 
-      if (!categoria || !valor || !data || !conta) {
+      if (!category || !value || !date || !account) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
-      const idCategory = await categoryIsRegistered(categoria, 'despesa')
+      const idCategory = await categoryIsRegistered(category, 'despesa')
       if (!idCategory) {
         return res.status(400).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo despesa!' })
       }
 
-      const date = new Date(data)
-      if (isNaN(date.getTime())) {
+      const date = new Date(stringDate)
+      if (isNaN(validateDate.getTime())) {
         return res.status(400).json({ message: 'Data invalida.' })
       }
 
-      const novaDespesa = await Expense.create({
-        categoria: idCategory,
-        valor,
-        data: date,
-        descricao,
-        conta
+      const newExpense = await Expense.create({
+        category: idCategory,
+        value,
+        date,
+        description,
+        account
       })
-      res.status(201).json(novaDespesa)
+
+      const formattedExpense = await formattedCategoryById(newExpense)
+      res.status(201).json(formattedExpense)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar despesa', error })
     }
@@ -37,8 +39,13 @@ const ExpenseController = {
   // Listar todas as despesas
   async getAll(req, res) {
     try {
-      const despesas = await Expense.find()
-      res.status(200).json(despesas)
+      const expenses = await Expense.find()
+
+      const updatedExpenses = await Promise.all(expenses.map(async (expense) => {
+        return formattedCategoryById(expense)
+      }))
+
+      res.status(200).json(updatedExpenses)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar despesas', error })
     }
@@ -48,11 +55,13 @@ const ExpenseController = {
   async getById(req, res) {
     try {
       const { id } = req.params
-      const despesa = await Expense.findById(id)
+      const expense = await Expense.findById(id)
 
-      if (!despesa) return res.status(404).json({ message: 'Despesa não encontrada!' })
+      if (!expense) return res.status(404).json({ message: 'Despesa não encontrada!' })
 
-      res.status(200).json(despesa)
+      const updatedExpense = await formattedCategoryById(expense)
+
+      res.status(200).json(updatedExpense)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar despesa', error })
     }
@@ -62,29 +71,35 @@ const ExpenseController = {
   async update(req, res) {
     try {
       const { id } = req.params
-      const { categoria, valor, data, descricao, conta } = req.body
+      const { category, value, date: stringDate, description, account } = req.body
 
-      const idCategory = await categoryIsRegistered(categoria, 'despesa')
+      if (!category || !value || !stringDate || !account) {
+        return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
+      }
+
+      const idCategory = await categoryIsRegistered(category, 'despesa')
       if (!idCategory) {
         return res.status(400).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo despesa!' })
       }
 
-      const date = new Date(data)
+      const date = new Date(stringDate)
       if (isNaN(date.getTime())) {
         return res.status(400).json({ message: 'Data invalida.' })
       }
 
-      const despesaAtualizada = await Expense.findByIdAndUpdate(id, {
-        categoria: idCategory,
-        valor,
-        data: date,
-        descricao,
-        conta
+      const updatedExpense = await Expense.findByIdAndUpdate(id, {
+        category: idCategory,
+        value,
+        date,
+        description,
+        account
       }, { new: true })
 
-      if (!despesaAtualizada) return res.status(404).json({ message: 'Despesa não encontrada!' })
+      if (!updatedExpense) return res.status(404).json({ message: 'Despesa não encontrada!' })
 
-      res.status(200).json(despesaAtualizada)
+      const formattedExpense = await formattedCategoryById(updatedExpense)
+
+      res.status(200).json(formattedExpense)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar despesa', error })
     }
@@ -94,9 +109,9 @@ const ExpenseController = {
   async delete(req, res) {
     try {
       const { id } = req.params
-      const despesaRemovida = await Expense.findByIdAndDelete(id)
+      const deleteExpense = await Expense.findByIdAndDelete(id)
 
-      if (!despesaRemovida) return res.status(404).json({ message: 'Despesa não encontrada!' })
+      if (!deleteExpense) return res.status(404).json({ message: 'Despesa não encontrada!' })
 
       res.status(200).json({ message: 'Despesa removida com sucesso!' })
     } catch (error) {
@@ -105,4 +120,4 @@ const ExpenseController = {
   }
 }
 
-module.exports = ExpenseController
+export { ExpenseController }

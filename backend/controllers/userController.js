@@ -1,7 +1,7 @@
-const User = require("@/models/User")
-const jwt = require("jsonwebtoken")
-const bcryptjs = require("bcryptjs")
-const nodemailer = require("nodemailer")
+import User from '../models/User.js'
+import jwt from 'jsonwebtoken'
+import bcryptjs from 'bcryptjs'
+import nodemailer from 'nodemailer'
 
 const UserController = {
   async register(req, res) {
@@ -160,4 +160,4 @@ const UserController = {
   }
 }
 
-module.exports = UserController
+export { UserController }

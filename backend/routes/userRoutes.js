@@ -1,6 +1,6 @@
-const express = require('express')
-const UserController = require('@/controllers/userController')
-const authMiddleware = require("@/middleware/authMiddleware")
+import express from 'express'
+import authMiddleware from '../middleware/authMiddleware.js'
+import { UserController } from '../controllers/UserController.js'
 
 const router = express.Router()
 
@@ -10,4 +10,4 @@ router.get("/:id", authMiddleware, UserController.getUserById)    // Obter um us
 router.put("/:id", authMiddleware, UserController.updateUser)     // Atualizar um usuário pelo ID
 router.delete("/id", authMiddleware, UserController.deleteUser)   // Deletar um usuário pelo ID
 
-module.exports = router
+export default router

@@ -1,14 +1,14 @@
-require('module-alias/register')
-const express = require("express")
-const cors = require("cors")
-const connectDB = require("@/config/database")
-require("dotenv").config()
+import express from 'express'
+import cors from 'cors'
+import connectDB from './config/database.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
-const userRoutes = require('@/routes/userRoutes')
-const authRoutes = require('@/routes/authRoutes')
-const expenseRoutes = require('@/routes/expenseRouter')
-const incomeRouter = require('@/routes/incomeRouter')
-const categoryRouter = require('@/routes/categoryRouter')
+import userRoutes from './routes/userRoutes.js'
+import authRoutes from './routes/authRoutes.js'
+import expenseRoutes from './routes/expenseRouter.js'
+import incomeRouter from './routes/incomeRouter.js'
+import categoryRouter from './routes/categoryRouter.js'
 
 const app = express()
 const port = process.env.PORT || 5002

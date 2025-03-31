@@ -1,5 +1,5 @@
-const { Income } = require('@/models/Finance')
-const { categoryIsRegistered } = require('@/utils/utilsCategory')
+import { Income } from '../models/Finance.js'
+import { categoryIsRegistered, formattedCategoryById } from '../utils/utilsCategory.js'
 
 const IncomeController = {
   // Criar uma nova receita
@@ -21,14 +21,16 @@ const IncomeController = {
         return res.status(400).json({ message: 'Data invalida.' })
       }
 
-      const novaDespesa = await Income.create({
+      const newIncome = await Income.create({
         categoria: idCategory,
         valor,
         data: date,
         descricao,
         conta
       })
-      res.status(201).json(novaDespesa)
+
+      const formattedIncome = await formattedCategoryById(newIncome)
+      res.status(201).json(formattedIncome)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar receita', error })
     }
@@ -37,8 +39,13 @@ const IncomeController = {
   // Listar todas as receitas
   async getAll(req, res) {
     try {
-      const receitas = await Income.find()
-      res.status(200).json(receitas)
+      const incomes = await Income.find()
+
+      const updatedIncomes = await Promise.all(incomes.map(async (income) => {
+        return formattedCategoryById(income)
+      }))
+
+      res.status(200).json(updatedIncomes)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar receitas', error })
     }
@@ -48,11 +55,13 @@ const IncomeController = {
   async getById(req, res) {
     try {
       const { id } = req.params
-      const receita = await Income.findById(id)
+      const income = await Income.findById(id)
 
-      if (!receita) return res.status(404).json({ message: 'Receita não encontrada!' })
+      if (!income) return res.status(404).json({ message: 'Receita não encontrada!' })
 
-      res.status(200).json(receita)
+      const updateIncome = await formattedCategoryById(income)
+
+      res.status(200).json(updateIncome)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar receita', error })
     }
@@ -74,7 +83,7 @@ const IncomeController = {
         return res.status(400).json({ message: 'Data invalida.' })
       }
 
-      const receitaAtualizada = await Income.findByIdAndUpdate(id, {
+      const newIncome = await Income.findByIdAndUpdate(id, {
         categoria: idCategory,
         valor,
         data: date,
@@ -82,9 +91,11 @@ const IncomeController = {
         conta
       }, { new: true })
 
-      if (!receitaAtualizada) return res.status(404).json({ message: 'Receita não encontrada!' })
+      if (!newIncome) return res.status(404).json({ message: 'Receita não encontrada!' })
 
-      res.status(200).json(receitaAtualizada)
+      const updateIncome = await formattedCategoryById(newIncome)
+
+      res.status(200).json(updateIncome)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar receita', error })
     }
@@ -94,9 +105,9 @@ const IncomeController = {
   async delete(req, res) {
     try {
       const { id } = req.params
-      const receitaRemovida = await Income.findByIdAndDelete(id)
+      const deleteIncome = await Income.findByIdAndDelete(id)
 
-      if (!receitaRemovida) return res.status(404).json({ message: 'receita não encontrada!' })
+      if (!deleteIncome) return res.status(404).json({ message: 'receita não encontrada!' })
 
       res.status(200).json({ message: 'Receita removida com sucesso!' })
     } catch (error) {
@@ -105,4 +116,4 @@ const IncomeController = {
   }
 }
 
-module.exports = IncomeController
+export { IncomeController }

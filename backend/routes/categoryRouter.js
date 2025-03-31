@@ -1,6 +1,6 @@
-const express = require('express')
-const authMiddleware = require("@/middleware/authMiddleware")
-const CategoryController = require("@/controllers/categoryController")
+import express from 'express'
+import authMiddleware from '../middleware/authMiddleware.js'
+import { CategoryController } from '../controllers/CategoryController.js'
 
 const router = express.Router()
 
@@ -11,4 +11,4 @@ router.get('/:id', authMiddleware, CategoryController.getById)
 router.put('/:id', authMiddleware, CategoryController.update)
 router.delete('/:id', authMiddleware, CategoryController.delete)
 
-module.exports = router
+export default router

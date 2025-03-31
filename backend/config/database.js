@@ -1,5 +1,5 @@
-const mongoose = require("mongoose")
-const dotenv = require("dotenv")
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
 
 const env = process.env.NODE_ENV || "development"
 dotenv.config({ path: `.env.${env}` })
@@ -16,4 +16,4 @@ const connectDB = async () => {
   }
 }
 
-module.exports = connectDB
+export default connectDB

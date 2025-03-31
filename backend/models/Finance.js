@@ -1,12 +1,12 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 // Modelo de Categoria
 const CategorySchema = new mongoose.Schema({
-  nome: {
+  name: {
     type: String,
     required: true
   },
-  tipo: {
+  type: {
     type: String,
     enum: ['receita', 'despesa'],
     required: true
@@ -15,23 +15,23 @@ const CategorySchema = new mongoose.Schema({
 
 // Modelo de Receita
 const IncomeSchema = new mongoose.Schema({
-  categoria: {
+  category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
     required: true
   },
-  valor: {
+  value: {
     type: Number,
     required: true
   },
-  data: {
+  date: {
     type: Date,
     required: true
   },
-  descricao: {
+  description: {
     type: String
   },
-  conta: {
+  account: {
     type: String,
     required: true
   }
@@ -39,23 +39,23 @@ const IncomeSchema = new mongoose.Schema({
 
 // Modelo de Despesa
 const ExpenseSchema = new mongoose.Schema({
-  categoria: {
+  category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
     required: true
   },
-  valor: {
+  value: {
     type: Number,
     required: true
   },
-  data: {
+  date: {
     type: Date,
     required: true
   },
-  descricao: {
+  description: {
     type: String
   },
-  conta: {
+  account: {
     type: String,
     required: true
   }
@@ -63,23 +63,23 @@ const ExpenseSchema = new mongoose.Schema({
 
 // Modelo de Transferência
 const TransferSchema = new mongoose.Schema({
-  contaOrigem: {
+  originAccount: {
     type: String,
     required: true
   },
-  contaDestino: {
+  destinationAccount: {
     type: String,
     required: true
   },
-  valor: {
+  value: {
     type: Number,
     required: true
   },
-  data: {
+  date: {
     type: Date,
     required: true
   },
-  descricao: {
+  description: {
     type: String
   }
 })
@@ -89,4 +89,4 @@ const Income = mongoose.model('Income', IncomeSchema)
 const Expense = mongoose.model('Expense', ExpenseSchema)
 const Transfer = mongoose.model('Transfer', TransferSchema)
 
-module.exports = { Category, Income, Expense, Transfer }
+export { Category, Income, Expense, Transfer }

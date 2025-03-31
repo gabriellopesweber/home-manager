@@ -13,6 +13,7 @@
     "path": "0.12.7"
   },
   "name": "home-maganer",
+  "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -20,10 +21,7 @@
     "release": "NODE_ENV=release node server.js",
     "master": "NODE_ENV=production node server.js"
   },
-  "author": "",
+  "author": "Gabriel Lopes Weber",
   "license": "ISC",
-  "description": "",
-  "_moduleAliases": {
-    "@": "./"
-  }
+  "description": ""
 }

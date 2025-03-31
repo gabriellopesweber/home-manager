@@ -1,21 +1,22 @@
-const { Category } = require('../models/Finance')
+import { Category } from '../models/Finance.js'
+
+const CR = "receita"
+const CD = "despesa"
 
 const CategoryController = {
   // Criar uma nova categoria
   async create(req, res) {
     try {
-      const { nome, tipo } = req.body
-      const CR = "receita"
-      const CD = "despesa"
+      const { name, type } = req.body
 
-      if (!nome || !tipo) {
+      if (!name || !type) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
       const categorys = await Category.find()
       if (categorys) {
         categorys.map((category) => {
-          if (category.nome === nome && category.tipo === tipo) {
+          if (category.name === name && category.type === type) {
             return res.status(409).json({
               message: 'Categoria já esta cadastrada'
             })
@@ -23,13 +24,13 @@ const CategoryController = {
         })
       }
 
-      if (tipo !== CR && tipo !== CD) {
+      if (type !== CR && type !== CD) {
         return res.status(400).json({
           message: "Somente é aceito os seguintes tipos: receita ou despesa"
         })
       }
 
-      const newCategory = await Category.create({ nome, tipo })
+      const newCategory = await Category.create({ name, type })
       res.status(201).json(newCategory)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar categoria', error })
@@ -64,11 +65,21 @@ const CategoryController = {
   async update(req, res) {
     try {
       const { id } = req.params
-      const { nome, tipo } = req.body
+      const { name, type } = req.body
+
+      if (!name && !type) {
+        return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
+      }
+
+      if (type !== CR && type !== CD) {
+        return res.status(400).json({
+          message: "Somente é aceito os seguintes tipos: receita ou despesa"
+        })
+      }
 
       const updateCategory = await Category.findByIdAndUpdate(
         id,
-        { nome, tipo },
+        { name, type },
         { new: true }
       )
 
@@ -95,4 +106,4 @@ const CategoryController = {
   }
 }
 
-module.exports = CategoryController
+export { CategoryController }

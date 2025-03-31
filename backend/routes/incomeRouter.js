@@ -1,6 +1,6 @@
-const express = require('express')
-const authMiddleware = require("@/middleware/authMiddleware")
-const IncomeController = require('@/controllers/incomeController')
+import express from 'express'
+import authMiddleware from '../middleware/authMiddleware.js'
+import { IncomeController } from '../controllers/IncomeController.js'
 
 const router = express.Router()
 
@@ -11,4 +11,4 @@ router.get('/:id', authMiddleware, IncomeController.getById)
 router.put('/:id', authMiddleware, IncomeController.update)
 router.delete('/:id', authMiddleware, IncomeController.delete)
 
-module.exports = router
+export default router
