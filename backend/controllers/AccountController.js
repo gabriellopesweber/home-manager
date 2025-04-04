@@ -48,7 +48,7 @@ const AccountController = {
       const { id } = req.params
       const { name, balance } = req.body
 
-      if (!name && !balance) {
+      if (!name && typeof balance !== 'number') {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 

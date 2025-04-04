@@ -53,7 +53,7 @@ const IncomeController = {
     } catch (error) {
       if (updateBalanceSuccessfully) {
         // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
-        const { name: nameAccount } = req.body
+        const { account: nameAccount } = req.body
         await updateBalance(nameAccount, -errorValue)
       }
       res.status(500).json({ message: 'Erro ao criar receita', error })
@@ -122,12 +122,10 @@ const IncomeController = {
 
       // Obtem o valor já cadastrado
       const incomeById = await Income.findById(id)
-      const oldValue = incomeById.value // 1000
+      const oldValue = incomeById.value
       valueDifference = oldValue - value // Obtem a diferença de valores
-      //800-1000 = -200
 
       const accountUpdated = await updateBalance(nameAccount, -valueDifference)
-      // de 3502200 para 3502000
       if (!accountUpdated) return res.status(400).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
       updateBalanceSuccessfully = true
 
