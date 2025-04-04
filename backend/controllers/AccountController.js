@@ -34,7 +34,7 @@ const AccountController = {
       const { id } = req.params
       const account = await Account.findById(id)
 
-      if (!account) return res.status(404).json({ message: 'Categoria não encontrada!' })
+      if (!account) return res.status(404).json({ message: 'Conta não encontrada!' })
 
       res.status(200).json(account)
     } catch (error) {
@@ -48,7 +48,7 @@ const AccountController = {
       const { id } = req.params
       const { name, balance } = req.body
 
-      if (!name || !balance) {
+      if (!name && !balance) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
