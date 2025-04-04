@@ -178,7 +178,7 @@ const IncomeController = {
       updateBalanceSuccessfully = true
 
       // Deleta a receita
-      await Income.findByIdAndDelete(ids)
+      await Income.findByIdAndDelete(id)
 
       res.status(200).json({ message: 'Receita removida com sucesso!' })
     } catch (error) {
