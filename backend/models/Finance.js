@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { statusFinance } from '../constants/Finance.js'
 
 // Modelo de Categoria
 const CategorySchema = new mongoose.Schema({
@@ -20,9 +21,22 @@ const IncomeSchema = new mongoose.Schema({
     ref: 'Category',
     required: true
   },
+  status: {
+    type: Number,
+    enum: [
+      statusFinance.PENDING,
+      statusFinance.CONCILIATED,
+      statusFinance.CANCEL
+    ],
+    default: statusFinance.PENDING,
+  },
   value: {
     type: Number,
     required: true
+  },
+  executionDate: {
+    type: Date,
+    required: false,
   },
   date: {
     type: Date,
@@ -45,9 +59,22 @@ const ExpenseSchema = new mongoose.Schema({
     ref: 'Category',
     required: true
   },
+  status: {
+    type: Number,
+    enum: [
+      statusFinance.PENDING,
+      statusFinance.CONCILIATED,
+      statusFinance.CANCEL
+    ],
+    default: statusFinance.PENDING,
+  },
   value: {
     type: Number,
     required: true
+  },
+  executionDate: {
+    type: Date,
+    required: false,
   },
   date: {
     type: Date,

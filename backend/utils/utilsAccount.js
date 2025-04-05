@@ -27,14 +27,27 @@ async function updateBalance(name, balance, id) {
     )
     if (!updatedAccount) return false
 
-    return updatedAccount
+    return true
   } catch (error) {
     console.error("Erro ao atualizar saldo:", error)
     return false
   }
 }
 
+async function getIdAccountByName(name) {
+  try {
+
+    const account = await Account.findOne({ name })
+    if (!account) return false
+
+    return account.id
+  } catch (error) {
+    console.error("Erro ao localizar conta:", error)
+    return false
+  }
+}
 
 export {
-  updateBalance
+  updateBalance,
+  getIdAccountByName
 }
