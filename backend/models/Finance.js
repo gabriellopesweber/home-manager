@@ -11,6 +11,11 @@ const CategorySchema = new mongoose.Schema({
     type: String,
     enum: ['receita', 'despesa'],
     required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 })
 
@@ -36,7 +41,7 @@ const IncomeSchema = new mongoose.Schema({
   },
   executionDate: {
     type: Date,
-    required: false,
+    default: 'false',
   },
   date: {
     type: Date,
@@ -48,6 +53,11 @@ const IncomeSchema = new mongoose.Schema({
   account: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   }
 })
@@ -74,7 +84,7 @@ const ExpenseSchema = new mongoose.Schema({
   },
   executionDate: {
     type: Date,
-    required: false,
+    default: '',
   },
   date: {
     type: Date,
@@ -87,6 +97,11 @@ const ExpenseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
     required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 })
 
@@ -95,7 +110,6 @@ const AccountSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    unique: true
   },
   balance: {
     type: Number,
@@ -103,8 +117,12 @@ const AccountSchema = new mongoose.Schema({
   },
   updateDate: {
     type: Date,
-    required: false,
     default: ''
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 })
 
@@ -130,8 +148,15 @@ const TransferSchema = new mongoose.Schema({
   },
   description: {
     type: String
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 })
+
+AccountSchema.index({ name: 1, user: 1 }, { unique: true })
 
 const Category = mongoose.model('Category', CategorySchema)
 const Income = mongoose.model('Income', IncomeSchema)

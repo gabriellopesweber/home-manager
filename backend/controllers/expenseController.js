@@ -1,17 +1,18 @@
 import dayjs from 'dayjs'
-import { Expense } from '../models/Finance.js'
-import { updateBalance } from '../utils/utilsAccount.js'
-import { categoryIsRegistered, formattedCategoryById } from '../utils/utilsCategory.js'
+import { Account, Category, Expense } from '../models/Finance.js'
+import { statusFinance } from '../constants/Finance.js'
 
 const ExpenseController = {
   // Criar uma nova despesa
   async create(req, res) {
     let updateBalanceSuccessfully = false
-    let errorValue = 0
-    try {
-      const { category, value, date: stringDate, description, account: nameAccount } = req.body
+    let roolbackValue = 0
+    const user = req.user.id
 
-      if (!category || !value || !stringDate || !nameAccount) {
+    try {
+      const { category, status, value, date: stringDate, description, account } = req.body
+
+      if (!category || !value || !stringDate || !account) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
@@ -19,9 +20,12 @@ const ExpenseController = {
       if (typeof (category) !== "string") return res.status(400).json({ message: 'O parametro `category` deve ser do tipo String!' })
       if (typeof (value) !== "number") return res.status(400).json({ message: 'O parametro `value` deve ser do tipo Number!' })
       if (typeof (stringDate) !== "string") return res.status(400).json({ message: 'O parametro `date` deve ser do tipo String!' })
-      if (typeof (nameAccount) !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
+      if (typeof (account) !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
       if (description) {
         if (typeof (description) !== "string") return res.status(400).json({ message: 'O parametro `description` deve ser do tipo String!' })
+      }
+      if (status) {
+        if (typeof (status) !== "number") return res.status(400).json({ message: 'O parametro `status` deve ser do tipo number!' })
       }
 
       // Valida as regras de negocio
@@ -30,31 +34,50 @@ const ExpenseController = {
       const date = dayjs(stringDate)
       if (!date.isValid()) return res.status(400).json({ message: 'Data invalida.' })
 
-      const idCategory = await categoryIsRegistered(category, 'despesa')
-      if (!idCategory) {
-        return res.status(400).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo despesa!' })
+      const categoryById = await Category.findById({ _id: category, user, type: 'despesa' })
+      if (!categoryById) return res.status(404).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo despesa!' })
+
+      const dateNow = dayjs()
+      // Se a data passada, for a de hoje e status conciliado deve adicionar o valor a conta.
+      if ((dateNow.isSame(stringDate, 'day') && status === statusFinance.CONCILIATED) || status === statusFinance.CONCILIATED) {
+        roolbackValue = value
+        const updateBalance = await Account.findByIdAndUpdate(
+          { _id: account, user },
+          { $inc: { balance: value } }
+        )
+        if (!updateBalance) return res.status(400).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
+        updateBalanceSuccessfully = true
       }
 
-      errorValue = value
-      const accountUpdated = await updateBalance(nameAccount, value)
-      if (!accountUpdated) return res.status(400).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
-      updateBalanceSuccessfully = true
-
       const newExpense = await Expense.create({
-        category: idCategory,
+        category,
         value,
+        status,
+        executionDate: updateBalanceSuccessfully ? dateNow : null,
         date,
         description,
-        account: accountUpdated.id
+        account,
+        user
       })
 
-      const formattedExpense = await formattedCategoryById(newExpense)
-      res.status(201).json(formattedExpense)
+      res.status(201).json({
+        id: newExpense.id,
+        category: newExpense.category,
+        value: newExpense.value,
+        status: newExpense.status,
+        executionDate: newExpense.executionDate,
+        date: newExpense.date,
+        description: newExpense.description,
+        account: newExpense.account
+      })
     } catch (error) {
       if (updateBalanceSuccessfully) {
         // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
-        const { account: nameAccount } = req.body
-        await updateBalance(nameAccount, Math.abs(errorValue))
+        const { account } = req.body
+        await Account.findOneAndUpdate(
+          { _id: account, user },
+          { $inc: { balance: -roolbackValue } }
+        )
       }
       res.status(500).json({ message: 'Erro ao criar despesa', error })
     }
@@ -63,13 +86,9 @@ const ExpenseController = {
   // Listar todas as despesas
   async getAll(req, res) {
     try {
-      const expenses = await Expense.find()
+      const expenses = await Expense.find({ user: req.user.id })
 
-      const updatedExpenses = await Promise.all(expenses.map(async (expense) => {
-        return formattedCategoryById(expense)
-      }))
-
-      res.status(200).json(updatedExpenses)
+      res.status(200).json(expenses)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar despesas', error })
     }
@@ -79,13 +98,11 @@ const ExpenseController = {
   async getById(req, res) {
     try {
       const { id } = req.params
-      const expense = await Expense.findById(id)
+      const expense = await Expense.findById({ _id: id, user: req.user.id })
 
       if (!expense) return res.status(404).json({ message: 'Despesa não encontrada!' })
 
-      const updatedExpense = await formattedCategoryById(expense)
-
-      res.status(200).json(updatedExpense)
+      res.status(200).json(expense)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar despesa', error })
     }
@@ -93,21 +110,24 @@ const ExpenseController = {
 
   // Atualizar uma despesa
   async update(req, res) {
+    const user = req.user.id
     let updateBalanceSuccessfully = false
     let valueDifference = 0
-    const { category, value, date: stringDate, description, account: nameAccount } = req.body
+    let rollbackType = null
+    let roolbackValue = 0
+    let status
 
     try {
+      const { category, status: statusBody, value, date: stringDate, description, account } = req.body
       const { id } = req.params
 
       // Valida o tipo dos parametros recebidos
       if (typeof (category) !== "string") return res.status(400).json({ message: 'O parametro `category` deve ser do tipo String!' })
       if (typeof (value) !== "number") return res.status(400).json({ message: 'O parametro `value` deve ser do tipo Number!' })
       if (typeof (stringDate) !== "string") return res.status(400).json({ message: 'O parametro `date` deve ser do tipo String!' })
-      if (typeof (nameAccount) !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
-      if (description) {
-        if (typeof (description) !== "string") return res.status(400).json({ message: 'O parametro `description` deve ser do tipo String!' })
-      }
+      if (typeof (account) !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
+      if (description && typeof description !== "string") return res.status(400).json({ message: 'O parametro `description` deve ser do tipo String!' })
+      if (statusBody && typeof statusBody !== "number") return res.status(400).json({ message: 'O parametro `status` deve ser do tipo number!' })
 
       // Valida as regras de negocio
       if (value > 0) return res.status(400).json({ message: 'O parametro `value` deve ser um valor negativo.' })
@@ -115,37 +135,116 @@ const ExpenseController = {
       const date = dayjs(stringDate)
       if (!date.isValid()) return res.status(400).json({ message: 'Data invalida.' })
 
-      const idCategory = await categoryIsRegistered(category, 'despesa')
-      if (!idCategory) {
-        return res.status(400).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo despesa!' })
+      const categoryByName = await Category.findById({ _id: category, type: 'despesa', user })
+      if (!categoryByName) return res.status(404).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo despesa!' })
+
+      const accountByName = await Account.findById({ _id: account, user })
+      if (!accountByName) return res.status(404).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
+
+      const expense = await Expense.findOne({ _id: id, user })
+      if (!expense) return res.status(404).json({ message: 'Despesa não encontrada!' })
+
+      const currentyValue = expense.value
+      const currentyStatus = expense.status
+      const dateNow = dayjs()
+
+      if (typeof statusBody !== "number") {
+        status = currentyStatus
+      } else {
+        status = statusBody
       }
 
-      // Obtem o valor já cadastrado
-      const incomeById = await Income.findById(id)
-      const oldValue = incomeById.value
-      valueDifference = oldValue - value // Obtem a diferença de valores
+      valueDifference = value - currentyValue
 
-      const accountUpdated = await updateBalance(nameAccount, valueDifference)
-      if (!accountUpdated) return res.status(400).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
-      updateBalanceSuccessfully = true
+      // 1. Se valor mudou E status é conciliado
+      if ((dateNow.isSame(stringDate, 'day') && status === statusFinance.CONCILIATED) || status === statusFinance.CONCILIATED) {
+        if (currentyStatus !== statusFinance.CONCILIATED) {
+          roolbackValue = value
+
+          accountByName.balance += value
+          accountByName.updateDate = dateNow
+          await accountByName.save()
+
+          updateBalanceSuccessfully = true
+          rollbackType = 'valueChangeConciliatedStatusDifferent'
+        } else {
+          roolbackValue = valueDifference
+
+          accountByName.balance += valueDifference
+          accountByName.updateDate = dateNow
+          await accountByName.save()
+
+          updateBalanceSuccessfully = true
+          rollbackType = 'valueChangeConciliated'
+        }
+      }
+
+      // 2. Se status mudou de CONCILIATED para outro (mesmo valor)
+      if (valueDifference === 0 && currentyStatus !== status && !updateBalanceSuccessfully) {
+        if ((status === statusFinance.CONCILIATED && dateNow.isSame(stringDate, 'day')) || status === statusFinance.CONCILIATED) {
+          roolbackValue = value
+
+          accountByName.balance += value
+          accountByName.updateDate = dateNow
+          await accountByName.save()
+
+          rollbackType = 'onlyStatusAdded'
+        }
+      }
+
+      // Situação: Desfez conciliação
+      if (currentyStatus === statusFinance.CONCILIATED && status !== statusFinance.CONCILIATED && !updateBalanceSuccessfully) {
+        roolbackValue = currentyValue
+
+        accountByName.balance -= currentyValue
+        accountByName.updateDate = dateNow
+        await accountByName.save()
+
+        updateBalanceSuccessfully = true
+        rollbackType = 'onlyStatusRemoved'
+      }
 
       const updatedExpense = await Expense.findByIdAndUpdate(id, {
-        category: idCategory,
+        category: categoryByName.id,
         value,
+        status,
+        executionDate: updateBalanceSuccessfully ? dateNow : null,
         date,
         description,
-        account: accountUpdated.id
+        account: accountByName.id,
+        user
       }, { new: true })
 
-      if (!updatedExpense) return res.status(404).json({ message: 'Despesa não encontrada!' })
-
-      const formattedExpense = await formattedCategoryById(updatedExpense)
-
-      res.status(200).json(formattedExpense)
+      return res.status(200).json({
+        id: updatedExpense.id,
+        category: categoryByName.id,
+        value: updatedExpense.value,
+        status: updatedExpense.status,
+        executionDate: updatedExpense.executionDate,
+        date: updatedExpense.date,
+        description: updatedExpense.description,
+        account: accountByName.id
+      })
     } catch (error) {
+      const { account } = req.body
+
       if (updateBalanceSuccessfully) {
-        // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
-        await updateBalance(nameAccount, Math.abs(valueDifference))
+        switch (rollbackType) {
+          case 'onlyStatusRemoved':
+            await Account.findOneAndUpdate(
+              { _id: account, user },
+              { $inc: { balance: roolbackValue } }
+            )
+            break
+          case 'valueChangeConciliatedStatusDifferent':
+          case 'valueChangeConciliated':
+          case 'onlyStatusAdded':
+            await Account.findOneAndUpdate(
+              { _id: account, user },
+              { $inc: { balance: -roolbackValue } }
+            )
+            break
+        }
       }
       res.status(500).json({ message: 'Erro ao atualizar despesa', error })
     }
@@ -154,36 +253,38 @@ const ExpenseController = {
   // Deletar uma despesa
   async delete(req, res) {
     let updateBalanceSuccessfully = false
-    let val, accont
+    let roolbackValue, roolbackAccount
     try {
       const { id } = req.params
 
       // Obtem a despesa pelo ID
-      const expenseById = await Expense.findById(id)
-      if (!expenseById) {
-        return res.status(404).json({ message: 'Despesa não encontrada!' })
+      const expense = await Expense.findOne({ _id: id, user: req.user.id })
+      if (!expense) return res.status(404).json({ message: 'Despesa não encontrada!' })
+
+      if (expense.status === statusFinance.CONCILIATED) {
+        roolbackAccount = expense.account
+        roolbackValue = expense.value
+
+        const updateBalance = await Account.findOneAndUpdate(
+          { _id: expense.account, user: req.user.id },
+          { $inc: { balance: expense.value } }
+        )
+        if (!updateBalance) {
+          return res.status(400).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
+        }
+        updateBalanceSuccessfully = true
       }
 
-      const { value, account: accountId } = expenseById
-      val = value
-      accont = accountId
-
-      // Atualiza o saldo da conta removendo o valor da receita
-      const balanceUpdated = await updateBalance(null, value, accountId)
-      if (!balanceUpdated) {
-        return res.status(400).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
-      }
-      updateBalanceSuccessfully = true
-
-      const deleteExpense = await Expense.findByIdAndDelete(id)
-
-      if (!deleteExpense) return res.status(404).json({ message: 'Despesa não encontrada!' })
+      await Expense.findByIdAndDelete({ _id: id, user: req.user.id })
 
       res.status(200).json({ message: 'Despesa removida com sucesso!' })
     } catch (error) {
+      console.error(error)
       if (updateBalanceSuccessfully) {
-        // Restaura o saldo se a remoção falhar
-        await updateBalance(null, Math.abs(val), accont)
+        await Account.findOneAndUpdate(
+          { _id: roolbackAccount, user: req.user.id },
+          { $inc: { balance: -roolbackValue } }
+        )
       }
       res.status(500).json({ message: 'Erro ao remover despesa', error })
     }

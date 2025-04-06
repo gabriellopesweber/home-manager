@@ -8,19 +8,21 @@ const CategoryController = {
   async create(req, res) {
     try {
       const { name, type } = req.body
+      const user = req.user.id
 
       if (!name || !type) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
-      const categorys = await Category.find()
-      if (categorys) {
-        categorys.map((category) => {
-          if (category.name === name && category.type === type) {
-            return res.status(409).json({
-              message: 'Categoria já esta cadastrada'
-            })
-          }
+      const categories = await Category.find({ user })
+
+      const categoryExists = categories.some(category =>
+        category.name === name && category.type === type
+      )
+
+      if (categoryExists) {
+        return res.status(409).json({
+          message: 'Categoria já está cadastrada.'
         })
       }
 
@@ -30,8 +32,12 @@ const CategoryController = {
         })
       }
 
-      const newCategory = await Category.create({ name, type })
-      res.status(201).json(newCategory)
+      const newCategory = await Category.create({ name, type, user })
+      res.status(201).json({
+        id: newCategory.id,
+        name: newCategory.name,
+        type: newCategory.type
+      })
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar categoria', error })
     }
@@ -40,7 +46,7 @@ const CategoryController = {
   // Listar todas as categorias
   async getAll(req, res) {
     try {
-      const category = await Category.find()
+      const category = await Category.find({ user: req.user.id })
       res.status(200).json(category)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar categorias', error })
@@ -51,7 +57,7 @@ const CategoryController = {
   async getById(req, res) {
     try {
       const { id } = req.params
-      const category = await Category.findById(id)
+      const category = await Category.findById({ _id: id, user: req.user.id })
 
       if (!category) return res.status(404).json({ message: 'Categoria não encontrada!' })
 
@@ -66,6 +72,7 @@ const CategoryController = {
     try {
       const { id } = req.params
       const { name, type } = req.body
+      const user = req.user.id
 
       if (!name && !type) {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
@@ -77,9 +84,21 @@ const CategoryController = {
         })
       }
 
+      const categories = await Category.find({ user })
+
+      const categoryExists = categories.some(category =>
+        category.name === name && category.type === type
+      )
+
+      if (categoryExists) {
+        return res.status(409).json({
+          message: 'Categoria já está cadastrada.'
+        })
+      }
+
       const updateCategory = await Category.findByIdAndUpdate(
         id,
-        { name, type },
+        { name, type, user },
         { new: true }
       )
 
@@ -95,7 +114,7 @@ const CategoryController = {
   async delete(req, res) {
     try {
       const { id } = req.params
-      const deletedCategory = await Category.findByIdAndDelete(id)
+      const deletedCategory = await Category.findByIdAndDelete({ _id: id, user: req.user.id })
 
       if (!deletedCategory) return res.status(404).json({ message: 'Categoria não encontrada!' })
 
