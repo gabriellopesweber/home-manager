@@ -107,6 +107,7 @@ const TransferController = {
     const userId = req.user.id
     const { id } = req.params
     const { originAccount, destinationAccount, status: statusBody, value, date, description } = req.body
+
     let updatedBalanceOrigin = false
     let updatedBalanceDestination = false
     let rollbackType = null
@@ -115,88 +116,98 @@ const TransferController = {
     let status
 
     try {
-
       if (!originAccount || !destinationAccount || !value || !date) {
         return res.status(400).json({ message: 'Campos obrigatórios ausentes.' })
       }
 
-      if (statusBody) {
-        if (typeof statusBody !== 'number') return res.status(404).json({ message: '`status` deve ser um number' })
-        if (statusBody !== statusFinance.CANCEL && statusBody !== statusFinance.CONCILIATED && statusBody !== statusFinance.PENDING) {
-          return res.status(400).json({ message: 'o `status` deve ser 0 para conciliado, 1 para pendente e 2 para cancelado' })
+      if (typeof statusBody !== 'undefined') {
+        if (typeof statusBody !== 'number') return res.status(400).json({ message: '`status` deve ser um number' })
+        if (![statusFinance.CANCEL, statusFinance.CONCILIATED, statusFinance.PENDING].includes(statusBody)) {
+          return res.status(400).json({ message: 'Status inválido. Use 0 (conciliado), 1 (pendente) ou 2 (cancelado).' })
         }
       }
 
-      const origin = await Account.findById(originAccount)
-      const destination = await Account.findById(destinationAccount)
+      const origin = await Account.findOne({ _id: originAccount, user: userId })
+      const destination = await Account.findOne({ _id: destinationAccount, user: userId })
 
-      if (!origin || !destination) return res.status(404).json({ message: 'Conta de origem ou destino inválida' })
-      if (status === statusFinance.CONCILIATED && origin.balance < value) {
-        return res.status(400).json({ message: 'Saldo insuficiente para atualizar' })
-      }
+      if (!origin || !destination) return res.status(404).json({ message: 'Conta de origem ou destino inválida.' })
 
       const oldTransfer = await Transfer.findOne({ _id: id, user: userId })
-      if (!oldTransfer) return res.status(404).json({ message: 'Transferência não encontrada' })
+      if (!oldTransfer) return res.status(404).json({ message: 'Transferência não encontrada.' })
 
       const currentyValue = oldTransfer.value
       const currentyStatus = oldTransfer.status
       const dateNow = dayjs()
+      const stringDate = dayjs(date)
 
-      if (typeof statusBody !== "number") {
-        status = currentyStatus
-      } else {
-        status = statusBody
-      }
-
+      status = typeof statusBody === 'number' ? statusBody : currentyStatus
       valueDifference = value - currentyValue
 
-      // 1. Se status for igual ao conciliado
-      if (status === statusFinance.CONCILIATED) {
-        if (currentyStatus !== statusFinance.CONCILIATED) {
-          roolbackValue = value
+      // Cenário 1: Ambos conciliados, mas valor mudou
+      if (currentyStatus === statusFinance.CONCILIATED && status === statusFinance.CONCILIATED && valueDifference !== 0) {
+        if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
+        roolbackValue = valueDifference
 
-          await Account.findByIdAndUpdate(oldTransfer.originAccount, { $inc: { balance: oldTransfer.value }, updateDate: dateNow })
-          updatedBalanceOrigin = true
-          await Account.findByIdAndUpdate(oldTransfer.destinationAccount, { $inc: { balance: -oldTransfer.value }, updateDate: dateNow })
-          updatedBalanceDestination = true
+        await Account.findByIdAndUpdate(originAccount, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
+        await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
 
-          rollbackType = 'valueChangeConciliatedStatusDifferent'
-        } else {
-          roolbackValue = valueDifference
-
-          await Account.findByIdAndUpdate(oldTransfer.originAccount, { $inc: { balance: valueDifference }, updateDate: dateNow })
-          updatedBalanceOrigin = true
-          await Account.findByIdAndUpdate(oldTransfer.destinationAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow })
-          updatedBalanceDestination = true
-
-          rollbackType = 'valueChangeConciliated'
-        }
+        updatedBalanceOrigin = true
+        updatedBalanceDestination = true
+        rollbackType = 'valueChangeConciliated'
       }
 
-      // 2. Se status mudou de CONCILIATED para outro (mesmo valor)
-      if (valueDifference === 0 && currentyStatus !== status && !updatedBalanceOrigin && !updatedBalanceDestination) {
-        if ((status === statusFinance.CONCILIATED && dateNow.isSame(stringDate, 'day')) || status === statusFinance.CONCILIATED) {
+      // Cenário 2: Antes não conciliado, agora conciliado (novo ou mesmo valor)
+      else if (currentyStatus !== statusFinance.CONCILIATED && status === statusFinance.CONCILIATED) {
+        if (valueDifference !== 0) {
+          if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
+          roolbackValue = valueDifference
+
+          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
+
+          updatedBalanceOrigin = true
+          updatedBalanceDestination = true
+          rollbackType = 'StatusAddedAndValueDifference'
+        } else {
+          if (origin.balance < value) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = value
 
-          await Account.findByIdAndUpdate(oldTransfer.originAccount, { $inc: { balance: value }, updateDate: dateNow })
-          updatedBalanceOrigin = true
-          await Account.findByIdAndUpdate(oldTransfer.destinationAccount, { $inc: { balance: -value }, updateDate: dateNow })
-          updatedBalanceDestination = true
+          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: -value }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: value }, updateDate: dateNow.toDate() })
 
+          updatedBalanceOrigin = true
+          updatedBalanceDestination = true
           rollbackType = 'onlyStatusAdded'
         }
       }
 
-      // Situação: Desfez conciliação
-      if (currentyStatus === statusFinance.CONCILIATED && status !== statusFinance.CONCILIATED && !updatedBalanceOrigin && !updatedBalanceDestination) {
-        roolbackValue = currentyValue
+      // Cenário 3: Conciliação removida
+      else if (currentyStatus === statusFinance.CONCILIATED && status !== statusFinance.CONCILIATED) {
+        if (valueDifference !== 0) {
+          // Conciliação removida, mas saldo alterado
+          if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
+          roolbackValue = valueDifference
 
-        await Account.findByIdAndUpdate(oldTransfer.originAccount, { $inc: { balance: currentyValue }, updateDate: dateNow })
-        updatedBalanceOrigin = true
-        await Account.findByIdAndUpdate(oldTransfer.destinationAccount, { $inc: { balance: -currentyValue }, updateDate: dateNow })
-        updatedBalanceDestination = true
+          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
 
-        rollbackType = 'onlyStatusRemoved'
+          updatedBalanceOrigin = true
+          updatedBalanceDestination = true
+
+          rollbackType = 'statusRemovedAndValueDifference'
+        } else {
+          // Cenário 4: Conciliação removida
+          if (origin.balance < currentyValue) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
+          roolbackValue = currentyValue
+
+          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: currentyValue }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -currentyValue }, updateDate: dateNow.toDate() })
+
+          updatedBalanceOrigin = true
+          updatedBalanceDestination = true
+
+          rollbackType = 'onlyStatusRemoved'
+        }
       }
 
       const updated = await Transfer.findByIdAndUpdate(
@@ -206,7 +217,7 @@ const TransferController = {
           destinationAccount,
           status,
           value,
-          date: dayjs(date).toDate(),
+          date: stringDate.toDate(),
           description
         },
         { new: true }
@@ -214,14 +225,20 @@ const TransferController = {
 
       return res.status(200).json(updated)
     } catch (error) {
-      console.log(error)
+      console.error('Erro ao atualizar transferência:', error)
+
+      // Reversão de saldo em caso de erro
       switch (rollbackType) {
         case 'onlyStatusRemoved':
-        case 'valueChangeConciliatedStatusDifferent':
+        case 'statusRemovedAndValueDifference':
         case 'valueChangeConciliated':
-        case 'onlyStatusAdded':
           if (updatedBalanceOrigin) await Account.findByIdAndUpdate(originAccount, { $inc: { balance: -roolbackValue } })
           if (updatedBalanceDestination) await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: roolbackValue } })
+          break
+        case 'onlyStatusAdded':
+        case 'StatusAddedAndValueDifference':
+          if (updatedBalanceOrigin) await Account.findByIdAndUpdate(originAccount, { $inc: { balance: roolbackValue } })
+          if (updatedBalanceDestination) await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -roolbackValue } })
           break
       }
 
