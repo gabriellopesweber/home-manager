@@ -138,6 +138,19 @@ const TransferSchema = new mongoose.Schema({
     ref: 'Account',
     required: true
   },
+  status: {
+    type: Number,
+    enum: [
+      statusFinance.PENDING,
+      statusFinance.CONCILIATED,
+      statusFinance.CANCEL
+    ],
+    default: statusFinance.PENDING,
+  },
+  updateDate: {
+    type: Date,
+    default: ''
+  },
   value: {
     type: Number,
     required: true
