@@ -4,4 +4,9 @@ const statusFinance = {
   CANCEL: 2
 }
 
-export { statusFinance }
+const typeCard = {
+  CREDIT: 1,
+  DEBIT: 2
+}
+
+export { statusFinance, typeCard }

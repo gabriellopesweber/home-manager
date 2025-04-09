@@ -11,6 +11,7 @@ import incomeRouter from './routes/incomeRouter.js'
 import categoryRouter from './routes/categoryRouter.js'
 import accountRouter from './routes/accountRouter.js'
 import transferRouter from './routes/transferRouter.js'
+import card from './routes/cardRouter.js'
 
 const app = express()
 const port = process.env.PORT || 5002
@@ -27,6 +28,7 @@ app.use('/income', incomeRouter)
 app.use('/category', categoryRouter)
 app.use('/account', accountRouter)
 app.use('/transfer', transferRouter)
+app.use('/card', card)
 
 app.get("/", (req, res) => {
   res.send("🔥 API rodando com MongoDB!")
