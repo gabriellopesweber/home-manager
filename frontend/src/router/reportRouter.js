@@ -1,11 +1,11 @@
-import ReportRevenueIndex from '@/views/report/ReportRevenueIndex.vue'
+import ReportIncomeIndex from '@/views/report/ReportIncomeIndex.vue'
 import ReportExpenseIndex from '@/views/report/ReportExpenseIndex.vue'
 
 const reportRouter = [
   {
     path: '/relatorio/receitas',
     name: "relatorio.receitas",
-    component: ReportRevenueIndex,
+    component: ReportIncomeIndex,
     meta: {
       requiresAuth: true
     }

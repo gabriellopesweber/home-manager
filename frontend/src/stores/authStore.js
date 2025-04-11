@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import axios from "@/services/api"
+import { login, register, resetPassword, forgotPassword } from "@/services/authService"
 
 export const useAuthStore = defineStore("authorization", {
   state: () => ({
@@ -11,53 +11,21 @@ export const useAuthStore = defineStore("authorization", {
   },
   actions: {
     async login(email, password) {
-      try {
-        const response = await axios.post("/authorization/login", { email, password })
-        this.token = response.data.token
-        localStorage.setItem("token", this.token)
-      } catch (error) {
-        if (error.response) {
-          const { data, status } = error.response
-          throw { data, status }
-        }
-        throw error
-      }
+      const response = await login(email, password)
+      this.token = response.token
+      localStorage.setItem("token", this.token)
     },
 
     async register(name, email, password) {
-      try {
-        await axios.post("/authorization/register", { name, email, password })
-      } catch (error) {
-        if (error.response) {
-          const { data, status } = error.response
-          throw { data, status }
-        }
-        throw error
-      }
+      await register(name, email, password)
     },
 
     async resetPassword(token, newPassword) {
-      try {
-        await axios.post("/authorization/reset-password", { token, newPassword })
-      } catch (error) {
-        if (error.response) {
-          const { data, status } = error.response
-          throw { data, status }
-        }
-        throw error
-      }
+      await resetPassword(token, newPassword)
     },
 
     async forgotPassword(email) {
-      try {
-        await axios.post("/authorization/forgot-password", { email })
-      } catch (error) {
-        if (error.response) {
-          const { data, status } = error.response
-          throw { data, status }
-        }
-        throw error
-      }
+      await forgotPassword(email)
     },
 
     logout() {

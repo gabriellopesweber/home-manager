@@ -3,11 +3,7 @@
     fluid
     class="mt-5"
   >
-    <BaseMaterialCard title="Relatorio de Receitas">
-      <v-data-table
-        :items="items"
-      />
-    </BaseMaterialCard>
+    <BaseMaterialCard title="Receita" />
   </v-container>
 </template>
 
@@ -15,14 +11,12 @@
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 
 export default {
-  name: "ReportRevenueIndex",
+  name: "IncomeIndex",
   components: {
     BaseMaterialCard
   },
   data () {
-    return {
-      items: []
-    }
+    return {}
   }
 }
 </script>

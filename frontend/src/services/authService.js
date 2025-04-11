@@ -1,16 +1,17 @@
-import axios from "axios";
+import axios from "@/services/api"
 
-const API_URL = "http://localhost:5002/authorization"
+const API_URL = "/authorization"
 
 export const login = async (email, password) => {
   try {
     const response = await axios.post(`${API_URL}/login`, { email, password })
-    if (response.data.token) {
-      localStorage.setItem("token", response.data.token)
-    }
     return response.data
   } catch (error) {
-    throw error.response.data
+    if (error.response) {
+      const { data, status } = error.response
+      throw { data, status }
+    }
+    throw error
   }
 };
 
@@ -23,10 +24,36 @@ export const register = async (name, email, password) => {
     })
     return response.data
   } catch (error) {
-    throw error.response.data
+    if (error.response) {
+      const { data, status } = error.response
+      throw { data, status }
+    }
+    throw error
   }
 }
 
-export const logout = () => {
-  localStorage.removeItem("token")
+
+export const resetPassword = async (token, newPassword) => {
+  try {
+    await axios.post(`${API_URL}/reset-password`, { token, newPassword })
+  } catch (error) {
+    if (error.response) {
+      const { data, status } = error.response
+      throw { data, status }
+    }
+    throw error
+  }
 }
+
+export const forgotPassword = async (email) => {
+  try {
+    await axios.post(`${API_URL}/forgot-password`, { email })
+  } catch (error) {
+    if (error.response) {
+      const { data, status } = error.response
+      throw { data, status }
+    }
+    throw error
+  }
+}
+

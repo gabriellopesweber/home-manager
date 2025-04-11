@@ -3,7 +3,7 @@
     fluid
     class="mt-5"
   >
-    <BaseMaterialCard title="Relatorio de Saida">
+    <BaseMaterialCard title="Relatorio de Receitas">
       <v-data-table
         :items="items"
       />
@@ -13,10 +13,10 @@
 
 <script>
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import { getAll } from '@/services/ExpenseService'
+import { getAll } from '@/services/IncomeService'
 
 export default {
-  name: "ReportExpenseIndex",
+  name: "ReportIncomeIndex",
   components: {
     BaseMaterialCard
   },

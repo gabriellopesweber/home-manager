@@ -12,7 +12,7 @@
             <img
               class="mx-auto"
               :src="myLogo"
-              style="height: 75px; width: 200px;"
+              style="height: 75px"
             >
           </div>
         </template>
@@ -74,14 +74,14 @@
           prepend-icon="mdi-arrow-right-thick"
           color="primary"
           link
-          :to="{ name: 'manager.receitas' }"
+          :to="{ name: 'manager.income' }"
         />
         <v-list-item
           prepend-icon="mdi-arrow-left-thick"
           title="Saidas"
           color="primary"
           link
-          :to="{ name: 'manager.saidas' }"
+          :to="{ name: 'manager.expense' }"
         />
       </v-list-group>
     </v-list>
@@ -114,7 +114,7 @@ export default {
   },
   data () {
     return {
-      myLogo: "/img/HM-Black.svg"
+      myLogo: "/img/HM-Black-old.png"
     }
   },
   methods: {

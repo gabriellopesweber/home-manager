@@ -1,19 +1,19 @@
-import ReportRevenueIndex from '@/views/report/ReportRevenueIndex.vue'
-import ReportExpenseIndex from '@/views/report/ReportExpenseIndex.vue'
+import ExpenseIndex from '@/views/manager/expense/ExpenseIndex.vue'
+import IncomeIndex from '@/views/manager/Income/IncomeIndex.vue'
 
 const managerRouter = [
   {
     path: '/gerenciamento/receitas',
-    name: "manager.receitas",
-    component: ReportRevenueIndex,
+    name: "manager.income",
+    component: IncomeIndex,
     meta: {
       requiresAuth: true
     }
   },
   {
-    path: '/gerenciamento/saidas',
-    name: "manager.saidas",
-    component: ReportExpenseIndex,
+    path: '/gerenciamento/despesas',
+    name: "manager.expense",
+    component: ExpenseIndex,
     meta: {
       requiresAuth: true
     }

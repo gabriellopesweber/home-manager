@@ -4,16 +4,16 @@ import dayjs from 'dayjs'
 
 const TransferController = {
   async create(req, res) {
-    const { originAccount, destinationAccount, status, value, date, description } = req.body
+    const { origin_account, destination_account, status, value, date, description } = req.body
     const userId = req.user.id
     let updatedBalanceOrigin = false
     let updatedBalanceDestination = false
 
     try {
-      if (!originAccount || !destinationAccount || !value || !date || typeof status !== "number") {
+      if (!origin_account || !destination_account || !value || !date || typeof status !== "number") {
         return res.status(400).json({ message: 'Campos obrigatórios ausentes.' })
       }
-      if (originAccount === destinationAccount) {
+      if (origin_account === destination_account) {
         return res.status(400).json({ message: 'Contas de origem e destino devem ser diferentes.' })
       }
       if (value <= 0) {
@@ -24,8 +24,8 @@ const TransferController = {
         return res.status(400).json({ message: 'o `status` deve ser 0 para conciliado, 1 para pendente e 2 para cancelado' })
       }
 
-      const origin = await Account.findOne({ _id: originAccount, user: userId })
-      const destination = await Account.findOne({ _id: destinationAccount, user: userId })
+      const origin = await Account.findOne({ _id: origin_account, user: userId })
+      const destination = await Account.findOne({ _id: destination_account, user: userId })
 
       if (!origin || !destination) {
         return res.status(404).json({ message: 'Conta de origem ou destino não encontrada ou sem permissão.' })
@@ -46,8 +46,8 @@ const TransferController = {
       }
 
       const transfer = await Transfer.create({
-        originAccount,
-        destinationAccount,
+        originAccount: origin_account,
+        destinationAccount: destination_account,
         value,
         date: dayjs(date).toDate(),
         description,
@@ -65,9 +65,9 @@ const TransferController = {
       })
     } catch (error) {
       // Roolback nos saldos se erro após alteração
-      if (originAccount && destinationAccount && value) {
-        if (updatedBalanceOrigin) await Account.findByIdAndUpdate(originAccount, { $inc: { balance: value } })
-        if (updatedBalanceDestination) await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -value } })
+      if (origin_account && destination_account && value) {
+        if (updatedBalanceOrigin) await Account.findByIdAndUpdate(origin_account, { $inc: { balance: value } })
+        if (updatedBalanceDestination) await Account.findByIdAndUpdate(destination_account, { $inc: { balance: -value } })
       }
       console.error(error)
       return res.status(500).json({ message: 'Erro ao criar transferência', error })
@@ -106,7 +106,7 @@ const TransferController = {
   async update(req, res) {
     const userId = req.user.id
     const { id } = req.params
-    const { originAccount, destinationAccount, status: statusBody, value, date, description } = req.body
+    const { origin_account, destination_account, status: statusBody, value, date, description } = req.body
 
     let updatedBalanceOrigin = false
     let updatedBalanceDestination = false
@@ -116,7 +116,7 @@ const TransferController = {
     let status
 
     try {
-      if (!originAccount || !destinationAccount || !value || !date) {
+      if (!origin_account || !destination_account || !value || !date) {
         return res.status(400).json({ message: 'Campos obrigatórios ausentes.' })
       }
 
@@ -127,8 +127,8 @@ const TransferController = {
         }
       }
 
-      const origin = await Account.findOne({ _id: originAccount, user: userId })
-      const destination = await Account.findOne({ _id: destinationAccount, user: userId })
+      const origin = await Account.findOne({ _id: origin_account, user: userId })
+      const destination = await Account.findOne({ _id: destination_account, user: userId })
 
       if (!origin || !destination) return res.status(404).json({ message: 'Conta de origem ou destino inválida.' })
 
@@ -148,8 +148,8 @@ const TransferController = {
         if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
         roolbackValue = valueDifference
 
-        await Account.findByIdAndUpdate(originAccount, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
-        await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
+        await Account.findByIdAndUpdate(origin_account, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
+        await Account.findByIdAndUpdate(destination_account, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
 
         updatedBalanceOrigin = true
         updatedBalanceDestination = true
@@ -162,8 +162,8 @@ const TransferController = {
           if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = valueDifference
 
-          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
-          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(origin_account, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destination_account, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
 
           updatedBalanceOrigin = true
           updatedBalanceDestination = true
@@ -172,8 +172,8 @@ const TransferController = {
           if (origin.balance < value) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = value
 
-          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: -value }, updateDate: dateNow.toDate() })
-          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: value }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(origin_account, { $inc: { balance: -value }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destination_account, { $inc: { balance: value }, updateDate: dateNow.toDate() })
 
           updatedBalanceOrigin = true
           updatedBalanceDestination = true
@@ -188,8 +188,8 @@ const TransferController = {
           if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = valueDifference
 
-          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
-          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(origin_account, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destination_account, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
 
           updatedBalanceOrigin = true
           updatedBalanceDestination = true
@@ -200,8 +200,8 @@ const TransferController = {
           if (origin.balance < currentyValue) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = currentyValue
 
-          await Account.findByIdAndUpdate(originAccount, { $inc: { balance: currentyValue }, updateDate: dateNow.toDate() })
-          await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -currentyValue }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(origin_account, { $inc: { balance: currentyValue }, updateDate: dateNow.toDate() })
+          await Account.findByIdAndUpdate(destination_account, { $inc: { balance: -currentyValue }, updateDate: dateNow.toDate() })
 
           updatedBalanceOrigin = true
           updatedBalanceDestination = true
@@ -213,8 +213,8 @@ const TransferController = {
       const updated = await Transfer.findByIdAndUpdate(
         id,
         {
-          originAccount,
-          destinationAccount,
+          originAccount: origin_account,
+          destinationAccount: destination_account,
           status,
           value,
           date: stringDate.toDate(),
@@ -232,13 +232,13 @@ const TransferController = {
         case 'onlyStatusRemoved':
         case 'statusRemovedAndValueDifference':
         case 'valueChangeConciliated':
-          if (updatedBalanceOrigin) await Account.findByIdAndUpdate(originAccount, { $inc: { balance: -roolbackValue } })
-          if (updatedBalanceDestination) await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: roolbackValue } })
+          if (updatedBalanceOrigin) await Account.findByIdAndUpdate(origin_account, { $inc: { balance: -roolbackValue } })
+          if (updatedBalanceDestination) await Account.findByIdAndUpdate(destination_account, { $inc: { balance: roolbackValue } })
           break
         case 'onlyStatusAdded':
         case 'StatusAddedAndValueDifference':
-          if (updatedBalanceOrigin) await Account.findByIdAndUpdate(originAccount, { $inc: { balance: roolbackValue } })
-          if (updatedBalanceDestination) await Account.findByIdAndUpdate(destinationAccount, { $inc: { balance: -roolbackValue } })
+          if (updatedBalanceOrigin) await Account.findByIdAndUpdate(origin_account, { $inc: { balance: roolbackValue } })
+          if (updatedBalanceDestination) await Account.findByIdAndUpdate(destination_account, { $inc: { balance: -roolbackValue } })
           break
       }
 
@@ -256,7 +256,7 @@ const TransferController = {
 
       // Desfaz os saldos
       await Account.findByIdAndUpdate(transfer.originAccount, { $inc: { balance: transfer.value } })
-      await Account.findByIdAndUpdate(transfer.destinationAccount, { $inc: { balance: -transfer.value } })
+      await Account.findByIdAndUpdate(transfer.destination_account, { $inc: { balance: -transfer.value } })
 
       await Transfer.findByIdAndDelete(id)
 
