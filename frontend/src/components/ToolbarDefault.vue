@@ -41,18 +41,18 @@
 
         <v-list-item
           prepend-icon="mdi-receipt-text-arrow-right-outline"
-          title="Entradas"
+          title="Receitas"
           color="primary"
           link
-          :to="{ name: 'relatorio.receitas' }"
+          :to="{ name: 'report.income' }"
         />
         
         <v-list-item
           link 
           prepend-icon="mdi-receipt-text-arrow-left-outline"
-          title="Saidas"
+          title="Despesas"
           color="primary"
-          :to="{ name: 'relatorio.saidas' }"
+          :to="{ name: 'report.expense' }"
         />
       </v-list-group>
       <v-list-group
@@ -78,7 +78,7 @@
         />
         <v-list-item
           prepend-icon="mdi-arrow-left-thick"
-          title="Saidas"
+          title="Despesas"
           color="primary"
           link
           :to="{ name: 'manager.expense' }"

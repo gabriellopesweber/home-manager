@@ -10,11 +10,19 @@
     >
       <slot name="title" />
     </template>
+
     <template
       v-if="$slots.subtitle"
       #subtitle
     >
       <slot name="subtitle" />
+    </template>
+
+    <template
+      v-if="$slots.append"
+      #append
+    >
+      <slot name="append" />
     </template>
 
     <v-card-text class="pb-0">

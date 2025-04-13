@@ -128,8 +128,13 @@ export default {
             name: 'dashboard'
           })
         }
-      } catch {
-        this.$showMessage("Ocorreu um problema ao fazer o login!", "error")
+        this.$showMessage("Login efetuado!", "success")
+      } catch (error) {
+        if (error?.status === 400) {
+          return this.$showMessage("Usuario e senha invalidos!", "error")
+        }
+        
+        return this.$showMessage("Ocorreu um problema ao fazer o login!", "error")
       } finally {
         this.loading = false
       }

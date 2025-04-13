@@ -4,7 +4,7 @@ import ReportExpenseIndex from '@/views/report/ReportExpenseIndex.vue'
 const reportRouter = [
   {
     path: '/relatorio/receitas',
-    name: "relatorio.receitas",
+    name: "report.income",
     component: ReportIncomeIndex,
     meta: {
       requiresAuth: true
@@ -12,7 +12,7 @@ const reportRouter = [
   },
   {
     path: '/relatorio/saidas',
-    name: "relatorio.saidas",
+    name: "report.expense",
     component: ReportExpenseIndex,
     meta: {
       requiresAuth: true

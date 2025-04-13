@@ -33,6 +33,14 @@ export default createVuetify({
     VTextField: {
       rounded: 'lg',
       density: 'comfortable'
-    }
+    },
+    VAutocomplete: {
+      rounded: 'lg',
+      density: 'comfortable'
+    },
+    VNumberInput: {
+      rounded: 'lg',
+      density: 'comfortable'
+    },
   },
 })
