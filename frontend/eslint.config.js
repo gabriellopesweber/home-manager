@@ -38,10 +38,6 @@ export default [
       'vue/no-unused-properties': ['error', {
         'groups': ['props', 'data', 'computed', 'methods']
       }]
-
-      // Ativar a regra abaixo apenas quando for começar migração para composition
-      // Para manter padrão sem espaços a esquerda de código de dentro do <script></script>
-      // 'vue/script-indent': ['error']
     },
     languageOptions: {
       ecmaVersion: 'latest',

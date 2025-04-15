@@ -7,6 +7,7 @@
       <template #append>
         <BaseMaterialDialog
           v-model="showDialog"
+          max-width="1200"
           :configuration-btn="getConfiguration"
         >
           <template #title>
@@ -15,28 +16,31 @@
 
           <template #default>
             <v-form ref="form">
-              <v-row>
+              <v-row dense>
                 <v-col
                   cols="12"
                   md="9"
                 >
                   <v-text-field
+                    v-model="incomeData.description"
                     label="Descrição"
                     variant="outlined"
                   />
                 </v-col>
 
                 <v-col
+                  class="d-flex justify-center"
                   cols="12"
                   md="3"
                 >
                   <GlobalDataPiker
-                    v-model="dateSelected"
+                    v-model="incomeData.dateSelected"
                     :configuration-btn="{ 
                       color: 'primary',
                       prependIcon: 'mdi-calendar',
                       size: 'large'
                     }"
+                    @update:model-value="updateDate"
                   />
                 </v-col>
 
@@ -45,6 +49,7 @@
                   md="6"
                 >
                   <v-autocomplete
+                    v-model="incomeData.status"
                     label="Status"
                     variant="outlined"
                   />
@@ -54,9 +59,22 @@
                   cols="12"
                   md="6"
                 >
-                  <v-number-input
+                  <v-text-field
+                    v-model="maskedAmount"
                     label="Valor"
-                    control-variant="hidden"
+                    prefix="R$"
+                    variant="outlined"
+                    @keypress="onlyNumbers"
+                  />
+                </v-col>
+
+                <v-col
+                  cols="12"
+                  md="6"
+                >
+                  <v-autocomplete
+                    v-model="incomeData.category"
+                    label="Categoria"
                     variant="outlined"
                   />
                 </v-col>
@@ -66,16 +84,7 @@
                   md="6"
                 >
                   <v-autocomplete
-                    label="Status"
-                    variant="outlined"
-                  />
-                </v-col>
-
-                <v-col
-                  cols="12"
-                  md="6"
-                >
-                  <v-autocomplete
+                    v-model="incomeData.account"
                     label="Conta"
                     variant="outlined"
                   />
@@ -108,6 +117,7 @@
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
+import { formatCurrencyMaskBR } from '../../../utils/monetary'
 
 export default {
   name: "IncomeIndex",
@@ -119,7 +129,14 @@ export default {
   data () {
     return {
       showDialog: false,
-      dateSelected: ''
+      incomeData: {
+        description: '',
+        dateSelected: '',
+        status: null,
+        value: 0,
+        category: null,
+        account: null
+      }
     }
   },
   computed: {
@@ -134,12 +151,24 @@ export default {
           location: "left"
         }
       }
+    },
+    maskedAmount: {
+      get() {
+        return this.incomeData.value
+      },
+      set(val) {
+        this.incomeData.value = formatCurrencyMaskBR(val)
+      }
     }
   },
-  watch: {
-    dateSelected (value) { 
-      console.log(value)
+  methods: {
+    onlyNumbers(e) {
+      const allowed = /[0-9]/
+      if (!allowed.test(e.key)) e.preventDefault()
+    },
+    updateDate(e) {
+      console.log(e)
     }
-  },
+  }
 }
 </script>

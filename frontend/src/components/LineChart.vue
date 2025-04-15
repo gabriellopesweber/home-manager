@@ -8,7 +8,7 @@
 <script>
 import { Line as LineChart } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js'
-import { formatCurrencyBR } from '@/utils/monetary.js'
+import { formatCurrencyMaskBR } from '@/utils/monetary.js'
 
 // Registrar os componentes necessários do Chart.js
 ChartJS.register(Title, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement)
@@ -44,7 +44,7 @@ export default {
             callbacks: {
               label: (tooltipItem) => {
                 let value = tooltipItem.raw
-                return formatCurrencyBR(value)
+                return formatCurrencyMaskBR(value)
               }
             }
           }

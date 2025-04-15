@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import dayjs from 'dayjs'
 import { useDate } from 'vuetify'
 
 export default {
@@ -54,7 +55,7 @@ export default {
   methods: {
     updateDate(value) {
       this.selectedDate = value
-      this.$emit('update:model-value', this.value)
+      this.$emit('update:model-value', dayjs(value).toISOString())
       this.menu = false
     },
     formatDate(date) {

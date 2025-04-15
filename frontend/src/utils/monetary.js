@@ -1,5 +1,18 @@
-function formatCurrencyBR(value) {
-  return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+function formatCurrencyMaskBR(value) {
+  // Remove tudo que não for número
+  const cleaned = value.replace(/\D/g, '')
+
+  // Converte para número inteiro (centavos)
+  let numeric = parseInt(cleaned, 10)
+
+  if (isNaN(numeric)) numeric = 0
+
+  // Divide por 100 para pegar reais e centavos
+  const cents = (numeric / 100).toFixed(2)
+
+  // Formata como moeda brasileira
+  return cents.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 }
 
-export { formatCurrencyBR }
+
+export { formatCurrencyMaskBR }

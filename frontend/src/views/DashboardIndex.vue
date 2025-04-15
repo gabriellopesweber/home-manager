@@ -113,7 +113,7 @@
 <script>
 import LineChart from '@/components/LineChart.vue'
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import { formatCurrencyBR } from '@/utils/monetary.js'
+import { formatCurrencyMaskBR } from '@/utils/monetary.js'
 
 export default {
   components: { BaseMaterialCard, LineChart },
@@ -132,7 +132,7 @@ export default {
   computed: {
     formatMoney () {
       return (value) => {
-        return formatCurrencyBR(value)
+        return formatCurrencyMaskBR(value)
       }
     }
   },
