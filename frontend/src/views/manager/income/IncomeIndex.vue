@@ -15,7 +15,10 @@
           </template>
 
           <template #default>
-            <v-form ref="form">
+            <v-form
+              ref="form" 
+              v-model="isValid"
+            >
               <v-row dense>
                 <v-col
                   cols="12"
@@ -40,6 +43,7 @@
                       prependIcon: 'mdi-calendar',
                       size: 'large'
                     }"
+                    :rules="[() => $validation('required', incomeData.dateSelected)]"
                     @update:model-value="updateDate"
                   />
                 </v-col>
@@ -52,6 +56,9 @@
                     v-model="incomeData.status"
                     label="Status"
                     variant="outlined"
+
+                    :items="itemsStatus"
+                    :rules="[() => $validation('required', incomeData.status)]"
                   />
                 </v-col>
 
@@ -64,6 +71,7 @@
                     label="Valor"
                     prefix="R$"
                     variant="outlined"
+                    :rules="[() => $validation('required', incomeData.value)]"
                     @keypress="onlyNumbers"
                   />
                 </v-col>
@@ -75,7 +83,12 @@
                   <v-autocomplete
                     v-model="incomeData.category"
                     label="Categoria"
+                    item-value="_id"
+                    item-title="name"
                     variant="outlined"
+                    :rules="[() => $validation('required', incomeData.category)]"
+                    :items="itemsCategory"
+                    :loading="loading"
                   />
                 </v-col>
 
@@ -86,7 +99,12 @@
                   <v-autocomplete
                     v-model="incomeData.account"
                     label="Conta"
+                    item-value="_id"
+                    item-title="name"
                     variant="outlined"
+                    :rules="[() => $validation('required', incomeData.account)]"
+                    :items="itemsAccount"
+                    :loading="loading"
                   />
                 </v-col>
               </v-row>
@@ -95,13 +113,17 @@
 
           <template #actions>
             <div class="d-flex justify-space-between w-100 mb-2">
-              <v-btn class="ml-6">
+              <v-btn
+                class="ml-6"
+                @click="clearForm"
+              >
                 Limpar
               </v-btn>
               <v-btn
                 class="mr-6"
                 type="submit"
                 color="primary"
+                @click="validateAndCreate"
               >
                 Cadastrar
               </v-btn>
@@ -117,7 +139,9 @@
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
-import { formatCurrencyMaskBR } from '../../../utils/monetary'
+import CategoryService from "@/services/CategoryService"
+import AccountService from "@/services/AccountService"
+import { formatCurrencyMaskBR } from '@/utils/monetary'
 
 export default {
   name: "IncomeIndex",
@@ -129,6 +153,8 @@ export default {
   data () {
     return {
       showDialog: false,
+      loading: false,
+      isValid: false,
       incomeData: {
         description: '',
         dateSelected: '',
@@ -136,7 +162,14 @@ export default {
         value: 0,
         category: null,
         account: null
-      }
+      },
+      itemsCategory: [],
+      itemsAccount: [],
+      itemsStatus: [
+        { value: 0, title: 'Conciliado' },
+        { value: 1, title: 'Pendente' },
+        { value: 2, title: 'Cancelado' }
+      ]
     }
   },
   computed: {
@@ -161,6 +194,15 @@ export default {
       }
     }
   },
+  watch: {
+    showDialog(value) {
+      if (value) {
+        this.populateItems()
+      } else {
+        this.clearForm()
+      }
+    }
+  },
   methods: {
     onlyNumbers(e) {
       const allowed = /[0-9]/
@@ -168,6 +210,31 @@ export default {
     },
     updateDate(e) {
       console.log(e)
+    },
+    async populateItems() {
+      try {
+        this.loading = true
+        this.itemsCategory = await CategoryService.getAll({type: 'receita'})
+        this.itemsAccount = await AccountService.getAll()
+      } catch {
+        this.$showMessage("Ocorreu um erro ao carregar os items!", "error")
+      } finally { 
+        this.loading = false
+      }
+    },
+    async validateAndCreate () {
+      this.$refs.form.validate()
+      if (!this.isValid) return
+    },
+    clearForm () {
+      this.incomeData = {
+        description: '',
+        dateSelected: '',
+        status: null,
+        value: 0,
+        category: null,
+        account: null
+      }
     }
   }
 }

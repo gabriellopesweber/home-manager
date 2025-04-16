@@ -1,48 +1,55 @@
 import axios from "@/services/api"
 
-const API_URL = "/account"
+class AccountService {
+  constructor() {
+    this.api = axios
+    this.baseUrl = "/account"
+  }
 
-export const create = async (name, balance) => {
-  try {
-    const response = await axios.post(`${API_URL}/`, { name, balance })
-    return response.data
-  } catch (error) {
-    throw error.response.data
+  async create(name, balance) {
+    try {
+      const response = await this.api.post(`${this.baseUrl}/`, { name, balance })
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
+  }
+
+  async getAll() {
+    try {
+      const response = await this.api.get(`${this.baseUrl}/`)
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
+  }
+
+  async getById(id) {
+    try {
+      const response = await this.api.get(`${this.baseUrl}/${id}`)
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
+  }
+
+  async update(name, balance) {
+    try {
+      const response = await this.api.put(`${this.baseUrl}/`, { name, balance })
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
+  }
+
+  async deleteById(id) {
+    try {
+      const response = await this.api.delete(`${this.baseUrl}/${id}`)
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
   }
 }
 
-export const getAll = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/`)
-    return response.data
-  } catch (error) {
-    throw error.response.data
-  }
-}
-
-export const getById = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}/${id}`)
-    return response.data
-  } catch (error) {
-    throw error.response.data
-  }
-}
-
-export const update = async (name, balance) => {
-  try {
-    const response = await axios.put(`${API_URL}/`, { name, balance })
-    return response.data
-  } catch (error) {
-    throw error.response.data
-  }
-}
-
-export const deleteById = async (id) => {
-  try {
-    const response = await axios.delete(`${API_URL}/${id}`)
-    return response.data
-  } catch (error) {
-    throw error.response.data
-  }
-}
+export default new AccountService
