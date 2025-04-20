@@ -2,6 +2,7 @@
   <BaseMaterialDialog
     v-model="dialog"
     max-width="1200"
+    @update:model-value="$emit('update:model-value', $event)"
   >
     <template #title>
       <span class="d-flex justify-center"> Cadastrar Receita </span>
@@ -47,7 +48,6 @@
               v-model="incomeData.status"
               label="Status"
               variant="outlined"
-
               :items="itemsStatus"
               :rules="[() => $validation('required', incomeData.status)]"
             />
@@ -110,15 +110,43 @@
         >
           Limpar
         </v-btn>
-        <v-btn
-          class="mr-6"
-          type="submit"
-          color="primary"
-          :loading="loadingCreate"
-          @click="validateAndCreate"
+
+        <v-speed-dial
+          location="left center"
+          transition="scale-transition"
+          open-on-hover
         >
-          Cadastrar
-        </v-btn>
+          <template #activator="{ props: speedDial }">
+            <div v-bind="speedDial">
+              <v-tooltip location="top">
+                <template #activator="{ props: tooltip }">
+                  <v-fab
+                    v-bind="tooltip"
+                    class="mr-6"
+                    rounded="circle"
+                    type="submit"
+                    :icon="fabIcon"
+                    :color="colorAction"
+                    :aria-label="`Executar ação de ${textAction}`"
+                    @click="executeAction(fabIcon)"
+                  />
+                </template>
+                <span>{{ textAction }}</span>
+              </v-tooltip>
+            </div>
+          </template>
+
+          <v-btn
+            v-for="(action, index) in actions"
+            :key="index"
+            v-tooltip:top="`${action.text}`"
+            rounded="circle"
+            :icon="action.icon"
+            :loading="loadingCreate"
+            :color="action.color"
+            @click="updateTypeAction(action.icon, action.type, action.color)"
+          />
+        </v-speed-dial>
       </div>
     </template>
   </BaseMaterialDialog>
@@ -145,6 +173,7 @@ export default {
       required: true
     }
   },
+  emits: ['update:model-value'],
   data () {
     return {
       dialog: false,
@@ -166,6 +195,23 @@ export default {
         { value: 0, title: 'Conciliado' },
         { value: 1, title: 'Pendente' },
         { value: 2, title: 'Cancelado' }
+      ],
+      fabIcon: 'mdi-plus-circle-outline',
+      colorAction: "success",
+      textAction: 'Cadastrar',
+      actions: [
+        {
+          icon: 'mdi-plus-circle-outline',
+          text: 'Cadastrar',
+          color: 'success',
+          type: 'one'
+        },
+        {
+          icon: 'mdi-plus-circle-multiple-outline',
+          text: 'Cadastrar mais de uma',
+          color: 'success',
+          type: 'moreOne'
+        }
       ]
     }
   },
@@ -211,22 +257,55 @@ export default {
         this.loadingItems = false
       }
     },
-    async validateAndCreate () {
-      this.$refs.form.validate()
-      if (!this.isValid) return
+    updateTypeAction(icon, type, color) {
+      const found = this.actions.find(a => a.type === type)
+      if (!found) return
 
+      this.fabIcon = icon
+      this.colorAction = color
+      this.textAction = found.text
+
+      this.executeAction(this.fabIcon)
+    },
+    async executeAction(icon) {
+      if (icon === 'mdi-plus-circle-outline') {
+        await this.validateAndCreate()
+      }
+      if (icon === 'mdi-plus-circle-multiple-outline') {
+        if (this.validate()) {
+          await this.createIncome()
+        }
+      }
+    },
+    async validateAndCreate(){
+      if (this.validate()) {
+        if (await this.createIncome()) {
+          this.$emit('update:model-value', false)
+        }
+      }
+    },
+    validate() {
+      this.$refs.form.validate()
+      return this.isValid
+    },
+    async createIncome() {
       try {
         this.loadingCreate = true
 
         await IncomeService.create(this.incomeData)
 
+        this.$showMessage("Cadastro efetuado!", "success")
       } catch {
         this.$showMessage("Ocorreu um erro ao cadastrar Receita!", "error")
+        return false
       } finally {
         this.loadingCreate = false
       }
+
+      return true
     },
-    clearForm () {
+    clearForm() {
+      this.amount = "0,00"
       this.incomeData = {
         description: '',
         date: '',

@@ -40,7 +40,7 @@
             rounded="circule"
             size="small"
             variant="text"
-            @click="showDialog = false"
+            @click="$emit('update:model-value', false)"
           />
         </template>
 

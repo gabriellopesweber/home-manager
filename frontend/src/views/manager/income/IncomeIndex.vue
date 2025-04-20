@@ -121,7 +121,7 @@ export default {
     }
   },
   async created() {
-    this.items = await LaunchService.getAll(dayjs().startOf('day').toISOString(), dayjs().endOf('day').toISOString())
+    this.items = await LaunchService.getAll(dayjs().startOf('month').toISOString(), dayjs().endOf('day').toISOString())
   },
   methods: {
     updateTypeAction(icon, type, color) {
