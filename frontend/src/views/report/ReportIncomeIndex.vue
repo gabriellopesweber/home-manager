@@ -13,7 +13,7 @@
 
 <script>
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import { getAll } from '@/services/IncomeService'
+import IncomeService from '@/services/IncomeService'
 
 export default {
   name: "ReportIncomeIndex",
@@ -29,7 +29,7 @@ export default {
   async created () {
     try {
       this.loading = true
-      this.items = await getAll()
+      this.items = await IncomeService.getAll()
     } catch {
       // Exibir mensagem de erro
     } finally {

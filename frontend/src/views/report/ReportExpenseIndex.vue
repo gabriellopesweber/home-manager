@@ -13,7 +13,7 @@
 
 <script>
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import { getAll } from '@/services/ExpenseService'
+import ExpenseService from '@/services/ExpenseService'
 
 export default {
   name: "ReportExpenseIndex",
@@ -29,7 +29,7 @@ export default {
   async created () {
     try {
       this.loading = true
-      this.items = await getAll()
+      this.items = await ExpenseService.getAll()
     } catch {
       // Exibir mensagem de erro
     } finally {

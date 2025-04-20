@@ -3,7 +3,10 @@
     v-model="showDialog"
     rounded="xl"
   >
-    <template #activator="{ props: activation }">
+    <template 
+      v-if="showInternalBtn"
+      #activator="{ props: activation }"
+    >
       <v-btn 
         v-tooltip="{...configurationBtn['VTooltip'] ? configurationBtn['VTooltip'] : {text: '', disabled: true} }"
         v-bind="{ ...activation, ...configurationBtn }"
@@ -67,6 +70,10 @@ export default {
     modelValue: {
       type: Boolean,
       required: true
+    },
+    showInternalBtn: {
+      type: Boolean,
+      default: false
     },
     configurationBtn: {
       type: Object,

@@ -90,6 +90,7 @@ const ExpenseController = {
 
       res.status(200).json(expenses)
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar despesas', error })
     }
   },

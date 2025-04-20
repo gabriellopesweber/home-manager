@@ -17,6 +17,7 @@
     <v-date-picker
       v-model="selectedDate"
       show-adjacent-months
+      :rules="[() => $validation('required', selectedDate)]"
       @update:model-value="updateDate"
     />
   </v-menu>

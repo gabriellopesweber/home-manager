@@ -71,7 +71,7 @@
               >
                 <v-card-subtitle>Receitas</v-card-subtitle>
                 <v-card-title class="text-success">
-                  {{ resumo.receitas }}
+                  {{ formatMoney(resumo.receitas) }}
                 </v-card-title>
               </v-card>
             </v-col>
@@ -85,7 +85,7 @@
               >
                 <v-card-subtitle>Despesas</v-card-subtitle>
                 <v-card-title class="text-error">
-                  {{ resumo.despesas }}
+                  {{ formatMoney(resumo.despesas) }}
                 </v-card-title>
               </v-card>
             </v-col>
@@ -99,7 +99,7 @@
               >
                 <v-card-subtitle>Investimentos</v-card-subtitle>
                 <v-card-title class="text-primary">
-                  {{ resumo.investimentos }}
+                  {{ formatMoney(resumo.investimentos) }}
                 </v-card-title>
               </v-card>
             </v-col>

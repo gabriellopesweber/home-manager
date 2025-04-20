@@ -1,7 +1,13 @@
 const validationRules = {
   required: (value) => {
-    if (!value) {
-      return "Campo obrigatório."
+    if (typeof value === "number") {
+      if (value === undefined || value === null) {
+        return "Campo obrigatório."
+      }
+    } else {
+      if (!value) {
+        return "Campo obrigatório."
+      }
     }
 
     return true

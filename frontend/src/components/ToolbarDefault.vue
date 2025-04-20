@@ -95,6 +95,7 @@
           v-if="authStore.isAuthenticated"
           @click="logout"
         >
+          <v-icon> mdi-logout </v-icon>
           Sair
         </v-btn>
       </v-list-item>

@@ -25,6 +25,13 @@
       <slot name="append" />
     </template>
 
+    <template
+      v-if="$slots.prepend"
+      #prepend
+    >
+      <slot name="prepend" />
+    </template>
+
     <v-card-text class="pb-0">
       <slot name="default" />
     </v-card-text>

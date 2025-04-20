@@ -1,5 +1,6 @@
 import { Account, Category, Income } from '../models/Finance.js'
 import { statusFinance } from '../constants/Finance.js'
+import { validateRequiredFields } from '../utils/validations.js'
 import dayjs from 'dayjs'
 
 const IncomeController = {
@@ -12,9 +13,11 @@ const IncomeController = {
     try {
       const { category, status, value, date: stringDate, description, account } = req.body
 
-      if (!category || !value || !stringDate || !account) {
-        return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
+      const validation = validateRequiredFields({ category, value, stringDate, account })
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message })
       }
+
 
       // Valida o tipo dos parametros recebidos
       if (typeof (category) !== "string") return res.status(400).json({ message: 'O parametro `category` deve ser do tipo String!' })

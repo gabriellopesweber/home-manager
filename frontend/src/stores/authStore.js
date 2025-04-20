@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { login, register, resetPassword, forgotPassword } from "@/services/authService"
+import AuthService from "@/services/AuthService"
 
 export const useAuthStore = defineStore("authorization", {
   state: () => ({
@@ -11,21 +11,21 @@ export const useAuthStore = defineStore("authorization", {
   },
   actions: {
     async login(email, password) {
-      const response = await login(email, password)
+      const response = await AuthService.login(email, password)
       this.token = response.token
       localStorage.setItem("token", this.token)
     },
 
     async register(name, email, password) {
-      await register(name, email, password)
+      await AuthService.register(name, email, password)
     },
 
     async resetPassword(token, newPassword) {
-      await resetPassword(token, newPassword)
+      await AuthService.resetPassword(token, newPassword)
     },
 
     async forgotPassword(email) {
-      await forgotPassword(email)
+      await AuthService.forgotPassword(email)
     },
 
     logout() {

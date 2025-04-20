@@ -60,7 +60,10 @@
                 :loading="loading"
                 @click="login"
               >
-                Entrar
+                <span> Entrar </span>
+                <v-icon class="ml-2">
+                  mdi-login
+                </v-icon>
               </v-btn>
             </v-col>
           </v-row>
@@ -127,8 +130,8 @@ export default {
           this.router.push({
             name: 'dashboard'
           })
+          this.$showMessage("Login efetuado!", "success")
         }
-        this.$showMessage("Login efetuado!", "success")
       } catch (error) {
         if (error?.status === 400) {
           return this.$showMessage("Usuario e senha invalidos!", "error")
