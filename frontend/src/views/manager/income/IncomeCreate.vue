@@ -111,42 +111,18 @@
           Limpar
         </v-btn>
 
-        <v-speed-dial
-          location="left center"
-          transition="scale-transition"
-          open-on-hover
-        >
-          <template #activator="{ props: speedDial }">
-            <div v-bind="speedDial">
-              <v-tooltip location="top">
-                <template #activator="{ props: tooltip }">
-                  <v-fab
-                    v-bind="tooltip"
-                    class="mr-6"
-                    rounded="circle"
-                    type="submit"
-                    :icon="fabIcon"
-                    :color="colorAction"
-                    :aria-label="`Executar ação de ${textAction}`"
-                    @click="executeAction(fabIcon)"
-                  />
-                </template>
-                <span>{{ textAction }}</span>
-              </v-tooltip>
-            </div>
-          </template>
-
-          <v-btn
-            v-for="(action, index) in actions"
-            :key="index"
-            v-tooltip:top="`${action.text}`"
-            rounded="circle"
-            :icon="action.icon"
-            :loading="loadingCreate"
-            :color="action.color"
-            @click="updateTypeAction(action.icon, action.type, action.color)"
+        <div class="mr-6">
+          <ActionSpeedDial
+            direction="left center"
+            transition="slide-y-transition"
+            default-tooltip-location="left"
+            open-on-hover
+            :modal-is-open="dialog"
+            :default-icon="fabIcon"
+            :actions="actions"
+            @action="executeAction(fabIcon)"
           />
-        </v-speed-dial>
+        </div>
       </div>
     </template>
   </BaseMaterialDialog>
@@ -160,12 +136,14 @@ import IncomeService from "@/services/IncomeService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
+import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
 
 export default {
   name: "IncomeCreate",
   components: {
     BaseMaterialDialog,
-    GlobalDataPiker
+    GlobalDataPiker,
+    ActionSpeedDial
   },
   props: {
     showDialog: {
@@ -197,8 +175,6 @@ export default {
         { value: 2, title: 'Cancelado' }
       ],
       fabIcon: 'mdi-plus-circle-outline',
-      colorAction: "success",
-      textAction: 'Cadastrar',
       actions: [
         {
           icon: 'mdi-plus-circle-outline',
@@ -256,16 +232,6 @@ export default {
       } finally { 
         this.loadingItems = false
       }
-    },
-    updateTypeAction(icon, type, color) {
-      const found = this.actions.find(a => a.type === type)
-      if (!found) return
-
-      this.fabIcon = icon
-      this.colorAction = color
-      this.textAction = found.text
-
-      this.executeAction(this.fabIcon)
     },
     async executeAction(icon) {
       if (icon === 'mdi-plus-circle-outline') {

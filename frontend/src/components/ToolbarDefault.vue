@@ -70,11 +70,11 @@
         </template>
 
         <v-list-item
-          title="Receitas"
+          title="Lançamentos"
           prepend-icon="mdi-arrow-right-thick"
           color="primary"
           link
-          :to="{ name: 'manager.income' }"
+          :to="{ name: 'manager.launch' }"
         />
         <v-list-item
           prepend-icon="mdi-arrow-left-thick"

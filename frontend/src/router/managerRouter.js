@@ -4,7 +4,7 @@ import IncomeIndex from '@/views/manager/Income/IncomeIndex.vue'
 const managerRouter = [
   {
     path: '/gerenciamento/receitas',
-    name: "manager.income",
+    name: "manager.launch",
     component: IncomeIndex,
     meta: {
       requiresAuth: true

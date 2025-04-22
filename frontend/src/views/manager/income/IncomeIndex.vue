@@ -23,39 +23,12 @@
         </template>
         
         <template #append>
-          <v-speed-dial
-            location="bottom center"
-            transition="scale-transition"
+          <ActionSpeedDial
+            default-tooltip-location="left"
             open-on-hover
-          >
-            <template #activator="{ props: speedDial }">
-              <div v-bind="speedDial">
-                <v-tooltip location="left">
-                  <template #activator="{ props: tooltip }">
-                    <v-fab
-                      v-bind="tooltip"
-                      rounded="circle"
-                      :icon="fabIcon"
-                      :color="colorAction"
-                      :aria-label="`Executar ação de ${textAction}`"
-                      @click="executeAction(fabIcon)"
-                    />
-                  </template>
-                  <span>{{ textAction }}</span>
-                </v-tooltip>
-              </div>
-            </template>
-
-            <v-btn
-              v-for="(action, index) in actions"
-              :key="index"
-              v-tooltip:left="`${action.text}`"
-              :icon="action.icon"
-              rounded="circle"
-              :color="action.color"
-              @click="updateTypeAction(action.icon, action.type, action.color)"
-            />
-          </v-speed-dial>
+            :actions="actions"
+            @action="executeAction(fabIcon)"
+          />
         </template>
 
         <v-data-table
@@ -75,24 +48,24 @@
 <script>
 import dayjs from 'dayjs'
 import LaunchService from '../../../services/LaunchService'
+import { headerLaunch } from '../../../constants/headers/launch'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import IncomeCreate from './IncomeCreate.vue'
 import GlobalSelectPeriod from '../../../components/GlobalSelectPeriod.vue'
-import { headerLaunch } from '../../../constants/headers/launch'
+import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
 
 export default {
   name: "IncomeIndex",
   components: {
     BaseMaterialCard,
     IncomeCreate,
-    GlobalSelectPeriod
+    GlobalSelectPeriod,
+    ActionSpeedDial
   },
   data () {
     return {
       fabIcon: 'mdi-cash-plus',
-      colorAction: "success",
-      textAction: 'Cadastrar Receita',
       showIncome: false,
       showExpense: false,
       showTransfer: false,
@@ -124,16 +97,6 @@ export default {
     this.items = await LaunchService.getAll(dayjs().startOf('month').toISOString(), dayjs().endOf('day').toISOString())
   },
   methods: {
-    updateTypeAction(icon, type, color) {
-      const found = this.actions.find(a => a.type === type)
-      if (!found) return
-
-      this.fabIcon = icon
-      this.colorAction = color
-      this.textAction = found.text
-
-      this.executeAction(this.fabIcon)
-    },
     executeAction(icon) {
       if (icon === 'mdi-cash-plus') this.showIncome = true
       if (icon === 'mdi-cash-minus') this.showExpense = true
