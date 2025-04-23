@@ -22,16 +22,8 @@ const headerLaunch = [
     value: 'value'
   },
   {
-    title: 'Data de execução',
-    value: 'executionDate'
-  },
-  {
     title: 'Data',
     value: 'date'
-  },
-  {
-    title: 'ID',
-    value: '_id'
   },
   {
     title: 'Descrição',
@@ -42,9 +34,13 @@ const headerLaunch = [
     value: 'account'
   },
   {
-    title: 'usuario',
+    title: 'Usuario',
     value: 'user'
-  }
+  },
+  {
+    title: 'Ação',
+    value: 'actions'
+  },
 ]
 
 export { headerLaunch }

@@ -31,7 +31,7 @@
         :icon="action.icon"
         rounded="circle"
         :color="action.color"
-        @click="updateTypeAction(action.icon, action.type, action.color)"
+        @click="handleActionClick(action)"
       />
     </v-speed-dial>
   </div>
@@ -76,6 +76,10 @@ export default {
     curentyType: {
       type: String,
       required: true
+    },
+    autoUpdateActivator: {
+      type: Boolean,
+      default: true
     }
   },
   emits: ['action', 'update:curenty-type'],
@@ -87,22 +91,20 @@ export default {
       localKey: null
     }
   },
-  computed:{
+  computed: {
     availableActions() {
       return this.actions.filter(action => action.type !== this.curentyType)
     }
   },
   methods: {
-    updateTypeAction(icon, type, color) {
-      const found = this.actions.find(a => a.type === type)
-      if (!found) return
-
-      this.fabIcon = icon
-      this.colorAction = color
-      this.textAction = found.text
-      this.$emit('update:curenty-type', type)
-
-      this.executeAction(icon)
+    handleActionClick(action) {
+      if (this.autoUpdateActivator) {
+        this.fabIcon = action.icon
+        this.colorAction = action.color
+        this.textAction = action.text
+      }
+      this.$emit('update:curenty-type', action.type)
+      this.executeAction(action.icon)
     },
     executeAction(icon) {
       this.$emit('action', icon)

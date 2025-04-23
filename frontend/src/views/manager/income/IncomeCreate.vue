@@ -132,7 +132,6 @@
 
 <script>
 import { formatCurrencyMaskBR } from '@/utils/monetary'
-import CategoryService from "@/services/CategoryService"
 import AccountService from "@/services/AccountService"
 import IncomeService from "@/services/IncomeService"
 
@@ -151,6 +150,10 @@ export default {
     showDialog: {
       type: Boolean,
       required: true
+    },
+    itemsCategory:{
+      type: Array,
+      default: () => []
     }
   },
   emits: ['update:model-value'],
@@ -169,7 +172,6 @@ export default {
         category: null,
         account: null
       },
-      itemsCategory: [],
       itemsAccount: [],
       itemsStatus: [
         { value: 0, title: 'Conciliado' },
@@ -227,7 +229,7 @@ export default {
     async populateItems() {
       try {
         this.loadingItems = true
-        this.itemsCategory = await CategoryService.getAll({type: 'receita'})
+
         this.itemsAccount = await AccountService.getAll()
       } catch {
         this.$showMessage("Ocorreu um erro ao carregar os items!", "error")
