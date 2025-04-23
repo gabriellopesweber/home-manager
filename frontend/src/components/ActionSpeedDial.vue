@@ -25,7 +25,7 @@
       </template>
 
       <v-btn
-        v-for="(action) in actions"
+        v-for="(action) in availableActions"
         :key="action.type"
         v-tooltip:left="`${action.text}`"
         :icon="action.icon"
@@ -72,15 +72,24 @@ export default {
     defaultTooltipLocation: {
       type: String,
       default: 'top'
+    },
+    curentyType: {
+      type: String,
+      required: true
     }
   },
-  emits: ['action'],
+  emits: ['action', 'update:curenty-type'],
   data() {
     return {
       fabIcon: this.defaultIcon,
       colorAction: this.defaultColor,
       textAction: this.defaultText,
       localKey: null
+    }
+  },
+  computed:{
+    availableActions() {
+      return this.actions.filter(action => action.type !== this.curentyType)
     }
   },
   methods: {
@@ -91,6 +100,7 @@ export default {
       this.fabIcon = icon
       this.colorAction = color
       this.textAction = found.text
+      this.$emit('update:curenty-type', type)
 
       this.executeAction(icon)
     },

@@ -27,14 +27,41 @@
             default-tooltip-location="left"
             open-on-hover
             :actions="actions"
-            @action="executeAction(fabIcon)"
+            :curenty-type="fabType"
+            @action="executeAction(fabType)"
+            @update:curenty-type="fabType = $event"
           />
         </template>
 
         <v-data-table
           :items="items"
           :headers="header"
-        />
+        >
+          <template #item.type="{ item }">
+            <v-icon
+              v-if="item.type === 'income'"
+              color="success"
+            >
+              mdi-cash-plus
+            </v-icon>
+            <v-icon
+              v-else-if="item.type === 'expense'"
+              color="error"
+            >
+              mdi-cash-minus
+            </v-icon>
+            <v-icon
+              v-else-if="item.type === 'transfer'"
+              color="primary"
+            >
+              mdi-bank-transfer
+            </v-icon>
+          </template>
+
+          <template #item.value="{ item }">
+            R$: {{ maskedAmount(item.value) }}
+          </template>
+        </v-data-table>
       </BaseMaterialCard>
     </v-container>
 
@@ -49,6 +76,7 @@
 import dayjs from 'dayjs'
 import LaunchService from '../../../services/LaunchService'
 import { headerLaunch } from '../../../constants/headers/launch'
+import { formatCurrencyMaskBR } from '@/utils/monetary'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import IncomeCreate from './IncomeCreate.vue'
@@ -65,7 +93,7 @@ export default {
   },
   data () {
     return {
-      fabIcon: 'mdi-cash-plus',
+      fabType: 'receita',
       showIncome: false,
       showExpense: false,
       showTransfer: false,
@@ -93,14 +121,19 @@ export default {
       ]
     }
   },
+  computed: {
+    maskedAmount() {
+      return value => formatCurrencyMaskBR(value)
+    }
+  },
   async created() {
     this.items = await LaunchService.getAll(dayjs().startOf('month').toISOString(), dayjs().endOf('day').toISOString())
   },
   methods: {
-    executeAction(icon) {
-      if (icon === 'mdi-cash-plus') this.showIncome = true
-      if (icon === 'mdi-cash-minus') this.showExpense = true
-      if (icon === 'mdi-bank-transfer') this.showTransfer = true
+    executeAction(type) {
+      if (type === 'receita') this.showIncome = true
+      if (type === 'despesa') this.showExpense = true
+      if (type === 'transferencia') this.showTransfer = true
     }
   }
 }

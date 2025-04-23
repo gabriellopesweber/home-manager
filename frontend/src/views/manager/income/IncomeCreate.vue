@@ -115,12 +115,14 @@
           <ActionSpeedDial
             direction="left center"
             transition="slide-y-transition"
-            default-tooltip-location="left"
+            default-tooltip-location="top"
             open-on-hover
+            :curenty-type="fabType"
             :modal-is-open="dialog"
-            :default-icon="fabIcon"
+            :default-icon="actions[0].icon"
             :actions="actions"
-            @action="executeAction(fabIcon)"
+            @action="executeAction(fabType)"
+            @update:curenty-type="fabType = $event"
           />
         </div>
       </div>
@@ -174,7 +176,7 @@ export default {
         { value: 1, title: 'Pendente' },
         { value: 2, title: 'Cancelado' }
       ],
-      fabIcon: 'mdi-plus-circle-outline',
+      fabType: 'one',
       actions: [
         {
           icon: 'mdi-plus-circle-outline',
@@ -233,11 +235,10 @@ export default {
         this.loadingItems = false
       }
     },
-    async executeAction(icon) {
-      if (icon === 'mdi-plus-circle-outline') {
-        await this.validateAndCreate()
-      }
-      if (icon === 'mdi-plus-circle-multiple-outline') {
+    async executeAction(type) {
+      if (type === 'one') await this.validateAndCreate()
+      
+      if (type === 'moreOne') {
         if (this.validate()) {
           await this.createIncome()
         }

@@ -1,7 +1,9 @@
 const headerLaunch = [
   {
     title: 'Tipo',
-    value: 'type'
+    value: 'type',
+    align: 'center',
+    sortable: true
   },
   {
     title: 'ID',
