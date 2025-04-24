@@ -105,13 +105,12 @@
     <template #actions>
       <div class="d-flex justify-space-between w-100 mb-2">
         <v-btn
-          class="ml-6"
           @click="clearForm"
         >
           Limpar
         </v-btn>
 
-        <div class="mr-6">
+        <div>
           <ActionSpeedDial
             direction="left center"
             transition="slide-y-transition"

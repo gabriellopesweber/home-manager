@@ -33,6 +33,14 @@
         </template>
 
         <template
+          v-if="$slots.subtitle"
+          #item
+        >
+          <slot name="item" />
+        </template>
+
+        <template
+          v-if="showCloseBtn"
           #append
         >
           <v-btn
@@ -44,16 +52,15 @@
           />
         </template>
 
-        <v-card-text class="pb-0">
+        <v-card-text>
           <slot name="default" />
         </v-card-text>
 
-        <template
+        <v-card-actions
           v-if="$slots.actions"
-          #actions
         >
           <slot name="actions" />
-        </template>
+        </v-card-actions>
       </BaseMaterialCard>
     </template>
   </v-dialog>
@@ -74,6 +81,10 @@ export default {
     showInternalBtn: {
       type: Boolean,
       default: false
+    },
+    showCloseBtn: {
+      type: Boolean,
+      default: true
     },
     configurationBtn: {
       type: Object,

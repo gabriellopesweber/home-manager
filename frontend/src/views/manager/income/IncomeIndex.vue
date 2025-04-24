@@ -24,7 +24,8 @@
         
         <template #append>
           <ActionSpeedDial
-            default-tooltip-location="left"
+            direction="left center"
+            default-tooltip-location="top"
             open-on-hover
             :actions="actions"
             :curenty-type="fabType"
@@ -70,22 +71,37 @@
             {{ item.status }}
           </template>
 
-          <template #item.actions>
+          <template #item.actions="{ item }">
             <ActionSpeedDial
-              auto-update-activator="false"
+              direction="left center"
               default-tooltip-location="top"
               default-icon="mdi-cog-outline"
               default-text="Ações"
               default-color="primary"
+              default-variant="text"
+              open-on-hover
+              :auto-update-activator="false"
               :actions="actionsItem"
               :curenty-type="actionsType"
-              @action="executeActionByItem(actionsType)"
+              @action="executeActionByItem(actionsType, item)"
               @update:curenty-type="actionsType = $event"
             />
           </template>
         </v-data-table>
       </BaseMaterialCard>
     </v-container>
+
+    <GlobalConfirmEdit
+      v-model="showConformEdit"
+      title="Excluir Item"
+      text="Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."
+      ok-text="Sim, excluir"
+      cancel-text="Cancelar"
+      color="error"
+      :item="itemMarkedForDeletion"
+      @confirm="deleteItem"
+      @cancel="itemMarkedForDeletion = {}"
+    />
 
     <IncomeCreate
       :show-dialog="showIncome"
@@ -98,6 +114,9 @@
 <script>
 import dayjs from 'dayjs'
 import LaunchService from '../../../services/LaunchService'
+import ExpenseService from '../../../services/ExpenseService'
+import IncomeService from '../../../services/IncomeService'
+import TransferService from '../../../services/TransferService'
 import CategoryService from "@/services/CategoryService"
 import { headerLaunch } from '../../../constants/headers/launch'
 import { formatCurrencyMaskBR } from '@/utils/monetary'
@@ -106,6 +125,7 @@ import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import IncomeCreate from './IncomeCreate.vue'
 import GlobalSelectPeriod from '../../../components/GlobalSelectPeriod.vue'
 import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
+import GlobalConfirmEdit from '../../../components/GlobalConfirmEdit.vue'
 
 export default {
   name: "IncomeIndex",
@@ -113,7 +133,8 @@ export default {
     BaseMaterialCard,
     IncomeCreate,
     GlobalSelectPeriod,
-    ActionSpeedDial
+    ActionSpeedDial,
+    GlobalConfirmEdit
   },
   data () {
     return {
@@ -122,9 +143,11 @@ export default {
       showIncome: false,
       showExpense: false,
       showTransfer: false,
+      showConformEdit: false,
       items: [],
       itemsCategory: [],
       itemsCategoryIncome: [],
+      itemMarkedForDeletion: {},
       header: headerLaunch,
       actions: [
         {
@@ -187,9 +210,30 @@ export default {
       if (type === 'despesa') this.showExpense = true
       if (type === 'transferencia') this.showTransfer = true
     },
-    executeActionByItem(type) {
+    executeActionByItem(type, item) {
       if (type === 'edit') console.log('editar') // Ações de edição
-      if (type === 'delete') console.log('deletar') // Ações de deletar
+      if (type === 'delete') {
+        this.itemMarkedForDeletion = item
+        this.showConformEdit = true
+      }
+    },
+    async deleteItem() {
+      const {type, _id: id} = this.itemMarkedForDeletion
+      try {
+        if (type === "income") {
+          await IncomeService.deleteById(id)
+        } else if (type === "transfer") {
+          await TransferService.deleteById(id)
+        } else if (type === "expense") {
+          await ExpenseService.deleteById(id)
+        }
+        
+        this.items = this.items.filter(item => item._id !== id)
+        this.$showMessage('Item excluido com sucesso!', 'success')
+      } catch {
+        this.$showMessage('Ocorre um problema ao excluir!', 'error')
+      }
+
     }
   }
 }

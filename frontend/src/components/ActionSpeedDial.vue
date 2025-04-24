@@ -15,6 +15,7 @@
                 rounded="circle"
                 :icon="fabIcon"
                 :color="colorAction"
+                :variant="defaultVariant"
                 :aria-label="`Executar ação de ${textAction}`"
                 @click="executeAction(fabIcon)"
               />
@@ -27,9 +28,12 @@
       <v-btn
         v-for="(action) in availableActions"
         :key="action.type"
-        v-tooltip:left="`${action.text}`"
-        :icon="action.icon"
+        v-tooltip="{
+          text: action.text,
+          location: defaultTooltipLocation
+        }"
         rounded="circle"
+        :icon="action.icon"
         :color="action.color"
         @click="handleActionClick(action)"
       />
@@ -69,6 +73,10 @@ export default {
       type: String,
       default: 'Cadastrar Receita'
     },
+    defaultVariant: {
+      type: String,
+      default: "elevated"
+    },
     defaultTooltipLocation: {
       type: String,
       default: 'top'
@@ -93,7 +101,9 @@ export default {
   },
   computed: {
     availableActions() {
-      return this.actions.filter(action => action.type !== this.curentyType)
+      if (this.autoUpdateActivator) return this.actions.filter(action => action.type !== this.curentyType)
+      
+      return this.actions
     }
   },
   methods: {
