@@ -107,6 +107,7 @@
       :show-dialog="showIncome"
       :items-category="itemsCategoryIncome"
       @update:model-value="showIncome = $event"
+      @insert:item="items.push($event)"
     />
   </div>
 </template>

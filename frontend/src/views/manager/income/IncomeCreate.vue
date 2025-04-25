@@ -155,7 +155,7 @@ export default {
       default: () => []
     }
   },
-  emits: ['update:model-value'],
+  emits: ['update:model-value', 'insert:item'],
   data () {
     return {
       dialog: false,
@@ -260,8 +260,8 @@ export default {
       try {
         this.loadingCreate = true
 
-        await IncomeService.create(this.incomeData)
-
+        const newIncome = await IncomeService.create(this.incomeData)
+        this.$emit('insert:item', newIncome)
         this.$showMessage("Cadastro efetuado!", "success")
       } catch {
         this.$showMessage("Ocorreu um erro ao cadastrar Receita!", "error")
