@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { Account, Category, Expense } from '../models/Finance.js'
 import { statusFinance } from '../constants/Finance.js'
+import { formatExpenseItem } from '../utils/format.js'
 
 const ExpenseController = {
   // Criar uma nova despesa
@@ -60,16 +61,7 @@ const ExpenseController = {
         user
       })
 
-      res.status(201).json({
-        id: newExpense.id,
-        category: newExpense.category,
-        value: newExpense.value,
-        status: newExpense.status,
-        executionDate: newExpense.executionDate,
-        date: newExpense.date,
-        description: newExpense.description,
-        account: newExpense.account
-      })
+      res.status(201).json(formatExpenseItem(newExpense))
     } catch (error) {
       if (updateBalanceSuccessfully) {
         // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
@@ -88,9 +80,8 @@ const ExpenseController = {
     try {
       const expenses = await Expense.find({ user: req.user.id })
 
-      res.status(200).json(expenses)
+      res.status(200).json(expenses.map(expense => formatExpenseItem(expense)))
     } catch (error) {
-      console.log(error)
       res.status(500).json({ message: 'Erro ao listar despesas', error })
     }
   },
@@ -103,7 +94,7 @@ const ExpenseController = {
 
       if (!expense) return res.status(404).json({ message: 'Despesa não encontrada!' })
 
-      res.status(200).json(expense)
+      res.status(200).json(formatExpenseItem(expense))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar despesa', error })
     }
@@ -216,16 +207,7 @@ const ExpenseController = {
         user
       }, { new: true })
 
-      return res.status(200).json({
-        id: updatedExpense.id,
-        category: categoryByName.id,
-        value: updatedExpense.value,
-        status: updatedExpense.status,
-        executionDate: updatedExpense.executionDate,
-        date: updatedExpense.date,
-        description: updatedExpense.description,
-        account: accountByName.id
-      })
+      return res.status(200).json(formatExpenseItem(updatedExpense))
     } catch (error) {
       const { account } = req.body
 

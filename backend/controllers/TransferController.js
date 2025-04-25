@@ -1,5 +1,6 @@
 import { statusFinance } from '../constants/Finance.js'
 import { Transfer, Account } from '../models/Finance.js'
+import { formatTransferItem } from '../utils/format.js'
 import dayjs from 'dayjs'
 
 const TransferController = {
@@ -54,15 +55,7 @@ const TransferController = {
         user: userId
       })
 
-      return res.status(201).json({
-        id: transfer.id,
-        originAccount: transfer.originAccount,
-        destinationAccount: transfer.destinationAccount,
-        value: transfer.value,
-        date: transfer.date,
-        description: transfer.description,
-        user: transfer.user,
-      })
+      return res.status(201).json(formatTransferItem(transfer))
     } catch (error) {
       // Roolback nos saldos se erro após alteração
       if (origin_account && destination_account && value) {
@@ -81,7 +74,7 @@ const TransferController = {
         .populate('originAccount destinationAccount')
         .sort({ date: -1 })
 
-      return res.status(200).json(transfers)
+      return res.status(200).json(transfers.map(transfer => formatTransferItem(transfer)))
     } catch (error) {
       return res.status(500).json({ message: 'Erro ao buscar transferências', error })
     }
@@ -97,7 +90,7 @@ const TransferController = {
 
       if (!transfer) return res.status(404).json({ message: 'Transferência não encontrada' })
 
-      return res.status(200).json(transfer)
+      return res.status(200).json(formatTransferItem(transfer))
     } catch (error) {
       return res.status(500).json({ message: 'Erro ao buscar transferência', error })
     }
@@ -223,7 +216,7 @@ const TransferController = {
         { new: true }
       )
 
-      return res.status(200).json(updated)
+      return res.status(200).json(formatTransferItem(updated))
     } catch (error) {
       console.error('Erro ao atualizar transferência:', error)
 
@@ -256,7 +249,7 @@ const TransferController = {
 
       // Desfaz os saldos
       await Account.findByIdAndUpdate(transfer.originAccount, { $inc: { balance: transfer.value } })
-      await Account.findByIdAndUpdate(transfer.destination_account, { $inc: { balance: -transfer.value } })
+      await Account.findByIdAndUpdate(transfer.destinationAccount, { $inc: { balance: -transfer.value } })
 
       await Transfer.findByIdAndDelete(id)
 

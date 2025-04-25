@@ -1,4 +1,5 @@
 import { Category } from '../models/Finance.js'
+import { formatCategoryItem } from '../utils/format.js'
 
 const CR = "receita"
 const CD = "despesa"
@@ -33,11 +34,7 @@ const CategoryController = {
       }
 
       const newCategory = await Category.create({ name, type, user })
-      res.status(201).json({
-        id: newCategory.id,
-        name: newCategory.name,
-        type: newCategory.type
-      })
+      res.status(201).json(formatCategoryItem(newCategory))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar categoria', error })
     }
@@ -55,7 +52,7 @@ const CategoryController = {
       }
 
       const category = await Category.find(filter)
-      res.status(200).json(category)
+      res.status(200).json(category.map(category => formatCategoryItem(category)))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar categorias', error })
     }
@@ -69,7 +66,7 @@ const CategoryController = {
 
       if (!category) return res.status(404).json({ message: 'Categoria não encontrada!' })
 
-      res.status(200).json(category)
+      res.status(200).json(formatCategoryItem(category))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar categoria', error })
     }
@@ -112,7 +109,7 @@ const CategoryController = {
 
       if (!updateCategory) return res.status(404).json({ message: 'Categoria não encontrada!' })
 
-      res.status(200).json(updateCategory)
+      res.status(200).json(formatCategoryItem(updateCategory))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar categoria', error })
     }

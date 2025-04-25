@@ -1,6 +1,7 @@
 import { Account, Category, Income } from '../models/Finance.js'
 import { statusFinance } from '../constants/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
+import { formatIncomeItem } from '../utils/format.js'
 import dayjs from 'dayjs'
 
 const IncomeController = {
@@ -63,16 +64,7 @@ const IncomeController = {
         user
       })
 
-      res.status(201).json({
-        id: newIncome.id,
-        category: newIncome.category,
-        value: newIncome.value,
-        status: newIncome.status,
-        executionDate: newIncome.executionDate,
-        date: newIncome.date,
-        description: newIncome.description,
-        account: newIncome.account
-      })
+      res.status(201).json(formatIncomeItem(newIncome))
     } catch (error) {
       if (updateBalanceSuccessfully) {
         // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
@@ -91,7 +83,7 @@ const IncomeController = {
     try {
       const incomes = await Income.find({ user: req.user.id })
 
-      res.status(200).json(incomes)
+      res.status(200).json(incomes.map(income => formatIncomeItem(income)))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar receitas', error })
     }
@@ -105,7 +97,7 @@ const IncomeController = {
 
       if (!income) return res.status(404).json({ message: 'Receita não encontrada!' })
 
-      res.status(200).json(income)
+      res.status(200).json(formatIncomeItem(income))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar receita', error })
     }
@@ -219,16 +211,7 @@ const IncomeController = {
         user
       }, { new: true })
 
-      return res.status(200).json({
-        id: updatedIncome.id,
-        category: categoryByName.name,
-        value: updatedIncome.value,
-        status: updatedIncome.status,
-        executionDate: updatedIncome.executionDate,
-        date: updatedIncome.date,
-        description: updatedIncome.description,
-        account: accountByName.name
-      })
+      return res.status(200).json(formatIncomeItem(updatedIncome))
 
     } catch (error) {
       const { account } = req.body

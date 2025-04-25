@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { Income, Expense, Transfer } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
+import { formatExpenseItem, formatIncomeItem, formatTransferItem } from '../utils/format.js'
 
 const LaunchController = {
   // Listar todas as Receitas, Despesas e Transferencias de acordo com a data inicial e final
@@ -23,15 +24,16 @@ const LaunchController = {
         Transfer.find({ user: userId, date: { $gte: start, $lte: end } })
       ])
 
-      const mappedIncomes = incomes.map(item => ({ ...item.toObject(), type: 'income' }))
-      const mappedExpenses = expenses.map(item => ({ ...item.toObject(), type: 'expense' }))
-      const mappedTransfers = transfers.map(item => ({ ...item.toObject(), type: 'transfer' }))
+      const incomesFormatted = incomes.map(income => { return formatIncomeItem(income, true) })
+      const expenseFormatted = expenses.map(expense => { return formatExpenseItem(expense, true) })
+      const transferFormatted = transfers.map(transfer => { return formatTransferItem(transfer, true) })
 
-      const combined = [...mappedIncomes, ...mappedExpenses, ...mappedTransfers]
+      const combined = [...incomesFormatted, ...expenseFormatted, ...transferFormatted]
         .sort((a, b) => new Date(a.date) - new Date(b.date))
 
       res.status(200).json(combined)
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar lançamentos', error })
     }
   }

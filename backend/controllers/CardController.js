@@ -1,5 +1,6 @@
 import { Card } from '../models/Card.js'
 import { validateRequiredFields } from '../utils/validations.js'
+import { formatCardItem } from '../utils/format.js'
 
 const isInvalidType = (field, type) => typeof field !== type
 
@@ -52,7 +53,7 @@ const CardController = {
         closingDate: closing_date,
         isActive: is_active
       })
-      res.status(201).json(newCard)
+      res.status(201).json(formatCardItem(newCard))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar cartão', error })
     }
@@ -63,7 +64,7 @@ const CardController = {
       const { account_id } = req.query
 
       const cards = await Card.find({ user: req.user.id, account: account_id }).sort({ name: 1 })
-      res.status(200).json(cards)
+      res.status(200).json(cards.map(card => formatCardItem(card)))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar cartão', error })
     }
@@ -77,7 +78,7 @@ const CardController = {
 
       if (!card) return res.status(404).json({ message: 'Cartão não encontrado!' })
 
-      res.status(200).json(card)
+      res.status(200).json(formatCardItem(card))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar cartão', error })
     }
@@ -130,7 +131,7 @@ const CardController = {
 
       if (!updateCard) return res.status(404).json({ message: 'Cartão não encontrado!' })
 
-      res.status(200).json(updateCard)
+      res.status(200).json(formatCardItem(updateCard))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar cartão', error })
     }

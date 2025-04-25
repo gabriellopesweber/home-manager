@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { Account } from '../models/Finance.js'
+import { formatAccountItem } from '../utils/format.js'
 
 const AccountController = {
   // Criar uma nova conta
@@ -13,7 +14,7 @@ const AccountController = {
       }
 
       const newAccount = await Account.create({ name, balance, user })
-      res.status(201).json(newAccount)
+      res.status(201).json(formatAccountItem(newAccount))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar conta', error })
     }
@@ -23,7 +24,7 @@ const AccountController = {
   async getAll(req, res) {
     try {
       const accounts = await Account.find({ user: req.user.id })
-      res.status(200).json(accounts)
+      res.status(200).json(accounts.map(account => formatAccountItem(account)))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar conta', error })
     }
@@ -37,7 +38,7 @@ const AccountController = {
 
       if (!account) return res.status(404).json({ message: 'Conta não encontrada!' })
 
-      res.status(200).json(account)
+      res.status(200).json(formatAccountItem(account))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao buscar conta', error })
     }
@@ -65,7 +66,7 @@ const AccountController = {
 
       if (!updateAccount) return res.status(404).json({ message: 'Conta não encontrada!' })
 
-      res.status(200).json(updateAccount)
+      res.status(200).json(formatAccountItem(updateAccount))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao atualizar conta', error })
     }
