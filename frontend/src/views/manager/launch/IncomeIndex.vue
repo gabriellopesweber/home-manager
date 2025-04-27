@@ -140,20 +140,20 @@
 
 <script>
 import dayjs from 'dayjs'
-import LaunchService from '../../../services/LaunchService'
-import ExpenseService from '../../../services/ExpenseService'
-import IncomeService from '../../../services/IncomeService'
-import TransferService from '../../../services/TransferService'
+import LaunchService from '@/services/LaunchService'
+import ExpenseService from '@/services/ExpenseService'
+import IncomeService from '@/services/IncomeService'
+import TransferService from '@/services/TransferService'
 import CategoryService from "@/services/CategoryService"
-import { headerLaunch } from '../../../constants/headers/launch'
+import { headerLaunch } from '@/constants/headers/launch'
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import IncomeCreate from './IncomeCreate.vue'
-import GlobalSelectPeriod from '../../../components/GlobalSelectPeriod.vue'
-import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
-import GlobalConfirmEdit from '../../../components/GlobalConfirmEdit.vue'
-import AccountService from '../../../services/AccountService'
+import IncomeCreate from '@/views/manager/launch/IncomeCreate.vue'
+import GlobalSelectPeriod from '@/components/GlobalSelectPeriod.vue'
+import GlobalConfirmEdit from '@/components/GlobalConfirmEdit.vue'
+import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
+import AccountService from '@/services/AccountService'
 
 export default {
   name: "IncomeIndex",

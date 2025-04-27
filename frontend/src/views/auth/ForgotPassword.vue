@@ -68,18 +68,11 @@
 
 <script>
 import BaseMaterialCard from "@/components/BaseMaterialCard.vue"
-import { useAuthStore } from "@/stores/authStore"
-import { useRouter } from "vue-router"
+import AuthService from "@/services/AuthService"
 
 export default {
   components: {
     BaseMaterialCard,
-  },
-  setup () {
-    const authStore = useAuthStore()
-    const router = useRouter()
-
-    return { authStore, router }
   },
   data() {
     return {
@@ -95,8 +88,8 @@ export default {
         this.loading = true
         this.$refs.form.validate()
         if (this.valid) {
-          await this.authStore.forgotPassword(this.email)
-          this.router.push({
+          await AuthService.forgotPassword(this.email)
+          this.$router.push({
             name: 'login'
           })
           this.$showMessage("E-mail enviado com sucesso!", "success")

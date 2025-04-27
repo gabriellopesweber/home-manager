@@ -157,6 +157,24 @@ const UserController = {
     } catch (error) {
       res.status(500).json({ message: "Erro ao redefinir senha", error })
     }
+  },
+
+  async refreshToken(req, res) {
+    try {
+      const { token } = req.body
+
+      if (!token) return res.status(400).json({ message: "Token não fornecido!" })
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      const user = await User.findById(decoded.id)
+      if (!user) return res.status(400).json({ message: "Token inválido ou expirado!" })
+
+      const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h" })
+
+      return res.status(200).json({ message: "Token atualizado com sucesso!", token: newToken })
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao redefinir senha", error })
+    }
   }
 }
 

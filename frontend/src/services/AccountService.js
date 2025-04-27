@@ -5,8 +5,9 @@ class AccountService {
     this.baseUrl = "/account"
   }
 
-  async create(name, balance) {
+  async create(params) {
     try {
+      const { name, balance } = params
       const response = await axios.post(`${this.baseUrl}/`, { name, balance })
       return response.data
     } catch (error) {
@@ -32,9 +33,10 @@ class AccountService {
     }
   }
 
-  async update(name, balance) {
+  async update(id, params) {
     try {
-      const response = await axios.put(`${this.baseUrl}/`, { name, balance })
+      const { name, balance } = params
+      const response = await axios.put(`${this.baseUrl}/${id}`, { name, balance })
       return response.data
     } catch (error) {
       throw error.response.data

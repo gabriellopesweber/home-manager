@@ -60,6 +60,18 @@ class AuthService {
     }
   }
 
+  async refreshToken(token) {
+    try {
+      await axios.post(`${this.baseUrl}/refresh-password`, { token })
+    } catch (error) {
+      if (error.response) {
+        const { data, status } = error.response
+        throw { data, status }
+      }
+      throw error
+    }
+  }
+
 }
 
 export default new AuthService

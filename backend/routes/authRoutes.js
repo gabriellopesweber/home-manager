@@ -11,5 +11,6 @@ router.post("/login", UserController.login)
 
 router.post("/forgot-password", UserController.forgotPassword) // Solicita a redefinição da senha do usuario
 router.post("/reset-password", UserController.resetPassword) // Redefine a senha do usuario
+router.post("/refresh-password", UserController.refreshToken) // Redefine a senha do usuario
 
 export default router

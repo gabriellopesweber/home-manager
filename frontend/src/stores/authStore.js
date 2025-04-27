@@ -1,10 +1,13 @@
 import { defineStore } from "pinia"
 import AuthService from "@/services/AuthService"
+import dayjs from "dayjs"
 
 export const useAuthStore = defineStore("authorization", {
   state: () => ({
     token: localStorage.getItem("token") || "",
     user: null,
+    timeActive: null,
+    timeExpired: null
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
@@ -14,24 +17,33 @@ export const useAuthStore = defineStore("authorization", {
       const response = await AuthService.login(email, password)
       this.token = response.token
       localStorage.setItem("token", this.token)
+
+      this.timeExpired = dayjs().add(2, 'hour').toISOString()
     },
 
-    async register(name, email, password) {
-      await AuthService.register(name, email, password)
+    async refreshToken() {
+      console.log("atualizando token")
+      const response = await AuthService.refreshToken(this.token)
+      this.token = response.token
+      this.timeActive = dayjs().toISOString()
+      this.timeExpired = dayjs().add(2, 'hour').toISOString()
+      localStorage.setItem("token", this.token)
+      localStorage.setItem("timeActive", this.timeActive)
+      localStorage.setItem("timeExpired", this.timeExpired)
     },
 
-    async resetPassword(token, newPassword) {
-      await AuthService.resetPassword(token, newPassword)
-    },
-
-    async forgotPassword(email) {
-      await AuthService.forgotPassword(email)
+    updateTimeActive(time) {
+      this.timeActive = time
     },
 
     logout() {
       this.token = ""
       this.user = null
+      this.timeActive = null
+      this.timeExpired = null
       localStorage.removeItem("token")
+      localStorage.removeItem("timeActive")
+      localStorage.removeItem("timeExpired")
     }
   }
 })

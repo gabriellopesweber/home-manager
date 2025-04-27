@@ -5,8 +5,9 @@ class CategoryService {
     this.baseUrl = "/category"
   }
 
-  async create(name, type) {
+  async create(params) {
     try {
+      const { name, type } = params
       const response = await axios.post(`${this.baseUrl}/`, { name, type })
       return response.data
     } catch (error) {
@@ -32,9 +33,10 @@ class CategoryService {
     }
   }
 
-  async update(name, type) {
+  async update(id, params) {
+    const { name, type } = params
     try {
-      const response = await axios.put(`${this.baseUrl}/`, { name, type })
+      const response = await axios.put(`${this.baseUrl}/${id}`, { name, type })
       return response.data
     } catch (error) {
       throw error.response?.data || error

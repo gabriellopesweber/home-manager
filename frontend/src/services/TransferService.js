@@ -5,8 +5,9 @@ class TransferService {
     this.baseUrl = "/transfer"
   }
 
-  async create(origin_account, destination_account, status, value, date, description) {
+  async create(params) {
     try {
+      const { origin_account, destination_account, status, value, date, description } = params
       const response = await axios.post(`${this.baseUrl}/`, {
         origin_account,
         destination_account,
@@ -39,9 +40,10 @@ class TransferService {
     }
   }
 
-  async update(origin_account, destination_account, status, value, date, description) {
+  async update(id, params) {
     try {
-      const response = await axios.put(`${this.baseUrl}/`, {
+      const { origin_account, destination_account, status, value, date, description } = params
+      const response = await axios.put(`${this.baseUrl}/${id}`, {
         origin_account,
         destination_account,
         status,

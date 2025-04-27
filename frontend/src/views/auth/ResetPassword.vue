@@ -85,18 +85,11 @@
 
 <script>
 import BaseMaterialCard from "@/components/BaseMaterialCard.vue"
-import { useAuthStore } from "@/stores/authStore"
-import { useRouter } from "vue-router"
+import AuthService from "@/services/AuthService"
 
 export default {
   components: {
     BaseMaterialCard,
-  },
-  setup () {
-    const authStore = useAuthStore()
-    const router = useRouter()
-
-    return { authStore, router }
   },
   data() {
     return {
@@ -129,8 +122,8 @@ export default {
       }
     },
     async updatePass () {
-      await this.authStore.resetPassword(this.token, this.confirmationPassword)
-      this.router.push({
+      await AuthService.resetPassword(this.token, this.confirmationPassword)
+      this.$router.push({
         name: 'login'
       })
       this.$showMessage("Senha atualizada com sucesso!", "success")

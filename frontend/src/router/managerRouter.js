@@ -1,5 +1,5 @@
 import ExpenseIndex from '@/views/manager/expense/ExpenseIndex.vue'
-import IncomeIndex from '@/views/manager/Income/IncomeIndex.vue'
+import IncomeIndex from '@/views/manager/launch/IncomeIndex.vue'
 
 const managerRouter = [
   {

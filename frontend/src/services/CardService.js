@@ -5,8 +5,9 @@ class CardService {
     this.baseUrl = "/card"
   }
 
-  async create(account_id, name, brand, type, last_four_digits, card_limit, due_date, closing_date, is_active) {
+  async create(params) {
     try {
+      const { account_id, name, brand, type, last_four_digits, card_limit, due_date, closing_date, is_active } = params
       const response = await axios.post(`${this.baseUrl}/`, {
         account_id,
         name,
@@ -42,9 +43,10 @@ class CardService {
     }
   }
 
-  async update(account_id, name, brand, type, last_four_digits, card_limit, due_date, closing_date, is_active) {
+  async update(id, params) {
     try {
-      const response = await axios.put(`${this.baseUrl}/`, {
+      const { account_id, name, brand, type, last_four_digits, card_limit, due_date, closing_date, is_active } = params
+      const response = await axios.put(`${this.baseUrl}/${id}`, {
         account_id,
         name,
         brand,
