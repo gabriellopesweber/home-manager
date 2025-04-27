@@ -74,7 +74,7 @@
             <v-autocomplete
               v-model="incomeData.category"
               label="Categoria"
-              item-value="_id"
+              item-value="id"
               item-title="name"
               variant="outlined"
               :rules="[() => $validation('required', incomeData.category)]"
@@ -90,7 +90,7 @@
             <v-autocomplete
               v-model="incomeData.account"
               label="Conta"
-              item-value="_id"
+              item-value="id"
               item-title="name"
               variant="outlined"
               :rules="[() => $validation('required', incomeData.account)]"
@@ -254,6 +254,12 @@ export default {
     },
     validate() {
       this.$refs.form.validate()
+
+      if (!this.incomeData.date) {
+        this.$showMessage("Informe uma data!", "warning") 
+        return false
+      }
+     
       return this.isValid
     },
     async createIncome() {
@@ -261,6 +267,7 @@ export default {
         this.loadingCreate = true
 
         const newIncome = await IncomeService.create(this.incomeData)
+        newIncome.type = 'income'
         this.$emit('insert:item', newIncome)
         this.$showMessage("Cadastro efetuado!", "success")
       } catch {

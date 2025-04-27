@@ -6,41 +6,42 @@ const headerLaunch = [
     sortable: true
   },
   {
-    title: 'ID',
-    value: '_id'
+    title: 'Descrição',
+    value: 'description',
+    sortable: true
   },
   {
     title: 'Categoria',
-    value: 'category'
-  },
-  {
-    title: 'Status',
-    value: 'status'
-  },
-  {
-    title: 'Valor',
-    value: 'value'
+    value: 'category',
+    sortable: true
   },
   {
     title: 'Data',
-    value: 'date'
+    value: 'date',
+    sortable: true
   },
   {
-    title: 'Descrição',
-    value: 'description'
+    title: 'Valor',
+    value: 'value',
+    sortable: true,
+    nowrap: true
   },
   {
     title: 'Conta',
-    value: 'account'
+    value: 'account',
+    sortable: true,
+    nowrap: true
   },
   {
-    title: 'Usuario',
-    value: 'user'
+    title: 'Status',
+    value: 'status',
+    align: 'center',
+    sortable: true
   },
   {
     title: 'Ação',
     value: 'actions'
-  },
-]
+  }
+].map(h => ({ ...h, nowrap: true }))
 
 export { headerLaunch }

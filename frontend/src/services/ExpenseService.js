@@ -39,9 +39,10 @@ class ExpenseService {
     }
   }
 
-  async update(category, status, value, date, description, account) {
+  async update(id, params) {
     try {
-      const response = await axios.put(`${this.baseUrl}/`, {
+      const { category, status, value, date, description, account } = params
+      const response = await axios.put(`${this.baseUrl}/${id}`, {
         category,
         status,
         value,

@@ -67,8 +67,34 @@
             {{ formatCategory(item.category) }}
           </template>
 
+          <template #item.date="{ item }">
+            {{ formatDate(item.date) }}
+          </template>
+
+          <template #item.account="{ item }">
+            {{ formatAccount(item.account) }}
+          </template>
+
           <template #item.status="{ item }">
-            {{ item.status }}
+            <v-btn
+              v-if="item.status === 0"
+              v-tooltip:top="'Alterar para pendente'"
+              icon="mdi-thumb-up"
+              color="success"
+              variant="text"
+              rounded="circle"
+              :loading="loadingUpdateStatus[item.id]"
+              @click="updateStatus(1, item)"
+            />
+            <v-btn
+              v-else-if="item.status === 1"
+              v-tooltip:top="'Alterar para conciliado'"
+              icon="mdi-thumb-down"
+              variant="text"
+              rounded="circle"
+              :loading="loadingUpdateStatus[item.id]"
+              @click="updateStatus(0, item)"
+            />
           </template>
 
           <template #item.actions="{ item }">
@@ -127,6 +153,7 @@ import IncomeCreate from './IncomeCreate.vue'
 import GlobalSelectPeriod from '../../../components/GlobalSelectPeriod.vue'
 import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
 import GlobalConfirmEdit from '../../../components/GlobalConfirmEdit.vue'
+import AccountService from '../../../services/AccountService'
 
 export default {
   name: "IncomeIndex",
@@ -145,9 +172,12 @@ export default {
       showExpense: false,
       showTransfer: false,
       showConformEdit: false,
+      loadingUpdateStatus: [],
       items: [],
       itemsCategory: [],
+      itemsAccount: [],
       itemsCategoryIncome: [],
+      itemsCategoryExpense: [],
       itemMarkedForDeletion: {},
       header: headerLaunch,
       actions: [
@@ -192,19 +222,35 @@ export default {
     },
     formatCategory() {
       return categoryID => {
-        const itensFiltered = this.itemsCategory.find(ob => ob._id === categoryID)
+        const itensFiltered = this.itemsCategory.find(ob => ob.id === categoryID)
         return itensFiltered?.name
+      }
+    },
+    formatDate() {
+      return date => {
+        return dayjs(date).format("DD/MM/YYYY")
+      }
+    },
+    formatAccount() {
+      return accountId => {
+        const accountsMap = new Map(this.itemsAccount.map(account => [account.id, account.name]))
+        return accountsMap.get(accountId) || ''
       }
     }
   },
   async created() {
     this.items = await LaunchService.getAll(dayjs().startOf('month').toISOString(), dayjs().endOf('day').toISOString())
     await this.populateCategory()
+    await this.populateAccount()
   },
   methods: {
     async populateCategory(){
       this.itemsCategory = await CategoryService.getAll()
       this.itemsCategoryIncome = this.itemsCategory.filter(category => category.type === 'receita')
+      this.itemsCategoryExpense = this.itemsCategory.filter(category => category.type === 'despesa')
+    },
+    async populateAccount(){
+      this.itemsAccount = await AccountService.getAll()
     },
     executeAction(type) {
       if (type === 'receita') this.showIncome = true
@@ -219,7 +265,7 @@ export default {
       }
     },
     async deleteItem() {
-      const {type, _id: id} = this.itemMarkedForDeletion
+      const {type, id} = this.itemMarkedForDeletion
       try {
         if (type === "income") {
           await IncomeService.deleteById(id)
@@ -229,12 +275,26 @@ export default {
           await ExpenseService.deleteById(id)
         }
         
-        this.items = this.items.filter(item => item._id !== id)
+        this.items = this.items.filter(item => item.id !== id)
         this.$showMessage('Item excluido com sucesso!', 'success')
       } catch {
         this.$showMessage('Ocorre um problema ao excluir!', 'error')
       }
-
+    },
+    async updateStatus(status, item) {
+      try {
+        this.loadingUpdateStatus[item.id] = true
+        item.status = status
+        if (item.type === 'income')
+          await IncomeService.update(item.id, item)
+        else if (item.type === 'expense')
+          await ExpenseService.update(item.id, item)
+        this.$showMessage('Status atualizado com sucesso!', 'success')
+      } catch {
+        this.$showMessage('Ocorre um problema ao atualizar o status!', 'error')
+      } finally {
+        this.loadingUpdateStatus[item.id] = false
+      }
     }
   }
 }

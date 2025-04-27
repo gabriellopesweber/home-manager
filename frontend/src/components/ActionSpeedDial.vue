@@ -17,7 +17,7 @@
                 :color="colorAction"
                 :variant="defaultVariant"
                 :aria-label="`Executar ação de ${textAction}`"
-                @click="executeAction(fabIcon)"
+                @click="autoUpdateActivator? executeAction(fabIcon): () => ({}) "
               />
             </template>
             <span>{{ textAction }}</span>

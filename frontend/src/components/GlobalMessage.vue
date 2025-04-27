@@ -2,7 +2,7 @@
   <v-alert
     v-if="messageStore.visible"
     :type="messageStore.type"
-    variant="tonal"
+    elevation="2"
     class="message-alert"
   >
     {{ messageStore.message }}
@@ -23,8 +23,9 @@ export default {
 <style scoped>
 .message-alert {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9999;
   width: 400px;
 }
