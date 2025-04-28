@@ -1,4 +1,4 @@
-import ExpenseIndex from '@/views/manager/expense/ExpenseIndex.vue'
+import AccountIndex from '@/views/manager/account/AccountIndex.vue'
 import IncomeIndex from '@/views/manager/launch/IncomeIndex.vue'
 
 const managerRouter = [
@@ -11,9 +11,9 @@ const managerRouter = [
     }
   },
   {
-    path: '/gerenciamento/despesas',
-    name: "manager.expense",
-    component: ExpenseIndex,
+    path: '/gerenciamento/contas',
+    name: "manager.account",
+    component: AccountIndex,
     meta: {
       requiresAuth: true
     }

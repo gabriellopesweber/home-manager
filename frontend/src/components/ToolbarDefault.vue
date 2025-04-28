@@ -71,17 +71,17 @@
 
         <v-list-item
           title="Lançamentos"
-          prepend-icon="mdi-arrow-right-thick"
+          prepend-icon="mdi-finance"
           color="primary"
           link
           :to="{ name: 'manager.launch' }"
         />
         <v-list-item
-          prepend-icon="mdi-arrow-left-thick"
-          title="Despesas"
+          prepend-icon="mdi-bank"
+          title="Contas"
           color="primary"
           link
-          :to="{ name: 'manager.expense' }"
+          :to="{ name: 'manager.account' }"
         />
       </v-list-group>
     </v-list>

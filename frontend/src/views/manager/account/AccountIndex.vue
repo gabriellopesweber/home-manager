@@ -3,7 +3,7 @@
     fluid
     class="mt-5"
   >
-    <BaseMaterialCard title="Despesas" />
+    <BaseMaterialCard title="Conta" />
   </v-container>
 </template>
 
@@ -11,7 +11,7 @@
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 
 export default {
-  name: "ExpenseIndex",
+  name: "AccountIndex",
   components: {
     BaseMaterialCard
   },
