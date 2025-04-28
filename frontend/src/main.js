@@ -8,6 +8,8 @@ import validationPlugin from "@/plugins/validationPlugin"
 import messagePlugin from "@/plugins/messagePlugin"
 import { setupInterceptors } from './services/interceptor'
 import '@/assets/global.css'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
 
 const app = createApp(App)
 
@@ -16,6 +18,7 @@ app.use(vuetify)
 app.use(router)
 app.use(messagePlugin)
 app.use(validationPlugin)
+dayjs.extend(customParseFormat)
 
 setupInterceptors()
 

@@ -17,7 +17,7 @@
               cols="12"
               md="6"
             >
-              <GlobalSelectPeriod />
+              <GlobalSelectPeriod @update:period="searchByPeriod" />
             </v-col>
           </v-row>
         </template>
@@ -327,6 +327,14 @@ export default {
       } finally {
         this.loadingUpdateStatus[item.id] = false
       }
+    },
+    async searchByPeriod(period) {
+      try {
+        this.items = await LaunchService.getAll(period.initialPeriod, period.finalPeriod)
+      } catch {
+        this.$showMessage('Ocorre um problema ao atualizar os lançamentos!', 'error')
+      }
+      
     }
   }
 }
