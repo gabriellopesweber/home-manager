@@ -6,6 +6,7 @@ import router from './router/index'
 import vuetify from './plugins/vuetify'
 import validationPlugin from "@/plugins/validationPlugin"
 import messagePlugin from "@/plugins/messagePlugin"
+import { setupInterceptors } from './services/interceptor'
 import '@/assets/global.css'
 
 const app = createApp(App)
@@ -15,5 +16,7 @@ app.use(vuetify)
 app.use(router)
 app.use(messagePlugin)
 app.use(validationPlugin)
+
+setupInterceptors()
 
 app.mount('#app')

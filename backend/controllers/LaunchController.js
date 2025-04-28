@@ -33,7 +33,6 @@ const LaunchController = {
 
       res.status(200).json(combined)
     } catch (error) {
-      console.log(error)
       res.status(500).json({ message: 'Erro ao listar lançamentos', error })
     }
   }

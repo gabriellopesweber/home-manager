@@ -1,4 +1,5 @@
 import axios from "@/services/api"
+import { AuthAPI } from "@/services/authApi"
 
 class AuthService {
   constructor() {
@@ -38,7 +39,8 @@ class AuthService {
 
   async resetPassword(token, newPassword) {
     try {
-      await axios.post(`${this.baseUrl}/reset-password`, { token, newPassword })
+      const response = await axios.post(`${this.baseUrl}/reset-password`, { token, newPassword })
+      return response.data
     } catch (error) {
       if (error.response) {
         const { data, status } = error.response
@@ -50,7 +52,8 @@ class AuthService {
 
   async forgotPassword(email) {
     try {
-      await axios.post(`${this.baseUrl}/forgot-password`, { email })
+      const response = await axios.post(`${this.baseUrl}/forgot-password`, { email })
+      return response.data
     } catch (error) {
       if (error.response) {
         const { data, status } = error.response
@@ -62,7 +65,8 @@ class AuthService {
 
   async refreshToken(token) {
     try {
-      await axios.post(`${this.baseUrl}/refresh-password`, { token })
+      const response = await AuthAPI.post(`${this.baseUrl}/refresh-password`, { token })
+      return response.data
     } catch (error) {
       if (error.response) {
         const { data, status } = error.response
