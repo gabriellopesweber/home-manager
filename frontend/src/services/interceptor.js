@@ -20,7 +20,7 @@ export function setupInterceptors() {
         throw Promise.reject(new Error('Sessão expirada. Faça login novamente.'))
       }
 
-      if (diffActiveMinutes >= 1) {
+      if (diffActiveMinutes >= 60) {
         try {
           await authStore.refreshToken()
           config.headers.Authorization = `Bearer ${authStore.token}`
