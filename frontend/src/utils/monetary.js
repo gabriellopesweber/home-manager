@@ -1,6 +1,8 @@
 function formatCurrencyMaskBR(value) {
   // Remove tudo que não for número
-  const cleaned = String(value).replace(/\D/g, '')
+  const cleaned = String(value)
+    .replace(/[^\d-]/g, '')
+    .replace(/(?!^)-/g, '')
 
   // Converte para número inteiro (centavos)
   let numeric = parseInt(cleaned, 10)

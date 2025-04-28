@@ -37,6 +37,8 @@
         <v-data-table
           :items="items"
           :headers="header"
+          :items-per-page="String(items.length)"
+          hide-default-footer
         >
           <template #item.type="{ item }">
             <v-icon
@@ -113,6 +115,27 @@
               @update:curenty-type="actionsType = $event"
             />
           </template>
+
+          <template #bottom>
+            <v-row dense>
+              <v-col
+                class="d-flex justify-end px-10 pt-4"
+                align-self="center"
+                cols="12"
+              >
+                <span> Saldo atual:  </span>
+                <span> $XX </span>
+              </v-col>
+              <v-col
+                class="d-flex justify-end px-10 pb-4"
+                align-self="center"
+                cols="12"
+              >
+                <span> Saldo previsto:  </span>
+                <span> XX </span>
+              </v-col>
+            </v-row>
+          </template>
         </v-data-table>
       </BaseMaterialCard>
     </v-container>
@@ -135,6 +158,13 @@
       @update:model-value="showIncome = $event"
       @insert:item="items.push($event)"
     />
+
+    <ExpenseCreate
+      :show-dialog="showExpense"
+      :items-category="itemsCategoryExpense"
+      @update:model-value="showExpense = $event"
+      @insert:item="items.push($event)"
+    />
   </div>
 </template>
 
@@ -154,12 +184,14 @@ import GlobalSelectPeriod from '@/components/GlobalSelectPeriod.vue'
 import GlobalConfirmEdit from '@/components/GlobalConfirmEdit.vue'
 import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 import AccountService from '@/services/AccountService'
+import ExpenseCreate from '@/views/manager/launch/ExpenseCreate.vue'
 
 export default {
   name: "IncomeIndex",
   components: {
     BaseMaterialCard,
     IncomeCreate,
+    ExpenseCreate,
     GlobalSelectPeriod,
     ActionSpeedDial,
     GlobalConfirmEdit

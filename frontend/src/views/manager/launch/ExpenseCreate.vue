@@ -5,7 +5,7 @@
     @update:model-value="$emit('update:model-value', $event)"
   >
     <template #title>
-      <span class="d-flex justify-center"> Cadastrar Receita </span>
+      <span class="d-flex justify-center"> Cadastrar Despesa </span>
     </template>
 
     <template #default>
@@ -19,7 +19,7 @@
             md="9"
           >
             <v-text-field
-              v-model="incomeData.description"
+              v-model="expenseData.description"
               label="Descrição"
               variant="outlined"
             />
@@ -31,7 +31,7 @@
             md="3"
           >
             <GlobalDataPiker
-              v-model="incomeData.date"
+              v-model="expenseData.date"
               :configuration-btn="{ 
                 color: 'primary',
                 prependIcon: 'mdi-calendar',
@@ -45,11 +45,11 @@
             md="6"
           >
             <v-autocomplete
-              v-model="incomeData.status"
+              v-model="expenseData.status"
               label="Status"
               variant="outlined"
               :items="itemsStatus"
-              :rules="[() => $validation('required', incomeData.status)]"
+              :rules="[() => $validation('required', expenseData.status)]"
             />
           </v-col>
 
@@ -62,7 +62,7 @@
               label="Valor"
               prefix="R$"
               variant="outlined"
-              :rules="[() => $validation('required', incomeData.value)]"
+              :rules="[() => $validation('required', expenseData.value)]"
               @keypress="onlyNumbers"
             />
           </v-col>
@@ -72,12 +72,12 @@
             md="6"
           >
             <v-autocomplete
-              v-model="incomeData.category"
+              v-model="expenseData.category"
               label="Categoria"
               item-value="id"
               item-title="name"
               variant="outlined"
-              :rules="[() => $validation('required', incomeData.category)]"
+              :rules="[() => $validation('required', expenseData.category)]"
               :items="itemsCategory"
               :loading-items="loadingItems"
             />
@@ -88,12 +88,12 @@
             md="6"
           >
             <v-autocomplete
-              v-model="incomeData.account"
+              v-model="expenseData.account"
               label="Conta"
               item-value="id"
               item-title="name"
               variant="outlined"
-              :rules="[() => $validation('required', incomeData.account)]"
+              :rules="[() => $validation('required', expenseData.account)]"
               :items="itemsAccount"
               :loading-items="loadingItems"
             />
@@ -132,14 +132,14 @@
 <script>
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 import AccountService from "@/services/AccountService"
-import IncomeService from "@/services/IncomeService"
+import ExpenseService from "@/services/ExpenseService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
 import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
 
 export default {
-  name: "IncomeCreate",
+  name: "ExpenseCreate",
   components: {
     BaseMaterialDialog,
     GlobalDataPiker,
@@ -163,7 +163,7 @@ export default {
       loadingCreate: false,
       isValid: false,
       amount: "0,00",
-      incomeData: {
+      expenseData: {
         description: '',
         date: '',
         status: null,
@@ -204,7 +204,7 @@ export default {
         
         if (isNaN(numeric)) numeric = 0
         
-        this.incomeData.value = numeric
+        this.expenseData.value = numeric
         this.amount = formatCurrencyMaskBR(val)
       }
     }
@@ -240,13 +240,13 @@ export default {
       
       if (type === 'moreOne') {
         if (this.validate()) {
-          await this.createIncome()
+          await this.createExpense()
         }
       }
     },
     async validateAndCreate(){
       if (this.validate()) {
-        if (await this.createIncome()) {
+        if (await this.createExpense()) {
           this.$emit('update:model-value', false)
         }
       }
@@ -254,19 +254,21 @@ export default {
     validate() {
       this.$refs.form.validate()
 
-      if (!this.incomeData.date) {
+      if (!this.expenseData.date) {
         this.$showMessage("Informe uma data!", "warning") 
         return false
       }
      
       return this.isValid
     },
-    async createIncome() {
+    async createExpense() {
       try {
         this.loadingCreate = true
 
-        const newIncome = await IncomeService.create(this.incomeData)
-        newIncome.type = 'income'
+        this.expenseData.value = -this.expenseData.value
+
+        const newIncome = await ExpenseService.create(this.expenseData)
+        newIncome.type = 'expense'
         this.$emit('insert:item', newIncome)
         this.$showMessage("Cadastro efetuado!", "success")
       } catch {
@@ -280,7 +282,7 @@ export default {
     },
     clearForm() {
       this.amount = "0,00"
-      this.incomeData = {
+      this.expenseData = {
         description: '',
         date: '',
         status: null,

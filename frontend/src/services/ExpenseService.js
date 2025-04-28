@@ -5,16 +5,9 @@ class ExpenseService {
     this.baseUrl = "/expense"
   }
 
-  async create(category, status, value, date, description, account) {
+  async create(params) {
     try {
-      const response = await axios.post(`${this.baseUrl}/`, {
-        category,
-        status,
-        value,
-        date,
-        description,
-        account
-      })
+      const response = await axios.post(`${this.baseUrl}/`, params)
       return response.data
     } catch (error) {
       throw error.response.data
