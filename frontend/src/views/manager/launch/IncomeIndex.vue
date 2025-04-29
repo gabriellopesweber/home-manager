@@ -6,38 +6,28 @@
     >
       <BaseMaterialCard>
         <template #title>
-          <v-row no-gutters>
-            <v-col
-              cols="12"
-              md="6"
-            >
-              <span> Lançamentos </span>
-            </v-col>
-            <v-col
-              cols="12"
-              md="6"
-            >
-              <GlobalSelectPeriod @update:period="searchByPeriod" />
-            </v-col>
-          </v-row>
-        </template>
-        
-        <template #append>
-          <ActionSpeedDial
-            direction="left center"
-            default-tooltip-location="top"
-            open-on-hover
-            :actions="actions"
-            :curenty-type="fabType"
-            @action="executeAction(fabType)"
-            @update:curenty-type="fabType = $event"
-          />
+          <div class="d-flex justify-space-between my-2">
+            <span> Lançamentos </span>
+
+            <GlobalSelectPeriod @update:period="searchByPeriod" />
+
+            <ActionSpeedDial
+              direction="left center"
+              default-tooltip-location="top"
+              open-on-hover
+              :actions="actions"
+              :curenty-type="fabType"
+              @action="executeAction(fabType)"
+              @update:curenty-type="fabType = $event"
+            />
+          </div>
         </template>
 
         <v-data-table
           :items="items"
           :headers="header"
           :items-per-page="String(items.length)"
+          :loading="loading"
           hide-default-footer
         >
           <template #item.type="{ item }">
@@ -204,6 +194,7 @@ export default {
       showExpense: false,
       showTransfer: false,
       showConformEdit: false,
+      loading: false,
       loadingUpdateStatus: [],
       items: [],
       itemsCategory: [],
@@ -271,9 +262,11 @@ export default {
     }
   },
   async created() {
+    this.loading = true
     this.items = await LaunchService.getAll(dayjs().startOf('month').toISOString(), dayjs().endOf('day').toISOString())
     await this.populateCategory()
     await this.populateAccount()
+    this.loading = false
   },
   methods: {
     async populateCategory(){
@@ -330,11 +323,13 @@ export default {
     },
     async searchByPeriod(period) {
       try {
+        this.loading = true
         this.items = await LaunchService.getAll(period.initialPeriod, period.finalPeriod)
       } catch {
         this.$showMessage('Ocorre um problema ao atualizar os lançamentos!', 'error')
+      } finally {
+        this.loading = false
       }
-      
     }
   }
 }

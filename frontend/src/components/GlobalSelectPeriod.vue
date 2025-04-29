@@ -1,9 +1,11 @@
 <template>
   <div class="d-flex align-center">
     <v-btn
+      v-tooltip:top="'Período anterior'"
       icon="mdi-calendar-arrow-left"
       variant="text"
       rounded="cincle"
+      @click="previousPeriod"
     />
 
     <v-menu
@@ -12,6 +14,7 @@
     >
       <template #activator="{ props }">
         <v-btn
+          v-tooltip:top="'Selecione o período'"
           v-bind="props"
           color="primary"
           variant="text"
@@ -72,9 +75,11 @@
     </v-menu>
 
     <v-btn
+      v-tooltip:top="'Próximo período'"
       icon="mdi-calendar-arrow-right" 
       variant="text"
       rounded="cincle"
+      @click="nextPeriod"
     />
   </div>
 </template>
@@ -89,10 +94,14 @@ export default {
       menu: false, 
       showSelectPeriod: false, 
       selectedItem: null,
+      baseSelectedDates: [],
       selectedDates: [],
       editingDates: [],
       initialPeriod: null,
       finalPeriod: null,
+      flag: 'month',
+      count: 0,
+      typeActive: 3,
       items: [
         { title: "Hoje", type: 1 },
         { title: "Esta semana", type: 2 },
@@ -103,46 +112,45 @@ export default {
     }
   },
   mounted() {
-    this.editingDates = [...this.selectedDates]
+    this.editingDates = [...this.selectedDates],
+    this.selectItem({type: 3})
   },
   methods: {
     selectItem(item) {
+      this.typeActive = item.type
       switch (item.type) {
         case 1: 
-          this.initialPeriod = dayjs().startOf('day').format('DD/MM/YYYY')
-          this.finalPeriod = dayjs().startOf('day').format('DD/MM/YYYY')
-
-          item.period = this.initialPeriod
+          this.flag = 'day'
           break
         case 2: 
-          this.initialPeriod = dayjs().startOf('week').format('DD/MM/YYYY')
-          this.finalPeriod = dayjs().endOf('week').format('DD/MM/YYYY')
-          
-          item.period = `${this.initialPeriod} - ${this.finalPeriod}`
+          this.flag = 'week'
           break
         case 3: 
-          this.initialPeriod = dayjs().startOf('month').format('DD/MM/YYYY')
-          this.finalPeriod = dayjs().endOf('month').format('DD/MM/YYYY')
-          
-          item.period = `${this.initialPeriod} - ${this.finalPeriod}`
+          this.flag = 'month'
           break
         case 4: 
-          this.initialPeriod = dayjs().startOf('year').format('DD/MM/YYYY')
-          this.finalPeriod = dayjs().endOf('year').format('DD/MM/YYYY')
-          
-          item.period = `${this.initialPeriod} - ${this.finalPeriod}`
+          this.flag = 'year'
           break
         case 5:
           this.showSelectPeriod = true
           break
       }
   
-      if (item.type !== 5) {
-        
+      if (item.type >= 1 && item.type <= 4) {
+        this.initialPeriod = dayjs().startOf(this.flag).format('DD/MM/YYYY')
+        this.finalPeriod = dayjs().endOf(this.flag).format('DD/MM/YYYY')
+
+        if (this.typeActive === 1 ) {
+          item.period = this.initialPeriod
+        } else {
+          item.period = `${this.initialPeriod} - ${this.finalPeriod}`
+        }
+
         this.$emit('update:period', { 
           initialPeriod: dayjs(this.initialPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD'),
           finalPeriod: dayjs(this.finalPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD')
         })
+
         this.selectedItem = item
         this.menu = false
       }
@@ -157,6 +165,7 @@ export default {
         period: `Personalizado (${dayjs(initial).format('DD/MM/YYYY')} – ${dayjs(final).format('DD/MM/YYYY')})`,
         type: 5
       }
+      this.baseSelectedDates = []
 
       this.$emit('update:period', {
         initialPeriod: dayjs(initial).format('YYYY-MM-DD'),
@@ -168,6 +177,46 @@ export default {
     },
     cancelAction() {
       this.editingDates = [...this.selectedDates]
+    },
+    previousPeriod() {
+      this.count--
+      this.handlerDate()
+    },
+    nextPeriod() {
+      this.count++
+      this.handlerDate()
+    },
+    handlerDate() {
+      let start, end = null
+
+      if (this.typeActive === 5 && !this.baseSelectedDates) {
+        this.baseSelectedDates = [...this.selectedDates]
+      }
+
+      switch (this.typeActive) {
+        case 1:
+          this.initialPeriod = dayjs().startOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
+          this.finalPeriod = dayjs().endOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
+          this.selectedItem = { period: this.initialPeriod }
+          break
+        case 5:
+          start = dayjs(this.baseSelectedDates[0]).add(this.count, 'day')
+          end = dayjs(this.baseSelectedDates[this.baseSelectedDates.length - 1]).add(this.count, 'day')
+
+          this.initialPeriod = start.format('DD/MM/YYYY')
+          this.finalPeriod = end.format('DD/MM/YYYY')
+          this.selectedItem = { period: `Personalizado (${this.initialPeriod} - ${this.finalPeriod})` }
+          break
+        default:
+          this.initialPeriod = dayjs().startOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
+          this.finalPeriod = dayjs().endOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
+          this.selectedItem = { period: `${this.initialPeriod} - ${this.finalPeriod}` }
+      }
+
+      this.$emit('update:period', { 
+        initialPeriod: dayjs(this.initialPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD'),
+        finalPeriod: dayjs(this.finalPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD')
+      })
     }
   }
 }
