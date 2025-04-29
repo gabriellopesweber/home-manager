@@ -1,5 +1,6 @@
 <template>
   <v-navigation-drawer
+    v-model="menu"
     absolute
   >
     <v-list
@@ -88,6 +89,12 @@
   </v-navigation-drawer>
 
   <v-app-bar>
+    <v-btn
+      v-tooltip:right="!menu ? 'Abrir menu lateral' : 'Fechar menu lateral'"
+      :icon="menu ? 'mdi-menu-open' : 'mdi-menu-close'"
+      rounded="circle"
+      @click="menu = !menu"
+    />
     <v-spacer />
     <v-list>
       <v-list-item>
@@ -115,7 +122,8 @@ export default {
   },
   data () {
     return {
-      myLogo: "/img/HM-Black-old.png"
+      myLogo: "/img/HM-Black-old.png",
+      menu: true
     }
   },
   methods: {

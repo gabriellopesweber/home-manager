@@ -1,11 +1,11 @@
 import AccountIndex from '@/views/manager/account/AccountIndex.vue'
-import IncomeIndex from '@/views/manager/launch/IncomeIndex.vue'
+import LaunchIndex from '@/views/manager/launch/LaunchIndex.vue'
 
 const managerRouter = [
   {
     path: '/gerenciamento/lancamentos',
     name: "manager.launch",
-    component: IncomeIndex,
+    component: LaunchIndex,
     meta: {
       requiresAuth: true
     }

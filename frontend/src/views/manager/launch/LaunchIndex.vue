@@ -28,8 +28,18 @@
           :headers="header"
           :items-per-page="String(items.length)"
           :loading="loading"
+          :cell-props="getCellProps"
           hide-default-footer
         >
+          <template #item.info="{ item }">
+            <v-icon 
+              v-if="warningIcons[item.id]"
+              v-tooltip:top="'Conciliação em atraso'"
+            >
+              {{ warningIcons[item.id] }}
+            </v-icon>
+          </template>
+          
           <template #item.type="{ item }">
             <v-icon
               v-if="item.type === 'income'"
@@ -177,7 +187,7 @@ import AccountService from '@/services/AccountService'
 import ExpenseCreate from '@/views/manager/launch/ExpenseCreate.vue'
 
 export default {
-  name: "IncomeIndex",
+  name: "LaunchIndex",
   components: {
     BaseMaterialCard,
     IncomeCreate,
@@ -196,6 +206,7 @@ export default {
       showConformEdit: false,
       loading: false,
       loadingUpdateStatus: [],
+      warningToShow: [],
       items: [],
       itemsCategory: [],
       itemsAccount: [],
@@ -259,6 +270,15 @@ export default {
         const accountsMap = new Map(this.itemsAccount.map(account => [account.id, account.name]))
         return accountsMap.get(accountId) || ''
       }
+    },
+    warningIcons() {
+      return this.items.reduce((acc, item) => {
+        if (item.status === 1 && this.getWarningDateConciliation(item.date)) {
+          this.warningToShow[item.id] = true
+          acc[item.id] = 'mdi-circle-medium'
+        }
+        return acc
+      }, {})
     }
   },
   async created() {
@@ -307,6 +327,7 @@ export default {
       }
     },
     async updateStatus(status, item) {
+      const oldStatus = item.status
       try {
         this.loadingUpdateStatus[item.id] = true
         item.status = status
@@ -316,6 +337,7 @@ export default {
           await ExpenseService.update(item.id, item)
         this.$showMessage('Status atualizado com sucesso!', 'success')
       } catch {
+        item.status = oldStatus
         this.$showMessage('Ocorre um problema ao atualizar o status!', 'error')
       } finally {
         this.loadingUpdateStatus[item.id] = false
@@ -330,6 +352,21 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    getWarningDateConciliation(date) {
+      const now = dayjs()
+      const dateDayjs = dayjs(date)
+
+      return now.isSameOrAfter(dateDayjs, 'day')
+    },
+    getCellProps({ item }) {
+      if (item.status === 1 && this.getWarningDateConciliation(item.date)) {
+        return {
+          class: 'bg-warning opacity-70 text-white',
+        }
+      }
+
+      return {}
     }
   }
 }

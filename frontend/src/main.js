@@ -10,6 +10,7 @@ import { setupInterceptors } from './services/interceptor'
 import '@/assets/global.css'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 
 const app = createApp(App)
 
@@ -19,6 +20,7 @@ app.use(router)
 app.use(messagePlugin)
 app.use(validationPlugin)
 dayjs.extend(customParseFormat)
+dayjs.extend(isSameOrAfter)
 
 setupInterceptors()
 

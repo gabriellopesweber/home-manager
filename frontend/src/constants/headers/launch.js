@@ -1,5 +1,11 @@
 const headerLaunch = [
   {
+    title: '',
+    value: 'info',
+    align: 'center',
+    width: 5
+  },
+  {
     title: 'Tipo',
     value: 'type',
     align: 'center',
