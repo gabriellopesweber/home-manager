@@ -283,19 +283,26 @@ export default {
   },
   async created() {
     this.loading = true
-    this.items = await LaunchService.getAll(dayjs().startOf('month').toISOString(), dayjs().endOf('day').toISOString())
     await this.populateCategory()
     await this.populateAccount()
     this.loading = false
   },
   methods: {
-    async populateCategory(){
-      this.itemsCategory = await CategoryService.getAll()
-      this.itemsCategoryIncome = this.itemsCategory.filter(category => category.type === 'receita')
-      this.itemsCategoryExpense = this.itemsCategory.filter(category => category.type === 'despesa')
+    async populateCategory() {
+      try {
+        this.itemsCategory = await CategoryService.getAll()
+        this.itemsCategoryIncome = this.itemsCategory.filter(category => category.type === 'receita')
+        this.itemsCategoryExpense = this.itemsCategory.filter(category => category.type === 'despesa')
+      } catch {
+        this.$showMessage('Ocorreu um problema ao buscar categorias', 'error')
+      }
     },
-    async populateAccount(){
-      this.itemsAccount = await AccountService.getAll()
+    async populateAccount() {
+      try {
+        this.itemsAccount = await AccountService.getAll()
+      } catch {
+        this.$showMessage('Ocorreu um problema ao buscar contas', 'error')
+      }
     },
     executeAction(type) {
       if (type === 'receita') this.showIncome = true

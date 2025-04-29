@@ -136,7 +136,7 @@ import ExpenseService from "@/services/ExpenseService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
-import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
+import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 
 export default {
   name: "ExpenseCreate",
