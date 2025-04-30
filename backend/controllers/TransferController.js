@@ -32,10 +32,6 @@ const TransferController = {
         return res.status(404).json({ message: 'Conta de origem ou destino não encontrada ou sem permissão.' })
       }
 
-      if (origin.balance < value) {
-        return res.status(400).json({ messsage: 'Saldo insuficiente na conta de origem.' })
-      }
-
       if (status === statusFinance.CONCILIATED) {
         origin.balance -= value
         destination.balance += value
@@ -138,7 +134,6 @@ const TransferController = {
 
       // Cenário 1: Ambos conciliados, mas valor mudou
       if (currentyStatus === statusFinance.CONCILIATED && status === statusFinance.CONCILIATED && valueDifference !== 0) {
-        if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
         roolbackValue = valueDifference
 
         await Account.findByIdAndUpdate(origin_account, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
@@ -152,7 +147,6 @@ const TransferController = {
       // Cenário 2: Antes não conciliado, agora conciliado (novo ou mesmo valor)
       else if (currentyStatus !== statusFinance.CONCILIATED && status === statusFinance.CONCILIATED) {
         if (valueDifference !== 0) {
-          if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = valueDifference
 
           await Account.findByIdAndUpdate(origin_account, { $inc: { balance: -valueDifference }, updateDate: dateNow.toDate() })
@@ -162,7 +156,6 @@ const TransferController = {
           updatedBalanceDestination = true
           rollbackType = 'StatusAddedAndValueDifference'
         } else {
-          if (origin.balance < value) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = value
 
           await Account.findByIdAndUpdate(origin_account, { $inc: { balance: -value }, updateDate: dateNow.toDate() })
@@ -178,7 +171,6 @@ const TransferController = {
       else if (currentyStatus === statusFinance.CONCILIATED && status !== statusFinance.CONCILIATED) {
         if (valueDifference !== 0) {
           // Conciliação removida, mas saldo alterado
-          if (origin.balance < Math.abs(valueDifference)) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = valueDifference
 
           await Account.findByIdAndUpdate(origin_account, { $inc: { balance: valueDifference }, updateDate: dateNow.toDate() })
@@ -190,7 +182,6 @@ const TransferController = {
           rollbackType = 'statusRemovedAndValueDifference'
         } else {
           // Cenário 4: Conciliação removida
-          if (origin.balance < currentyValue) return res.status(400).json({ message: 'Saldo insuficiente para atualizar.' })
           roolbackValue = currentyValue
 
           await Account.findByIdAndUpdate(origin_account, { $inc: { balance: currentyValue }, updateDate: dateNow.toDate() })

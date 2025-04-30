@@ -18,7 +18,7 @@ class TransferService {
       })
       return response.data
     } catch (error) {
-      throw error.response.data
+      throw error.response
     }
   }
 
@@ -27,7 +27,7 @@ class TransferService {
       const response = await axios.get(`${this.baseUrl}/`)
       return response.data
     } catch (error) {
-      throw error.response.data
+      throw error.response
     }
   }
 
@@ -36,7 +36,7 @@ class TransferService {
       const response = await axios.get(`${this.baseUrl}/${id}`)
       return response.data
     } catch (error) {
-      throw error.response.data
+      throw error.response
     }
   }
 
@@ -53,7 +53,7 @@ class TransferService {
       })
       return response.data
     } catch (error) {
-      throw error.response.data
+      throw error.response
     }
   }
 
@@ -62,7 +62,7 @@ class TransferService {
       const response = await axios.delete(`${this.baseUrl}/${id}`)
       return response.data
     } catch (error) {
-      throw error.response.data
+      throw error.response
     }
   }
 

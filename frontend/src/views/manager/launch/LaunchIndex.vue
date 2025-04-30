@@ -62,7 +62,16 @@
           </template>
 
           <template #item.account="{ item }">
-            {{ formatAccount(item.account) }}
+            <div
+              v-if="item.type === 'transfer'"
+              class="d-flex"
+            >
+              <span>{{ formatAccount(item).origin }}</span>
+              <v-icon>mdi-arrow-right-thick</v-icon>
+              <span>{{ formatAccount(item).destination }}</span>
+            </div>
+
+            <span v-else> {{ formatAccount(item) }} </span>
           </template>
 
           <template #item.status="{ item }">
@@ -76,6 +85,7 @@
               :loading="loadingUpdateStatus[item.id]"
               @click="updateStatus(1, item)"
             />
+
             <v-btn
               v-else-if="item.status === 1"
               v-tooltip:top="'Alterar para pagamento efetuado'"
@@ -164,12 +174,12 @@
 
     <TransferCreate
       :show-dialog="showTransfer"
-      :items-category="itemsCategoryTransfer"
+      :edit-item="itemMarkedForEdit"
       @update:model-value="($event) => { 
         showTransfer = $event
         itemMarkedForEdit = {}
       }"
-      @insert:item="items.push($event)"
+      @insert:item="eventAfterCreate"
     />
   </div>
 </template>
@@ -220,7 +230,6 @@ export default {
       itemsAccount: [],
       itemsCategoryIncome: [],
       itemsCategoryExpense: [],
-      itemsCategoryTransfer: [],
       itemMarkedForDeletion: {},
       itemMarkedForEdit: {},
       header: headerLaunch,
@@ -276,9 +285,17 @@ export default {
       }
     },
     formatAccount() {
-      return accountId => {
+      return item => {
+        if (item.type === 'transfer') {
+          const accountsMap = new Map(this.itemsAccount.map(account => [account.id, account.name]))
+          return {
+            destination: accountsMap.get(item.destination_account),
+            origin: accountsMap.get(item.origin_account),
+          }
+        }
+
         const accountsMap = new Map(this.itemsAccount.map(account => [account.id, account.name]))
-        return accountsMap.get(accountId) || ''
+        return accountsMap.get(item.account) || ''
       }
     },
     warningIcons() {
@@ -326,7 +343,6 @@ export default {
         this.itemsCategory = await CategoryService.getAll()
         this.itemsCategoryIncome = this.itemsCategory.filter(category => category.type === 'receita')
         this.itemsCategoryExpense = this.itemsCategory.filter(category => category.type === 'despesa')
-        this.itemsCategoryTransfer = this.itemsCategory.filter(category => category.type === 'transter')
       } catch {
         this.$showMessage('Ocorreu um problema ao buscar categorias', 'error')
       }
@@ -357,8 +373,8 @@ export default {
             this.showTransfer = true
             break
         }
-        
       }
+      
       if (type === 'delete') {
         this.itemMarkedForDeletion = item
         this.showConformEdit = true
@@ -426,12 +442,15 @@ export default {
       return {}
     },
     eventAfterCreate(event) {
+      console.log(event)
       const index = this.items.findIndex(i => i.id === event.id)
+      console.log(index, typeof index)
       
-      if (typeof index === 'number') {
+      if (typeof index === 'number' && index >= 0) {
         this.items[index] = event
       } else {
         this.items.push(event)
+        console.log("Adicionado: ", this.items)
       }
     }
   }

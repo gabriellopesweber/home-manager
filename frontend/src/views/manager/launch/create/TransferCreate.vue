@@ -54,7 +54,22 @@
               :rules="[() => $validation('required', dataSend.origin_account)]"
               :items="itemsAccount"
               :loading-items="loadingItems"
-            />
+              @update:model-value="async ($event) => {
+                idSelected = $event
+                dataSend.destination_account = null
+                await getBalanceOfSelected(idSelected)
+              }"
+            >
+              <template #append>
+                <v-progress-circular v-if="loadingBalance" />
+                <v-icon
+                  v-else
+                  v-tooltip:top="balance ? `Saldo: ${formatMoney(balance)}` : 'Seleciona uma conta para ver o saldo'"
+                >
+                  mdi-wallet-outline
+                </v-icon>
+              </template>
+            </v-autocomplete>
           </v-col>
 
           <v-col
@@ -70,14 +85,14 @@
               variant="outlined"
               prepend-inner-icon="mdi-bank-transfer-in"
               :rules="[() => $validation('required', dataSend.destination_account)]"
-              :items="itemsAccount"
+              :items="getAccountFiltered"
               :loading-items="loadingItems"
             />
           </v-col>
 
           <v-col
             cols="12"
-            md="4"
+            md="6"
           >
             <v-autocomplete
               v-model="dataSend.status"
@@ -90,7 +105,7 @@
 
           <v-col
             cols="12"
-            md="4"
+            md="6"
           >
             <v-text-field
               v-model="maskedAmount"
@@ -99,22 +114,6 @@
               variant="outlined"
               :rules="[() => $validation('required', dataSend.value)]"
               @keypress="onlyNumbers"
-            />
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-autocomplete
-              v-model="dataSend.category"
-              label="Categoria"
-              item-value="id"
-              item-title="name"
-              variant="outlined"
-              :rules="[() => $validation('required', dataSend.category)]"
-              :items="itemsCategory"
-              :loading-items="loadingItems"
             />
           </v-col>
         </v-row>
@@ -181,10 +180,6 @@ export default {
       type: Boolean,
       required: true
     },
-    itemsCategory: {
-      type: Array,
-      default: () => []
-    },
     editItem: {
       type: Object,
       default: () => {}
@@ -196,16 +191,18 @@ export default {
       dialog: false,
       loading: false,
       loadingItems: false,
+      loadingBalance: false,
       isValid: false,
       amount: "0,00",
       type: 'transfer',
       isEdit: false,
+      idSelected: '',
+      balance: '',
       dataSend: {
         description: '',
         date: '',
         status: null,
         value: 0,
-        category: null,
         origin_account: null,
         destination_account: null
       },
@@ -245,6 +242,15 @@ export default {
         this.dataSend.value = numeric
         this.amount = formatCurrencyMaskBR(val)
       }
+    },
+    formatMoney() {
+      return value => {
+        return 'R$: ' + formatCurrencyMaskBR(value)
+      }
+    },
+    getAccountFiltered() {
+      if (!this.idSelected) return this.itemsAccount
+      return this.itemsAccount.filter( item => item.id !== this.idSelected)
     }
   },
   watch: {
@@ -258,6 +264,7 @@ export default {
         }
         this.populateItems()
       } else {
+        this.isEdit = false
         this.clearForm()
       }
     }
@@ -315,7 +322,10 @@ export default {
           this.$emit('insert:item', newItem)
           this.$showMessage("Atualizado com sucesso!", "success")
           this.$emit('update:model-value', false)
-        } catch {
+        } catch (error) {
+          if (error.status === 400) {
+            return this.$showMessage("Saldo insuficiente!", "error")
+          }
           this.$showMessage("Ocorreu um erro ao atualizar a transferência!", "error")
           return false
         } finally {
@@ -333,7 +343,10 @@ export default {
         newItem.type = this.type
         this.$emit('insert:item', newItem)
         this.$showMessage("Cadastro efetuado!", "success")
-      } catch {
+      } catch (error) {
+        if (error.status === 400) {
+          return this.$showMessage("Saldo insuficiente!", "error")
+        }
         this.$showMessage("Ocorreu um erro ao cadastrar Receita!", "error")
         return false
       } finally {
@@ -349,9 +362,21 @@ export default {
         date: '',
         status: null,
         value: 0,
-        category: null,
         origin_account: null,
         destination_account: null,
+      }
+    },
+    async getBalanceOfSelected(id) {
+      try {
+        this.loadingBalance = true
+        if (!id) return
+
+        const item = await AccountService.getById(id)
+        this.balance = item.balance
+      } catch {
+        this.$showMessage('Ocorreu um problema ao buscar o saldo da conta', 'error')
+      } finally {
+        this.loadingBalance = false
       }
     }
   }
