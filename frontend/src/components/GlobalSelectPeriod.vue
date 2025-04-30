@@ -24,11 +24,14 @@
         </v-btn>
       </template>
 
-      <v-list>
+      <v-list rounded="lg">
         <v-list-item
           v-for="item in items"
           :key="item.type"
-          class="d-flex justify-center"
+          :append-icon="item.type === 5 ? 'mdi-calendar-edit-outline' : ''"
+          active-color="primary"
+          :active="item.type === activeItem.type"
+          class="d-flex justify-space-between"
           @click="selectItem(item)"
         >
           <template v-if="item.type !== 5">
@@ -43,7 +46,9 @@
             >
               <template #activator="{ props: nestedProps }">
                 <v-list-item-title v-bind="nestedProps">
-                  {{ item.title }}
+                  <span> 
+                    {{ item.title }}
+                  </span>
                 </v-list-item-title>
               </template>
 
@@ -135,6 +140,8 @@ export default {
       if (item.type === 5) {
         this.showCustomPicker = true
         return
+      } else {
+        this.customRange = []
       }
       this.showCustomPicker = false
       this.calculatePeriod()
