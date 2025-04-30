@@ -29,7 +29,7 @@
           v-for="item in items"
           :key="item.type"
           :append-icon="item.type === 5 ? 'mdi-calendar-edit-outline' : ''"
-          active-color="primary"
+          color="primary"
           :active="item.type === activeItem.type"
           class="d-flex justify-space-between"
           @click="selectItem(item)"
@@ -126,8 +126,10 @@ export default {
   },
   watch: {
     customRange(newRange) {
-      this.emitUpdate(newRange[0], newRange[newRange.length - 1])
-      this.baseCustomRange = [...newRange]
+      if (this.activeItem.type === 5) {
+        this.emitUpdate(newRange[0], newRange[newRange.length - 1])
+        this.baseCustomRange = [...newRange]
+      }
     }
   },
   mounted() {

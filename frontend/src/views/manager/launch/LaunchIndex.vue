@@ -42,22 +42,10 @@
           
           <template #item.type="{ item }">
             <v-icon
-              v-if="item.type === 'income'"
-              color="success"
+              v-tooltip:top="getConfigType(item.type).tooltip"
+              :color="getConfigType(item.type).color"
             >
-              mdi-cash-plus
-            </v-icon>
-            <v-icon
-              v-else-if="item.type === 'expense'"
-              color="error"
-            >
-              mdi-cash-minus
-            </v-icon>
-            <v-icon
-              v-else-if="item.type === 'transfer'"
-              color="primary"
-            >
-              mdi-bank-transfer
+              {{ getConfigType(item.type).icon }}
             </v-icon>
           </template>
 
@@ -90,7 +78,7 @@
             />
             <v-btn
               v-else-if="item.status === 1"
-              v-tooltip:top="'Alterar para conciliado'"
+              v-tooltip:top="'Alterar para pagamento efetuado'"
               icon="mdi-thumb-down"
               variant="text"
               rounded="circle"
@@ -155,14 +143,32 @@
     <IncomeCreate
       :show-dialog="showIncome"
       :items-category="itemsCategoryIncome"
-      @update:model-value="showIncome = $event"
-      @insert:item="items.push($event)"
+      :edit-item="itemMarkedForEdit"
+      @update:model-value="($event) => { 
+        showIncome = $event
+        itemMarkedForEdit = {}
+      }"
+      @insert:item="eventAfterCreate"
     />
 
     <ExpenseCreate
       :show-dialog="showExpense"
       :items-category="itemsCategoryExpense"
-      @update:model-value="showExpense = $event"
+      :edit-item="itemMarkedForEdit"
+      @update:model-value="($event) => { 
+        showExpense = $event
+        itemMarkedForEdit = {}
+      }"
+      @insert:item="eventAfterCreate"
+    />
+
+    <TransferCreate
+      :show-dialog="showTransfer"
+      :items-category="itemsCategoryTransfer"
+      @update:model-value="($event) => { 
+        showTransfer = $event
+        itemMarkedForEdit = {}
+      }"
       @insert:item="items.push($event)"
     />
   </div>
@@ -175,16 +181,17 @@ import ExpenseService from '@/services/ExpenseService'
 import IncomeService from '@/services/IncomeService'
 import TransferService from '@/services/TransferService'
 import CategoryService from "@/services/CategoryService"
+import AccountService from '@/services/AccountService'
 import { headerLaunch } from '@/constants/headers/launch'
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import IncomeCreate from '@/views/manager/launch/IncomeCreate.vue'
 import GlobalSelectPeriod from '@/components/GlobalSelectPeriod.vue'
 import GlobalConfirmEdit from '@/components/GlobalConfirmEdit.vue'
 import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
-import AccountService from '@/services/AccountService'
-import ExpenseCreate from '@/views/manager/launch/ExpenseCreate.vue'
+import IncomeCreate from '@/views/manager/launch/create/IncomeCreate.vue'
+import ExpenseCreate from '@/views/manager/launch/create/ExpenseCreate.vue'
+import TransferCreate from '@/views/manager/launch/create/TransferCreate.vue'
 
 export default {
   name: "LaunchIndex",
@@ -192,6 +199,7 @@ export default {
     BaseMaterialCard,
     IncomeCreate,
     ExpenseCreate,
+    TransferCreate,
     GlobalSelectPeriod,
     ActionSpeedDial,
     GlobalConfirmEdit
@@ -212,7 +220,9 @@ export default {
       itemsAccount: [],
       itemsCategoryIncome: [],
       itemsCategoryExpense: [],
+      itemsCategoryTransfer: [],
       itemMarkedForDeletion: {},
+      itemMarkedForEdit: {},
       header: headerLaunch,
       actions: [
         {
@@ -279,6 +289,29 @@ export default {
         }
         return acc
       }, {})
+    },
+    getConfigType() {
+      return type => {
+        const tooltipMap = {
+          income: {
+            icon: 'mdi-cash-plus',
+            tooltip: 'Receita',
+            color: 'success'
+          },
+          expense: {
+            icon: 'mdi-cash-minus',
+            tooltip: 'Despesa',
+            color: 'error'
+          },
+          transfer: {
+            icon: 'mdi-bank-transfer',
+            tooltip: 'Transferencia',
+            color: 'primary'
+          },
+        }
+
+        return tooltipMap[type]
+      }
     }
   },
   async created() {
@@ -293,6 +326,7 @@ export default {
         this.itemsCategory = await CategoryService.getAll()
         this.itemsCategoryIncome = this.itemsCategory.filter(category => category.type === 'receita')
         this.itemsCategoryExpense = this.itemsCategory.filter(category => category.type === 'despesa')
+        this.itemsCategoryTransfer = this.itemsCategory.filter(category => category.type === 'transter')
       } catch {
         this.$showMessage('Ocorreu um problema ao buscar categorias', 'error')
       }
@@ -310,7 +344,21 @@ export default {
       if (type === 'transferencia') this.showTransfer = true
     },
     executeActionByItem(type, item) {
-      if (type === 'edit') console.log('editar') // Ações de edição
+      if (type === 'edit') {
+        this.itemMarkedForEdit = item
+        switch (item.type) {
+          case 'income':
+            this.showIncome = true
+            break
+          case 'expense':
+            this.showExpense = true
+            break
+          case 'transfer':
+            this.showTransfer = true
+            break
+        }
+        
+      }
       if (type === 'delete') {
         this.itemMarkedForDeletion = item
         this.showConformEdit = true
@@ -331,6 +379,8 @@ export default {
         this.$showMessage('Item excluido com sucesso!', 'success')
       } catch {
         this.$showMessage('Ocorre um problema ao excluir!', 'error')
+      } finally {
+        this.itemMarkedForDeletion = {}
       }
     },
     async updateStatus(status, item) {
@@ -374,6 +424,15 @@ export default {
       }
 
       return {}
+    },
+    eventAfterCreate(event) {
+      const index = this.items.findIndex(i => i.id === event.id)
+      
+      if (typeof index === 'number') {
+        this.items[index] = event
+      } else {
+        this.items.push(event)
+      }
     }
   }
 }

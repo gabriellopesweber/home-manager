@@ -17,6 +17,7 @@
                 :color="colorAction"
                 :variant="defaultVariant"
                 :aria-label="`Executar ação de ${textAction}`"
+                :loading="loading"
                 @click="autoUpdateActivator? executeAction(fabIcon): () => ({}) "
               />
             </template>
@@ -88,6 +89,10 @@ export default {
     autoUpdateActivator: {
       type: Boolean,
       default: true
+    },
+    loading: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['action', 'update:curenty-type'],

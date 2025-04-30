@@ -5,7 +5,7 @@
     @update:model-value="$emit('update:model-value', $event)"
   >
     <template #title>
-      <span class="d-flex justify-center"> Cadastrar Receita </span>
+      <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Despesa </span>
     </template>
 
     <template #default>
@@ -19,7 +19,7 @@
             md="9"
           >
             <v-text-field
-              v-model="incomeData.description"
+              v-model="dataSend.description"
               label="Descrição"
               variant="outlined"
             />
@@ -31,7 +31,7 @@
             md="3"
           >
             <GlobalDataPiker
-              v-model="incomeData.date"
+              v-model="dataSend.date"
               :configuration-btn="{ 
                 color: 'primary',
                 prependIcon: 'mdi-calendar',
@@ -45,11 +45,11 @@
             md="6"
           >
             <v-autocomplete
-              v-model="incomeData.status"
+              v-model="dataSend.status"
               label="Status"
               variant="outlined"
               :items="itemsStatus"
-              :rules="[() => $validation('required', incomeData.status)]"
+              :rules="[() => $validation('required', dataSend.status)]"
             />
           </v-col>
 
@@ -62,7 +62,7 @@
               label="Valor"
               prefix="R$"
               variant="outlined"
-              :rules="[() => $validation('required', incomeData.value)]"
+              :rules="[() => $validation('required', dataSend.value)]"
               @keypress="onlyNumbers"
             />
           </v-col>
@@ -72,12 +72,12 @@
             md="6"
           >
             <v-autocomplete
-              v-model="incomeData.category"
+              v-model="dataSend.category"
               label="Categoria"
               item-value="id"
               item-title="name"
               variant="outlined"
-              :rules="[() => $validation('required', incomeData.category)]"
+              :rules="[() => $validation('required', dataSend.category)]"
               :items="itemsCategory"
               :loading-items="loadingItems"
             />
@@ -88,12 +88,12 @@
             md="6"
           >
             <v-autocomplete
-              v-model="incomeData.account"
+              v-model="dataSend.account"
               label="Conta"
               item-value="id"
               item-title="name"
               variant="outlined"
-              :rules="[() => $validation('required', incomeData.account)]"
+              :rules="[() => $validation('required', dataSend.account)]"
               :items="itemsAccount"
               :loading-items="loadingItems"
             />
@@ -112,6 +112,7 @@
 
         <div>
           <ActionSpeedDial
+            v-if="!isEdit"
             direction="left center"
             transition="slide-y-transition"
             default-tooltip-location="top"
@@ -120,8 +121,19 @@
             :modal-is-open="dialog"
             :default-icon="actions[0].icon"
             :actions="actions"
+            :loading="loading"
             @action="executeAction(fabType)"
             @update:curenty-type="fabType = $event"
+          />
+
+          <v-btn
+            v-else 
+            v-tooltip:top="'Salvar'"
+            icon="mdi-check"
+            class="bg-success"
+            rounded="circle"
+            :loading="loading"
+            @click="validateAndUpdate"
           />
         </div>
       </div>
@@ -132,14 +144,14 @@
 <script>
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 import AccountService from "@/services/AccountService"
-import IncomeService from "@/services/IncomeService"
+import ExpenseService from "@/services/ExpenseService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
-import ActionSpeedDial from '../../../components/ActionSpeedDial.vue'
+import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 
 export default {
-  name: "IncomeCreate",
+  name: "ExpenseCreate",
   components: {
     BaseMaterialDialog,
     GlobalDataPiker,
@@ -153,17 +165,23 @@ export default {
     itemsCategory:{
       type: Array,
       default: () => []
+    },
+    editItem: {
+      type: Object,
+      default: () => {}
     }
   },
   emits: ['update:model-value', 'insert:item'],
   data () {
     return {
       dialog: false,
+      loading: false,
       loadingItems: false,
-      loadingCreate: false,
       isValid: false,
       amount: "0,00",
-      incomeData: {
+      type: 'expense',
+      isEdit: false,
+      dataSend: {
         description: '',
         date: '',
         status: null,
@@ -173,7 +191,7 @@ export default {
       },
       itemsAccount: [],
       itemsStatus: [
-        { value: 0, title: 'Conciliado' },
+        { value: 0, title: 'Pago' },
         { value: 1, title: 'Pendente' }
       ],
       fabType: 'one',
@@ -204,7 +222,7 @@ export default {
         
         if (isNaN(numeric)) numeric = 0
         
-        this.incomeData.value = numeric
+        this.dataSend.value = numeric
         this.amount = formatCurrencyMaskBR(val)
       }
     }
@@ -213,8 +231,14 @@ export default {
     showDialog(value) {
       this.dialog = value
       if (value) {
+        if (Object.keys(this.editItem).length > 0) {
+          this.isEdit = true
+          this.dataSend = {...this.editItem}
+          this.maskedAmount = -this.editItem.value
+        }
         this.populateItems()
       } else {
+        this.isEdit = false
         this.clearForm()
       }
     }
@@ -240,13 +264,13 @@ export default {
       
       if (type === 'moreOne') {
         if (this.validate()) {
-          await this.createIncome()
+          await this.createExpense()
         }
       }
     },
-    async validateAndCreate(){
+    async validateAndCreate() {
       if (this.validate()) {
-        if (await this.createIncome()) {
+        if (await this.createExpense()) {
           this.$emit('update:model-value', false)
         }
       }
@@ -254,33 +278,58 @@ export default {
     validate() {
       this.$refs.form.validate()
 
-      if (!this.incomeData.date) {
+      if (!this.dataSend.date) {
         this.$showMessage("Informe uma data!", "warning") 
         return false
       }
      
       return this.isValid
     },
-    async createIncome() {
-      try {
-        this.loadingCreate = true
+    async validateAndUpdate() {
+      if (this.validate()) {
+        try {
+          this.loading = true
 
-        const newIncome = await IncomeService.create(this.incomeData)
-        newIncome.type = 'income'
-        this.$emit('insert:item', newIncome)
+          if (this.dataSend.value > 0) this.dataSend.value = -this.dataSend.value
+
+          const newItem = await ExpenseService.update(this.dataSend.id, this.dataSend)
+          newItem.type = this.type
+
+          this.$emit('insert:item', newItem)
+          this.$showMessage("Atualizado com sucesso!", "success")
+          this.$emit('update:model-value', false)
+        } catch {
+          this.$showMessage("Ocorreu um erro ao atualizar a despesa!", "error")
+          return false
+        } finally {
+          this.loading = false
+        }
+
+        return true
+      }
+    },
+    async createExpense() {
+      try {
+        this.loading = true
+
+        if (this.dataSend.value > 0) this.dataSend.value = -this.dataSend.value
+
+        const newItem = await ExpenseService.create(this.dataSend)
+        newItem.type = this.type
+        this.$emit('insert:item', newItem)
         this.$showMessage("Cadastro efetuado!", "success")
       } catch {
         this.$showMessage("Ocorreu um erro ao cadastrar Receita!", "error")
         return false
       } finally {
-        this.loadingCreate = false
+        this.loading = false
       }
 
       return true
     },
     clearForm() {
       this.amount = "0,00"
-      this.incomeData = {
+      this.dataSend = {
         description: '',
         date: '',
         status: null,
