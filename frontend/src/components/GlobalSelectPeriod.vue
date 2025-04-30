@@ -4,13 +4,14 @@
       v-tooltip:top="'Período anterior'"
       icon="mdi-calendar-arrow-left"
       variant="text"
-      rounded="cincle"
+      rounded="circle"
       @click="previousPeriod"
     />
 
     <v-menu
       v-model="menu"
       transition="slide-y-transition"
+      :close-on-content-click="false"
     >
       <template #activator="{ props }">
         <v-btn
@@ -19,25 +20,24 @@
           color="primary"
           variant="text"
         >
-          {{ selectedItem ? selectedItem.period : 'Selecione o período' }}
+          {{ selectedLabel }}
         </v-btn>
       </template>
 
       <v-list>
         <v-list-item
-          v-for="(item, index) in items"
-          :key="index"
+          v-for="item in items"
+          :key="item.type"
+          class="d-flex justify-center"
           @click="selectItem(item)"
         >
           <template v-if="item.type !== 5">
-            <v-list-item-title>
-              {{ item.title }}
-            </v-list-item-title>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
           </template>
 
           <template v-else>
             <v-menu
-              v-model="showSelectPeriod"
+              v-model="showCustomPicker"
               transition="scale-transition"
               :close-on-content-click="false"
             >
@@ -49,21 +49,19 @@
 
               <v-card class="d-flex flex-column">
                 <v-confirm-edit
-                  v-model="editingDates"
+                  v-model="customRange"
                   color="primary"
-                  @cancel="cancelAction"
-                  @save="confirmAction"
+                  @cancel="handleCustomCancel"
+                  @save="handleCustomSave"
                 >
                   <template #default="{ model: proxyModel, actions }">
                     <v-date-picker
                       v-model="proxyModel.value"
-                      class="d-flex justify-center"
                       color="primary"
                       show-adjacent-months
                       hide-header
                       multiple="range"
                     />
-                    
                     <component :is="actions" />
                   </template>
                 </v-confirm-edit>
@@ -76,9 +74,9 @@
 
     <v-btn
       v-tooltip:top="'Próximo período'"
-      icon="mdi-calendar-arrow-right" 
+      icon="mdi-calendar-arrow-right"
       variant="text"
-      rounded="cincle"
+      rounded="circle"
       @click="nextPeriod"
     />
   </div>
@@ -88,134 +86,115 @@
 import dayjs from 'dayjs'
 
 export default {
+  name: 'GlobalSelectPeriod',
   emits: ['update:period'],
   data() {
     return {
-      menu: false, 
-      showSelectPeriod: false, 
-      selectedItem: null,
-      baseSelectedDates: [],
-      selectedDates: [],
-      editingDates: [],
-      initialPeriod: null,
-      finalPeriod: null,
-      flag: 'month',
-      count: 0,
-      typeActive: 3,
+      menu: false,
+      showCustomPicker: false,
       items: [
-        { title: "Hoje", type: 1 },
-        { title: "Esta semana", type: 2 },
-        { title: "Este mês", type: 3 },
-        { title: "Este ano", type: 4 },
-        { title: "Personalizado", type: 5 }
-      ]
+        { title: 'Hoje', type: 1, flag: 'day' },
+        { title: 'Esta semana', type: 2, flag: 'week' },
+        { title: 'Este mês', type: 3, flag: 'month' },
+        { title: 'Este ano', type: 4, flag: 'year' },
+        { title: 'Personalizado', type: 5 }
+      ],
+      activeItem: null,
+      baseCustomRange: [],
+      count: 0,
+      customRange: [],
+    }
+  },
+  computed: {
+    selectedLabel() {
+      if (!this.activeItem) return 'Selecione o período'
+      if (this.activeItem.type === 5) return this.customLabel
+      return this.activeItem.period
+    },
+    customLabel() {
+      if (this.customRange.length < 2) return 'Personalizado'
+      // Usa primeiro e último elemento para definir início e fim
+      const start = this.customRange[0]
+      const end = this.customRange[this.customRange.length - 1]
+      return `Personalizado: ${dayjs(start).format('DD/MM/YYYY')} – ${dayjs(end).format('DD/MM/YYYY')}`
+    },
+  },
+  watch: {
+    customRange(newRange) {
+      if (newRange.length >= 2) {
+        this.emitUpdate(newRange[0], newRange[newRange.length - 1])
+        this.baseCustomRange = [...newRange]
+      }
     }
   },
   mounted() {
-    this.editingDates = [...this.selectedDates],
-    this.selectItem({type: 3})
+    this.selectItem(this.items.find(i => i.type === 3))
   },
   methods: {
     selectItem(item) {
-      this.typeActive = item.type
-      switch (item.type) {
-        case 1: 
-          this.flag = 'day'
-          break
-        case 2: 
-          this.flag = 'week'
-          break
-        case 3: 
-          this.flag = 'month'
-          break
-        case 4: 
-          this.flag = 'year'
-          break
-        case 5:
-          this.showSelectPeriod = true
-          break
+      this.activeItem = item
+      this.count = 0
+      if (item.type === 5) {
+        this.showCustomPicker = true
+        return
       }
-  
-      if (item.type >= 1 && item.type <= 4) {
-        this.initialPeriod = dayjs().startOf(this.flag).format('DD/MM/YYYY')
-        this.finalPeriod = dayjs().endOf(this.flag).format('DD/MM/YYYY')
-
-        if (this.typeActive === 1 ) {
-          item.period = this.initialPeriod
-        } else {
-          item.period = `${this.initialPeriod} - ${this.finalPeriod}`
-        }
-
-        this.$emit('update:period', { 
-          initialPeriod: dayjs(this.initialPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD'),
-          finalPeriod: dayjs(this.finalPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD')
-        })
-
-        this.selectedItem = item
-        this.menu = false
-      }
-    },
-    confirmAction() {
-      this.selectedDates = [...this.editingDates]
-
-      const initial = this.selectedDates[0]
-      const final = this.selectedDates[this.selectedDates.length - 1]
-
-      this.selectedItem = {
-        period: `Personalizado (${dayjs(initial).format('DD/MM/YYYY')} – ${dayjs(final).format('DD/MM/YYYY')})`,
-        type: 5
-      }
-      this.baseSelectedDates = []
-
-      this.$emit('update:period', {
-        initialPeriod: dayjs(initial).format('YYYY-MM-DD'),
-        finalPeriod:   dayjs(final).format('YYYY-MM-DD')
-      })
-
-      this.showSelectPeriod = false
+      this.showCustomPicker = false
+      this.calculatePeriod()
       this.menu = false
     },
-    cancelAction() {
-      this.editingDates = [...this.selectedDates]
+    calculatePeriod() {
+      const flag = this.activeItem.flag
+      const start = dayjs().startOf(flag).add(this.count, flag)
+      const end = dayjs().endOf(flag).add(this.count, flag)
+
+      this.activeItem.period =
+        this.activeItem.type === 1
+          ? start.format('DD/MM/YYYY')
+          : `${start.format('DD/MM/YYYY')} - ${end.format('DD/MM/YYYY')}`
+
+      this.emitUpdate(start, end)
     },
     previousPeriod() {
-      this.count--
-      this.handlerDate()
+      if (this.activeItem.type === 5) {
+        this.shiftCustom(-1)
+      } else {
+        this.count--
+        this.calculatePeriod()
+      }
     },
     nextPeriod() {
-      this.count++
-      this.handlerDate()
+      if (this.activeItem.type === 5) {
+        this.shiftCustom(1)
+      } else {
+        this.count++
+        this.calculatePeriod()
+      }
     },
-    handlerDate() {
-      let start, end = null
-
-      if (this.typeActive === 5 && !this.baseSelectedDates) {
-        this.baseSelectedDates = [...this.selectedDates]
+    shiftCustom(direction) {
+      if (!this.baseCustomRange.length) return
+      const days = dayjs(this.baseCustomRange[1]).diff(this.baseCustomRange[0], 'day') + 1
+      this.customRange = this.baseCustomRange.map(date =>
+        dayjs(date).add(direction * days, 'day').toDate()
+      )
+    },
+    handleCustomSave(dates) {
+      if (dates.length >= 2) {
+        this.customRange = dates
+        this.baseCustomRange = [...dates]
+        this.activeItem = this.items.find(i => i.type === 5)
+        this.emitUpdate(dates[0], dates[dates.length - 1])
       }
-
-      switch (this.typeActive) {
-        case 1:
-          this.initialPeriod = dayjs().startOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
-          this.finalPeriod = dayjs().endOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
-          this.selectedItem = { period: this.initialPeriod }
-          break
-        case 5:
-          start = dayjs(this.baseSelectedDates[0]).add(this.count, 'day')
-          end = dayjs(this.baseSelectedDates[this.baseSelectedDates.length - 1]).add(this.count, 'day')
-
-          this.initialPeriod = start.format('DD/MM/YYYY')
-          this.finalPeriod = end.format('DD/MM/YYYY')
-          this.selectedItem = { period: `Personalizado (${this.initialPeriod} - ${this.finalPeriod})` }
-          break
-        default:
-          this.initialPeriod = dayjs().startOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
-          this.finalPeriod = dayjs().endOf(this.flag).add(this.count, this.flag).format('DD/MM/YYYY')
-          this.selectedItem = { period: `${this.initialPeriod} - ${this.finalPeriod}` }
-      }
-
-      this.$emit('update:period', { 
-        initialPeriod: dayjs(this.initialPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD'),
-        finalPeriod: dayjs(this.finalPeriod, 'DD/MM/YYYY').format('YYYY-MM-DD')
+      this.showCustomPicker = false
+      this.menu = false
+    },
+    handleCustomCancel() {
+      this.customRange = [...this.baseCustomRange]
+      this.showCustomPicker = false
+    },
+    emitUpdate(start, end) {
+      this.$emit('update:period', {
+        initialPeriod: dayjs(start).format('YYYY-MM-DD'),
+        finalPeriod: dayjs(end).format('YYYY-MM-DD')
       })
     }
   }
