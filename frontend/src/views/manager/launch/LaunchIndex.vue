@@ -442,15 +442,12 @@ export default {
       return {}
     },
     eventAfterCreate(event) {
-      console.log(event)
       const index = this.items.findIndex(i => i.id === event.id)
-      console.log(index, typeof index)
       
       if (typeof index === 'number' && index >= 0) {
         this.items[index] = event
       } else {
         this.items.push(event)
-        console.log("Adicionado: ", this.items)
       }
     }
   }
