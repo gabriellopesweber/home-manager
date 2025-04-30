@@ -112,7 +112,7 @@ export default {
       return this.activeItem.period
     },
     customLabel() {
-      if (this.customRange.length < 2) return 'Personalizado'
+      if (this.customRange.length < 2)  return `Personalizado: ${dayjs(this.customRange[0]).format('DD/MM/YYYY')}`
       // Usa primeiro e último elemento para definir início e fim
       const start = this.customRange[0]
       const end = this.customRange[this.customRange.length - 1]
@@ -121,10 +121,8 @@ export default {
   },
   watch: {
     customRange(newRange) {
-      if (newRange.length >= 2) {
-        this.emitUpdate(newRange[0], newRange[newRange.length - 1])
-        this.baseCustomRange = [...newRange]
-      }
+      this.emitUpdate(newRange[0], newRange[newRange.length - 1])
+      this.baseCustomRange = [...newRange]
     }
   },
   mounted() {
@@ -172,18 +170,17 @@ export default {
     },
     shiftCustom(direction) {
       if (!this.baseCustomRange.length) return
-      const days = dayjs(this.baseCustomRange[1]).diff(this.baseCustomRange[0], 'day') + 1
+      const days = dayjs(this.baseCustomRange[this.baseCustomRange.length-1]).diff(this.baseCustomRange[0], 'day') + 1
+      
       this.customRange = this.baseCustomRange.map(date =>
         dayjs(date).add(direction * days, 'day').toDate()
       )
     },
     handleCustomSave(dates) {
-      if (dates.length >= 2) {
-        this.customRange = dates
-        this.baseCustomRange = [...dates]
-        this.activeItem = this.items.find(i => i.type === 5)
-        this.emitUpdate(dates[0], dates[dates.length - 1])
-      }
+      this.customRange = dates
+      this.baseCustomRange = [...dates]
+      this.activeItem = this.items.find(i => i.type === 5)
+      this.emitUpdate(dates[0], dates[dates.length - 1])
       this.showCustomPicker = false
       this.menu = false
     },
