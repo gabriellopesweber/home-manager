@@ -27,7 +27,7 @@ yarn install
 yarn dev
 ```
 
-O backend rodará em **http://localhost:5000** (ou outra porta configurada).
+O backend rodará em **http://localhost:5002**
 
 ### 3️⃣ Configurar o Frontend
 ```sh
@@ -64,4 +64,3 @@ Este projeto está licenciado sob a **MIT License**. Sinta-se à vontade para ut
 
 💡 **Desenvolvido por Gabriel Lopes Weber**  
 📧 Contato: [gabriellw.grb@gmail.com]
-
