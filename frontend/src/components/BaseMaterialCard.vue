@@ -32,7 +32,7 @@
       <slot name="prepend" />
     </template>
 
-    <v-card-text class="pb-0">
+    <v-card-text>
       <slot name="default" />
     </v-card-text>
 

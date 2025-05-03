@@ -8,7 +8,7 @@
       #activator="{ props: activation }"
     >
       <v-btn 
-        v-tooltip="{...configurationBtn['VTooltip'] ? configurationBtn['VTooltip'] : {text: '', disabled: true} }"
+        v-tooltip="{ ...configurationBtn['tooltip'] ? configurationBtn['tooltip'] : {text: '', disabled: true} }"
         v-bind="{ ...activation, ...configurationBtn }"
       />
     </template>

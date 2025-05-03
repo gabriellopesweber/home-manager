@@ -182,7 +182,7 @@ export default {
     },
     editItem: {
       type: Object,
-      default: () => {}
+      default: () => ({})
     }
   },
   emits: ['update:model-value', 'insert:item'],

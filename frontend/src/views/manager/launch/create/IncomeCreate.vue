@@ -164,11 +164,11 @@ export default {
     },
     itemsCategory:{
       type: Array,
-      default: () => []
+      default: () => ([])
     },
     editItem: {
       type: Object,
-      default: () => {}
+      default: () => ({})
     }
   },
   emits: ['update:model-value', 'insert:item'],

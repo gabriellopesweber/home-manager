@@ -1,8 +1,5 @@
 <template>
-  <v-navigation-drawer
-    v-model="menu"
-    absolute
-  >
+  <v-navigation-drawer v-model="menu">
     <v-list
       density="comfortable"
       nav

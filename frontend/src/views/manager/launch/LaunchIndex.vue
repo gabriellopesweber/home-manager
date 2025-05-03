@@ -6,21 +6,33 @@
     >
       <BaseMaterialCard>
         <template #title>
-          <div class="d-flex justify-space-between my-2">
-            <span> Lançamentos </span>
-
-            <GlobalSelectPeriod @update:period="searchByPeriod" />
-
-            <ActionSpeedDial
-              direction="left center"
-              default-tooltip-location="top"
-              open-on-hover
-              :actions="actions"
-              :curenty-type="fabType"
-              @action="executeAction(fabType)"
-              @update:curenty-type="fabType = $event"
-            />
-          </div>
+          <v-row dense>
+            <v-col align-self="center">
+              <span> Lançamentos </span>
+            </v-col>
+            <v-col
+              class="d-flex justify-center"
+              cols="12"
+              md="auto"
+              align-self="center"
+            >
+              <GlobalSelectPeriod @update:period="searchByPeriod" />
+            </v-col>
+            <v-col
+              class="d-flex justify-end my-2"
+              align-self="center"
+            >
+              <ActionSpeedDial
+                direction="left center"
+                default-tooltip-location="top"
+                open-on-hover
+                :actions="actions"
+                :curenty-type="fabType"
+                @action="executeAction(fabType)"
+                @update:curenty-type="fabType = $event"
+              />
+            </v-col>
+          </v-row>
         </template>
 
         <v-data-table
@@ -29,6 +41,7 @@
           :items-per-page="String(items.length)"
           :loading="loading"
           :cell-props="getCellProps"
+          hover
           hide-default-footer
         >
           <template #item.info="{ item }">
@@ -44,6 +57,7 @@
             <v-icon
               v-tooltip:top="getConfigType(item.type).tooltip"
               :color="getConfigType(item.type).color"
+              size="large"
             >
               {{ getConfigType(item.type).icon }}
             </v-icon>
@@ -121,8 +135,8 @@
                 align-self="center"
                 cols="12"
               >
-                <span> Saldo atual:  </span>
-                <span> $XX </span>
+                <span> Saldo atual: </span>
+                <span> {{ maskedAmount(currentBalance) }}</span>
               </v-col>
               <v-col
                 class="d-flex justify-end px-10 pb-4"
@@ -130,7 +144,7 @@
                 cols="12"
               >
                 <span> Saldo previsto:  </span>
-                <span> XX </span>
+                <span> {{ maskedAmount(expectedBalance) }}</span>
               </v-col>
             </v-row>
           </template>
@@ -214,10 +228,12 @@ export default {
     ActionSpeedDial,
     GlobalConfirmEdit
   },
-  data () {
+  data() {
     return {
       fabType: 'receita',
       actionsType: 'receita',
+      currentBalance: 0,
+      expectedBalance: 0,
       showIncome: false,
       showExpense: false,
       showTransfer: false,
