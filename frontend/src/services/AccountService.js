@@ -24,6 +24,15 @@ class AccountService {
     }
   }
 
+  async getTotalAssociated(id) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/total-associated/${id}`)
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
+  }
+
   async getById(id) {
     try {
       const response = await axios.get(`${this.baseUrl}/${id}`)

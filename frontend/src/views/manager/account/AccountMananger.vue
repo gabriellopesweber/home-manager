@@ -20,7 +20,7 @@
           >
             <v-text-field
               v-model="dataSend.name"
-              label="Descrição"
+              label="Nome"
               variant="outlined"
               :rules="[() => $validation('required', dataSend.name)]"
             />

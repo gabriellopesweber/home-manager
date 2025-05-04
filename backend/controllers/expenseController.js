@@ -78,7 +78,14 @@ const ExpenseController = {
   // Listar todas as despesas
   async getAll(req, res) {
     try {
-      const expenses = await Expense.find({ user: req.user.id })
+      const { account_id } = req.query
+      const filter = { user: req.user.id }
+
+      if (account_id) {
+        filter.account = account_id
+      }
+
+      const expenses = await Expense.find(filter)
 
       res.status(200).json(expenses.map(expense => formatExpenseItem(expense)))
     } catch (error) {

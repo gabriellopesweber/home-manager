@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { Account } from '../models/Finance.js'
+import { Account, Expense, Income, Transfer } from '../models/Finance.js'
 import { formatAccountItem } from '../utils/format.js'
 
 const AccountController = {
@@ -72,10 +72,42 @@ const AccountController = {
     }
   },
 
+  async getTotalAssociated(req, res) {
+    try {
+      const { id } = req.params
+      if (!id) return res.status(400).json({ message: 'Não foi informado o ID da conta!' })
+
+      let quantity = 0
+
+      const dataIncome = await Income.find({ user: req.user.id, account: id })
+      const dataExpense = await Expense.find({ user: req.user.id, account: id })
+      const dataTransfer = await Transfer.find({ user: req.user.id, account: id })
+
+      if (!dataIncome && !dataExpense && !dataTransfer) {
+        return res.status(404).json({ message: 'Não há dados!' })
+      }
+
+      quantity = dataIncome.length + dataExpense.length + dataTransfer.length
+
+      res.status(200).json({ quantity })
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao buscar total de contas bancarias associadas', error })
+    }
+  },
+
   // Deletar uma conta
   async delete(req, res) {
     try {
       const { id } = req.params
+
+      const isDeletedIncome = await Income.deleteMany({ user: req.user.id, account: id })
+      const isDeletedExpense = await Expense.deleteMany({ user: req.user.id, account: id })
+      const isDeletedTransfer = await Transfer.deleteMany({ user: req.user.id, account: id })
+
+      if (!isDeletedIncome || !isDeletedExpense || !isDeletedTransfer) {
+        return res.status(400).json({ message: 'Falha ao excluir itens!' })
+      }
+
       const deletedAccount = await Account.findByIdAndDelete({ _id: id, user: req.user.id })
 
       if (!deletedAccount) return res.status(404).json({ message: 'Conta não encontrada!' })

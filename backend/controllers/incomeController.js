@@ -81,7 +81,14 @@ const IncomeController = {
   // Listar todas as receitas
   async getAll(req, res) {
     try {
-      const incomes = await Income.find({ user: req.user.id })
+      const { account_id } = req.query
+      const filter = { user: req.user.id }
+
+      if (account_id) {
+        filter.account = account_id
+      }
+
+      const incomes = await Income.find(filter)
 
       res.status(200).json(incomes.map(income => formatIncomeItem(income)))
     } catch (error) {

@@ -1,13 +1,29 @@
 <template>
   <BaseMaterialDialog
     v-model="internalShowDialog"
-    width="400"
-    :title="title"
+    width="500"
     :show-close-btn="false"
     @update:model-value="$emit('update:model-value', $event)"
   >
-    <template #default>
+    <template 
+      v-if="title"
+      #title
+    >
+      <span class="d-flex justify-center">{{ title }}</span>
+    </template>
+
+    <template 
+      v-if="text"
+      #default
+    >
       <span>{{ text }}</span>
+    </template>
+
+    <template 
+      v-else-if="$slots.default"
+      #default
+    >
+      <slot name="default" />
     </template>
 
     <template #actions>
@@ -22,7 +38,9 @@
       >
         <!-- eslint-disable-next-line vue/no-unused-vars -->
         <template #default="{ model: _, actions }">
-          <component :is="actions" />
+          <div class="d-flex justify-space-between w-100">
+            <component :is="actions" />
+          </div>
         </template>
       </v-confirm-edit>
     </template>
@@ -48,7 +66,7 @@ export default {
     },
     text: {
       type: String,
-      default: 'Deseja realmente continuar com esta ação?',
+      default: '',
     },
     okText: {
       type: String,

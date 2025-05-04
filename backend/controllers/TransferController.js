@@ -64,9 +64,15 @@ const TransferController = {
   },
 
   async getAll(req, res) {
-    const userId = req.user.id
     try {
-      const transfers = await Transfer.find({ user: userId })
+      const { account_id } = req.query
+      const filter = { user: req.user.id }
+
+      if (account_id) {
+        filter.account = account_id
+      }
+
+      const transfers = await Transfer.find(filter)
         .populate('originAccount destinationAccount')
         .sort({ date: -1 })
 

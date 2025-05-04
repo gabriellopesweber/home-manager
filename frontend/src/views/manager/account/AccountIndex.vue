@@ -72,8 +72,9 @@
                         rounded="circle"
                         color="error"
                         size="small"
-                        @click="() => {
+                        @click="async () => {
                           itemMarkedToManager = account
+                          await findAssociatedTotal(account.id)
                           showConformEdit = true
                         }"
                       />
@@ -108,15 +109,31 @@
 
     <GlobalConfirmEdit
       v-model="showConformEdit"
-      title="Excluir Item"
-      text="Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."
+      title="Excluir conta bancaria"
       ok-text="Sim, excluir"
       cancel-text="Cancelar"
       color="error"
       :item="itemMarkedToManager"
       @confirm="deleteAccount"
       @cancel="itemMarkedToManager = {}"
-    />
+    >
+      <v-alert
+        type="warning"
+        border="start"
+        variant="tonal"
+      >
+        <span class="font-weight-black"> A exclusão da conta é permanente </span>
+        
+        <ul
+          v-if="associatedTotal > 0"
+          style="list-style: disc; padding-left: 1.5rem;"
+        >
+          <li>
+            Ao excluir será removido {{ associatedTotal }} lançamentos
+          </li>
+        </ul>
+      </v-alert>
+    </GlobalConfirmEdit>
     
     <AccountMananger 
       v-model="dialog"
@@ -149,7 +166,8 @@ export default {
       showConformEdit: false,
       itemMarkedToManager: {},
       itemsAccount: [],
-      loadingItem: []
+      loadingItem: [],
+      associatedTotal: 0
     }
   },
    computed: {
@@ -190,6 +208,19 @@ export default {
         this.$showMessage('Ocorre um problema ao excluir!', 'error')
       } finally {
         this.itemMarkedToManager = {}
+        this.loadingItem[id] = false
+      }
+    },
+    async findAssociatedTotal(id) {
+      try {
+        this.loadingItem[id] = true
+        const data = await AccountService.getTotalAssociated(id)
+        if (typeof data.quantity === "number") {
+          this.associatedTotal = data.quantity
+        }
+      } catch {
+        this.$showMessage('Falha ao buscar total de contas bancarias associadas', 'error')
+      } finally {
         this.loadingItem[id] = false
       }
     }

@@ -14,9 +14,10 @@ class ExpenseService {
     }
   }
 
-  async getAll() {
+  async getAll(filters = {}) {
     try {
-      const response = await axios.get(`${this.baseUrl}/`)
+      const { account_id } = filters
+      const response = await axios.get(`${this.baseUrl}/${account_id ? `account_id=${account_id}` : ``}`)
       return response.data
     } catch (error) {
       throw error.response.data
