@@ -9,6 +9,7 @@ export function formatAccountItem(account) {
     id: account._id,
     name: account.name,
     balance: account.balance,
+    open_balance: account.openBalance,
     update_date: account.updateDate,
     user: account.user
   }

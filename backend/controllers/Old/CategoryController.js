@@ -33,7 +33,7 @@ const CategoryController = {
         })
       }
 
-      const newCategory = await Category.create({ name, type, user })
+      const newCategory = await Category.create({ name, type, default: false, user })
       res.status(201).json(formatCategoryItem(newCategory))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar categoria', error })

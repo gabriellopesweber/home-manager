@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { Account, Expense, Income, Transfer } from '../models/Finance.js'
+import { Account, Category, Expense, Income, Transfer } from '../models/Finance.js'
 import { formatAccountItem } from '../utils/format.js'
 
 const AccountController = {
@@ -8,12 +8,17 @@ const AccountController = {
     try {
       const { name, balance } = req.body
       const user = req.user.id
+      let openingBalance = 0
+
+      if (balance > 0) {
+        openingBalance = balance
+      }
 
       if (!name || typeof balance !== "number") {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
-      const newAccount = await Account.create({ name, balance, user })
+      const newAccount = await Account.create({ name, balance, openingBalance, user })
       res.status(201).json(formatAccountItem(newAccount))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao criar conta', error })
@@ -50,6 +55,7 @@ const AccountController = {
       const { id } = req.params
       const { name, balance } = req.body
       const user = req.user.id
+      const nameCategory = 'Reajuste financeiro'
 
       if (!name && typeof balance !== 'number') {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
@@ -57,6 +63,44 @@ const AccountController = {
 
       const dateNow = dayjs()
       const updateDate = dateNow.toDate()
+
+      if (balance > 0) {
+        const type = 'receita'
+        const category = await Category.findOneAndUpdate(
+          { name: nameCategory },
+          { $setOnInsert: { name: nameCategory, default: true, type } },
+          { upsert: true, new: true }
+        )
+
+        await Income.create({
+          category: category.id,
+          value: balance,
+          status: 0,
+          executionDate: dateNow.toISOString(),
+          date: dateNow.toDate(),
+          description: '',
+          account: id,
+          user
+        })
+      } else {
+        const type = 'despesa'
+        const category = await Category.findOneAndUpdate(
+          { name: nameCategory },
+          { $setOnInsert: { name: nameCategory, default: true, type } },
+          { upsert: true, new: true }
+        )
+
+        await Expense.create({
+          category: category.id,
+          value: balance,
+          status: 0,
+          executionDate: dateNow.toDate(),
+          date: dateNow.toDate(),
+          description: '',
+          account: id,
+          user
+        })
+      }
 
       const updateAccount = await Account.findOneAndUpdate(
         { _id: id, user },

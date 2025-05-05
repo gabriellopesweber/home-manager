@@ -129,7 +129,7 @@
           style="list-style: disc; padding-left: 1.5rem;"
         >
           <li>
-            Ao excluir será removido {{ associatedTotal }} lançamentos
+            Ao excluir será removido {{ `${associatedTotal} ${associatedTotal > 1 ? 'lançamentos' : 'lançamento'}` }} 
           </li>
         </ul>
       </v-alert>

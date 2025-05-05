@@ -12,10 +12,14 @@ const CategorySchema = new mongoose.Schema({
     enum: ['receita', 'despesa'],
     required: true
   },
+  default: {
+    type: Boolean,
+    required: true
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   }
 })
 
@@ -114,6 +118,11 @@ const AccountSchema = new mongoose.Schema({
   balance: {
     type: Number,
     required: true
+  },
+  openingBalance: {
+    type: Number,
+    required: false,
+    default: 0
   },
   updateDate: {
     type: Date,
