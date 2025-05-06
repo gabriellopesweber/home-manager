@@ -42,5 +42,5 @@ export async function getBalanceAtDate({ date, id, user, status = null }) {
   const totalIncome = incomeAgg[0]?.total || 0
   const totalExpense = expenseAgg[0]?.total || 0
 
-  return openingBalance + (totalIncome - totalExpense)
+  return openingBalance + totalIncome - Math.abs(totalExpense)
 }

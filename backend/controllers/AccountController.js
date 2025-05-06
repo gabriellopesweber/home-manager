@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { Account, Category, Expense, Income, Transfer } from '../models/Finance.js'
 import { formatAccountItem } from '../utils/format.js'
 import { getBalanceAtDate } from '../utils/functions.js'
+import { statusFinance } from '../constants/Finance.js'
 
 const AccountController = {
   // Criar uma nova conta
@@ -62,10 +63,10 @@ const AccountController = {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
-      const balanceAtDate = await getBalanceAtDate({ date: dayjs().toISOString(), id, user })
+      const balanceAtDate = await getBalanceAtDate({ date: dayjs().toISOString(), id, user, status: statusFinance.CONCILIATED })
 
       const isAdjustmentPositive = balance > balanceAtDate
-      const adjustmentValue = Math.abs(balance - balanceAtDate)
+      const adjustmentValue = balance - balanceAtDate
 
       const type = isAdjustmentPositive ? 'receita' : 'despesa'
       const Model = isAdjustmentPositive ? Income : Expense
