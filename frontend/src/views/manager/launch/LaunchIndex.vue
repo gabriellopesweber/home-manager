@@ -131,20 +131,69 @@
           <template #bottom>
             <v-row dense>
               <v-col
-                class="d-flex justify-end px-10 pt-4"
+                class="px-10 pt-4"
                 align-self="center"
                 cols="12"
               >
-                <span> Saldo atual: </span>
-                <span> {{ maskedAmount(currentBalance) }}</span>
+                <v-row dense>
+                  <v-col
+                    class="d-flex justify-end"
+                    cols="10"
+                    align-self="center"
+                  >
+                    <span class="text-capitalize font-weight-black"> Saldo atual: </span>
+                  </v-col>
+                  <v-col
+                    class="d-flex justify-end"
+                    align-self="center"
+                  >
+                    <span
+                      v-if="loading"
+                      class="font-weight-light"
+                      :class="getColorBalance"
+                    > 
+                      {{ maskedAmount(currentBalance) }}
+                    </span>
+
+                    <v-skeleton-loader
+                      v-else
+                      class="w-100"
+                      type="text"
+                    />
+                  </v-col>
+                </v-row>
               </v-col>
               <v-col
                 class="d-flex justify-end px-10 pb-4"
                 align-self="center"
                 cols="12"
               >
-                <span> Saldo previsto:  </span>
-                <span> {{ maskedAmount(predicted) }}</span>
+                <v-row dense>
+                  <v-col
+                    class="d-flex justify-end"
+                    cols="10"
+                    align-self="center"
+                  >
+                    <span class="text-capitalize"> Saldo previsto:  </span>
+                  </v-col>
+                  
+                  <v-col
+                    class="d-flex justify-end"
+                    align-self="center"
+                  >
+                    <span 
+                      v-if="loading"
+                      class="font-weight-light"
+                    > {{ maskedAmount(predicted) }}</span>
+
+                    <v-skeleton-loader
+                      v-else
+                      class="w-100"
+                      style="margin: 0 !important;"
+                      type="text"
+                    />
+                  </v-col>
+                </v-row>
               </v-col>
             </v-row>
           </template>
@@ -345,6 +394,15 @@ export default {
 
         return tooltipMap[type]
       }
+    },
+    getColorBalance() {
+      if (this.currentBalance > 0) {
+        return 'text-success'
+      } else if (this.currentBalance < 0) {
+        return 'text-error'
+      }
+
+      return 'text-black'
     }
   },
   async created() {
