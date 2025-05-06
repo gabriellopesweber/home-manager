@@ -144,7 +144,7 @@
                 cols="12"
               >
                 <span> Saldo previsto:  </span>
-                <span> {{ maskedAmount(expectedBalance) }}</span>
+                <span> {{ maskedAmount(predicted) }}</span>
               </v-col>
             </v-row>
           </template>
@@ -233,7 +233,7 @@ export default {
       fabType: 'receita',
       actionsType: 'receita',
       currentBalance: 0,
-      expectedBalance: 0,
+      predicted: 0,
       showIncome: false,
       showExpense: false,
       showTransfer: false,
@@ -436,6 +436,9 @@ export default {
       try {
         this.loading = true
         this.items = await LaunchService.getAll(period.initialPeriod, period.finalPeriod)
+        const dataBalance = await LaunchService.getBalanceData(period.finalPeriod)
+        this.currentBalance = dataBalance.balance
+        this.predicted = dataBalance.predicted
       } catch {
         this.$showMessage('Ocorre um problema ao atualizar os lançamentos!', 'error')
       } finally {

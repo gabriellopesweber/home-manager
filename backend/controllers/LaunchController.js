@@ -2,6 +2,8 @@ import dayjs from 'dayjs'
 import { Income, Expense, Transfer } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
 import { formatExpenseItem, formatIncomeItem, formatTransferItem } from '../utils/format.js'
+import { getBalanceAtDate } from '../utils/functions.js'
+import { statusFinance } from '../constants/Finance.js'
 
 const LaunchController = {
   // Listar todas as Receitas, Despesas e Transferencias de acordo com a data inicial e final
@@ -34,6 +36,24 @@ const LaunchController = {
       res.status(200).json(combined)
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar lançamentos', error })
+    }
+  },
+
+  async getBalanceAt(req, res) {
+    try {
+      const { final_date } = req.query
+      const userId = req.user.id
+
+      const resultConciliated = await getBalanceAtDate({ date: final_date, user: userId, status: statusFinance.CONCILIATED })
+      const resultNotConciliated = await getBalanceAtDate({ date: final_date, user: userId, status: statusFinance.PENDING })
+
+      res.status(200).json({ message: 'Saldo do periodo selecionado', balance: resultConciliated, predicted: resultNotConciliated })
+    } catch (error) {
+      if (error.statusCode === 404) {
+        return res.status(error.statusCode).json({ message: error.message })
+      }
+
+      return res.status(500).json({ message: 'Erro ao executar a busca', error })
     }
   }
 }

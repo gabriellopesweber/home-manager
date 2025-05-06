@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { Account, Category, Expense, Income, Transfer } from '../models/Finance.js'
 import { formatAccountItem } from '../utils/format.js'
+import { getBalanceAtDate } from '../utils/functions.js'
 
 const AccountController = {
   // Criar uma nova conta
@@ -10,7 +11,7 @@ const AccountController = {
       const user = req.user.id
       let openingBalance = 0
 
-      if (balance > 0) {
+      if (balance !== 0) {
         openingBalance = balance
       }
 
@@ -55,63 +56,50 @@ const AccountController = {
       const { id } = req.params
       const { name, balance } = req.body
       const user = req.user.id
-      const nameCategory = 'Reajuste financeiro'
+      const nameCategory = 'Outros'
 
       if (!name && typeof balance !== 'number') {
         return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser preenchidos!' })
       }
 
-      const dateNow = dayjs()
-      const updateDate = dateNow.toDate()
+      const balanceAtDate = await getBalanceAtDate({ date: dayjs().toISOString(), id, user })
 
-      if (balance > 0) {
-        const type = 'receita'
-        const category = await Category.findOneAndUpdate(
-          { name: nameCategory },
-          { $setOnInsert: { name: nameCategory, default: true, type } },
-          { upsert: true, new: true }
-        )
+      const isAdjustmentPositive = balance > balanceAtDate
+      const adjustmentValue = Math.abs(balance - balanceAtDate)
 
-        await Income.create({
-          category: category.id,
-          value: balance,
-          status: 0,
-          executionDate: dateNow.toISOString(),
-          date: dateNow.toDate(),
-          description: '',
-          account: id,
-          user
-        })
-      } else {
-        const type = 'despesa'
-        const category = await Category.findOneAndUpdate(
-          { name: nameCategory },
-          { $setOnInsert: { name: nameCategory, default: true, type } },
-          { upsert: true, new: true }
-        )
+      const type = isAdjustmentPositive ? 'receita' : 'despesa'
+      const Model = isAdjustmentPositive ? Income : Expense
 
-        await Expense.create({
-          category: category.id,
-          value: balance,
-          status: 0,
-          executionDate: dateNow.toDate(),
-          date: dateNow.toDate(),
-          description: '',
-          account: id,
-          user
-        })
-      }
+      const category = await Category.findOneAndUpdate(
+        { name: nameCategory },
+        { $setOnInsert: { name: nameCategory, default: true, type } },
+        { upsert: true, new: true }
+      )
+      const updateDate = dayjs().toDate()
 
-      const updateAccount = await Account.findOneAndUpdate(
+      await Model.create({
+        category: category.id,
+        value: adjustmentValue,
+        status: 0,
+        executionDate: updateDate,
+        date: updateDate,
+        description: 'Ajuste de Saldo',
+        account: id,
+        user
+      })
+
+      const updatedAccount = await Account.findOneAndUpdate(
         { _id: id, user },
-        { name, balance, updateDate, user },
+        { name, balance, updateDate },
         { new: true }
       )
 
-      if (!updateAccount) return res.status(404).json({ message: 'Conta não encontrada!' })
-
-      res.status(200).json(formatAccountItem(updateAccount))
+      res.status(200).json(formatAccountItem(updatedAccount))
     } catch (error) {
+      if (error.statusCode === 404) {
+        return res.status(error.statusCode).json({ message: error.message })
+      }
+
       res.status(500).json({ message: 'Erro ao atualizar conta', error })
     }
   },
