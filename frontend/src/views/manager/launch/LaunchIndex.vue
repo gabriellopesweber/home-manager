@@ -131,67 +131,41 @@
           <template #bottom>
             <v-row dense>
               <v-col
-                class="px-10 pt-4"
-                align-self="center"
+                v-for="(item, index) in balanceInfos"
+                :key="index"
+                class="px-10"
                 cols="12"
               >
-                <v-row dense>
+                <v-row
+                  dense
+                  :class="index === 0 ? 'mt-2' : ''"
+                >
                   <v-col
                     class="d-flex justify-end"
                     cols="10"
-                    align-self="center"
-                  >
-                    <span class="text-capitalize font-weight-black"> Saldo atual: </span>
-                  </v-col>
-                  <v-col
-                    class="d-flex justify-end"
                     align-self="center"
                   >
                     <span
-                      v-if="loading"
-                      class="font-weight-light"
-                      :class="getColorBalance"
-                    > 
-                      {{ maskedAmount(currentBalance) }}
+                      class="text-capitalize"
+                      :class="index === 0 ? 'font-weight-black' : ''"
+                    >
+                      {{ item.label }}
                     </span>
-
-                    <v-skeleton-loader
-                      v-else
-                      class="w-100"
-                      type="text"
-                    />
                   </v-col>
-                </v-row>
-              </v-col>
-              <v-col
-                class="d-flex justify-end px-10 pb-4"
-                align-self="center"
-                cols="12"
-              >
-                <v-row dense>
-                  <v-col
-                    class="d-flex justify-end"
-                    cols="10"
-                    align-self="center"
-                  >
-                    <span class="text-capitalize"> Saldo previsto:  </span>
-                  </v-col>
-                  
-                  <v-col
-                    class="d-flex justify-end"
-                    align-self="center"
-                  >
-                    <span 
-                      v-if="loading"
-                      class="font-weight-light"
-                    > {{ maskedAmount(predicted) }}</span>
 
+                  <v-col align-self="center">
                     <v-skeleton-loader
-                      v-else
-                      class="w-100"
-                      style="margin: 0 !important;"
+                      :loading="loading"
+                      class="w-100 d-flex justify-end"
                       type="text"
-                    />
+                    >
+                      <span
+                        class="font-weight-light"
+                        :class="item.color()"
+                      >
+                        {{ item.value() }}
+                      </span>
+                    </v-skeleton-loader>
                   </v-col>
                 </v-row>
               </v-col>
@@ -331,6 +305,18 @@ export default {
           color: 'primary',
           type: 'edit'
         }
+      ],
+      balanceInfos: [
+        {
+          label: 'Saldo atual:',
+          value: () => this.maskedAmount(this.currentBalance),
+          color: () => this.getColorValue(this.currentBalance),
+        },
+        {
+          label: 'Saldo previsto:',
+          value: () => this.maskedAmount(this.predicted),
+          color: () => this.getColorValue(this.predicted),
+        }
       ]
     }
   },
@@ -394,15 +380,6 @@ export default {
 
         return tooltipMap[type]
       }
-    },
-    getColorBalance() {
-      if (this.currentBalance > 0) {
-        return 'text-success'
-      } else if (this.currentBalance < 0) {
-        return 'text-error'
-      }
-
-      return 'text-black'
     }
   },
   async created() {
@@ -526,7 +503,21 @@ export default {
       } else {
         this.items.push(event)
       }
+    },
+    getColorValue(val) {
+      const value = Number(val)
+
+      if (value > 0) return 'text-success'
+      if (value < 0) return 'text-error'
+      return 'text-black'
     }
   }
 }
 </script>
+
+<style scoped>
+::v-deep(.v-skeleton-loader__text) {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+</style>
