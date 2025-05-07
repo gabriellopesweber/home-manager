@@ -443,6 +443,7 @@ export default {
         }
         
         this.items = this.items.filter(item => item.id !== id)
+        await this.financialStatement()
         this.$showMessage('Item excluido com sucesso!', 'success')
       } catch {
         this.$showMessage('Ocorre um problema ao excluir!', 'error')
@@ -460,6 +461,8 @@ export default {
         else if (item.type === 'expense')
           await ExpenseService.update(item.id, item)
         this.$showMessage('Status atualizado com sucesso!', 'success')
+
+        await this.financialStatement()
       } catch {
         item.status = oldStatus
         this.$showMessage('Ocorre um problema ao atualizar o status!', 'error')
@@ -470,12 +473,24 @@ export default {
     async searchByPeriod(period) {
       try {
         this.loading = true
+        this.finalPeriod = period.finalPeriod
         this.items = await LaunchService.getAll(period.initialPeriod, period.finalPeriod)
-        const dataBalance = await LaunchService.getBalanceData(period.finalPeriod)
+        await this.financialStatement()
+      } catch {
+        this.$showMessage('Ocorre um problema ao atualizar os lançamentos!', 'error')
+      } finally {
+        this.loading = false
+      }
+    },
+    async financialStatement() {
+      try {
+        this.loading = true
+        
+        const dataBalance = await LaunchService.getBalanceData(this.finalPeriod)
         this.currentBalance = dataBalance.balance
         this.predicted = dataBalance.predicted
       } catch {
-        this.$showMessage('Ocorre um problema ao atualizar os lançamentos!', 'error')
+        this.$showMessage('Ocorre um problema ao buscar balanço financeiro!', 'error')
       } finally {
         this.loading = false
       }
@@ -495,7 +510,7 @@ export default {
 
       return {}
     },
-    eventAfterCreate(event) {
+    async eventAfterCreate(event) {
       const index = this.items.findIndex(i => i.id === event.id)
       
       if (typeof index === 'number' && index >= 0) {
@@ -503,6 +518,8 @@ export default {
       } else {
         this.items.push(event)
       }
+
+      await this.financialStatement()
     },
     getColorValue(val) {
       const value = Number(val)
