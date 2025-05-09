@@ -37,25 +37,14 @@
                 prependIcon: 'mdi-calendar',
                 size: 'large'
               }"
+              @update:model-value="afterUpdateDate"
             />
           </v-col>
 
           <v-col
+            class="d-flex"
             cols="12"
-            md="6"
-          >
-            <v-autocomplete
-              v-model="dataSend.status"
-              label="Status"
-              variant="outlined"
-              :items="itemsStatus"
-              :rules="[() => $validation('required', dataSend.status)]"
-            />
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="6"
+            md="4"
           >
             <v-text-field
               v-model="maskedAmount"
@@ -65,11 +54,34 @@
               :rules="[() => $validation('required', dataSend.value)]"
               @keypress="onlyNumbers"
             />
+
+            <div class="ml-2">
+              <v-fade-transition leave-absolute>
+                <v-btn
+                  v-if="!dataSend.status"
+                  v-tooltip:top="'Alterar para pendente'"
+                  icon="mdi-thumb-up"
+                  color="success"
+                  variant="text"
+                  rounded="circle"
+                  @click="dataSend.status = 1"
+                />
+
+                <v-btn
+                  v-else
+                  v-tooltip:top="'Alterar para pagamento efetuado'"
+                  icon="mdi-thumb-down"
+                  variant="text"
+                  rounded="circle"
+                  @click="dataSend.status = 0"
+                />
+              </v-fade-transition>
+            </div>
           </v-col>
 
           <v-col
             cols="12"
-            md="6"
+            md="4"
           >
             <v-autocomplete
               v-model="dataSend.category"
@@ -85,7 +97,7 @@
 
           <v-col
             cols="12"
-            md="6"
+            md="4"
           >
             <v-autocomplete
               v-model="dataSend.account"
@@ -149,6 +161,7 @@ import IncomeService from "@/services/IncomeService"
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
 import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
+import dayjs from 'dayjs'
 
 export default {
   name: "IncomeCreate",
@@ -184,16 +197,12 @@ export default {
       dataSend: {
         description: '',
         date: '',
-        status: null,
+        status: 0,
         value: 0,
         category: null,
         account: null
       },
       itemsAccount: [],
-      itemsStatus: [
-        { value: 0, title: 'Pago' },
-        { value: 1, title: 'Pendente' }
-      ],
       fabType: 'one',
       actions: [
         {
@@ -333,6 +342,17 @@ export default {
         value: 0,
         category: null,
         account: null
+      }
+    },
+    afterUpdateDate(date) {
+      if (!date) return false
+
+      if (dayjs().isBefore(dayjs(date))) {
+        this.dataSend.status = 1
+      }
+
+      if (dayjs().isSameOrAfter(dayjs(date))) {
+        this.dataSend.status = 0
       }
     }
   }
