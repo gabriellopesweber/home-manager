@@ -13,34 +13,42 @@ export async function getBalanceAtDate({ date, id, user, status = null }) {
   const accountQuery = { user }
   if (id) accountQuery._id = id
 
-  const account = await Account.findOne(accountQuery)
+  const accounts = await Account.find(accountQuery)
 
-  if (!account) {
+  if (!accounts) {
     throw new AppError('Conta não encontrada!', 404)
   }
 
-  const updateDate = dayjs(date).toDate()
-  const openingBalance = account.openingBalance || 0
+  let openingBalance = 0
 
-  const matchBase = {
-    account: account._id,
-    date: { $lte: updateDate }
-  }
-  if (typeof status === 'number') matchBase.status = status
+  for (const account of accounts) {
+    const updateDate = dayjs(date).toDate()
+    const openingBalanceAccount = account.openingBalance || 0
 
-  const [incomeAgg, expenseAgg] = await Promise.all([
-    Income.aggregate([
-      { $match: matchBase },
-      { $group: { _id: null, total: { $sum: '$value' } } }
-    ]),
-    Expense.aggregate([
-      { $match: matchBase },
-      { $group: { _id: null, total: { $sum: '$value' } } }
+    const matchBase = {
+      account: account._id,
+      date: { $lte: updateDate }
+    }
+    if (typeof status === 'number') matchBase.status = status
+
+    const [incomeAgg, expenseAgg] = await Promise.all([
+      Income.aggregate([
+        { $match: matchBase },
+        { $group: { _id: null, total: { $sum: '$value' } } }
+      ]),
+      Expense.aggregate([
+        { $match: matchBase },
+        { $group: { _id: null, total: { $sum: '$value' } } }
+      ])
     ])
-  ])
 
-  const totalIncome = incomeAgg[0]?.total || 0
-  const totalExpense = expenseAgg[0]?.total || 0
+    const totalIncome = incomeAgg[0]?.total || 0
+    const totalExpense = expenseAgg[0]?.total || 0
 
-  return openingBalance + totalIncome - Math.abs(totalExpense)
+    console.log(totalIncome, totalExpense)
+
+    openingBalance += openingBalanceAccount + totalIncome - Math.abs(totalExpense)
+  }
+
+  return openingBalance
 }

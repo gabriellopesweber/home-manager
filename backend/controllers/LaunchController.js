@@ -47,7 +47,11 @@ const LaunchController = {
       const resultConciliated = await getBalanceAtDate({ date: final_date, user: userId, status: statusFinance.CONCILIATED })
       const resultNotConciliated = await getBalanceAtDate({ date: final_date, user: userId, status: statusFinance.PENDING })
 
-      res.status(200).json({ message: 'Saldo do periodo selecionado', balance: resultConciliated, predicted: resultNotConciliated })
+      res.status(200).json({
+        message: 'Saldo do periodo selecionado',
+        balance: resultConciliated,
+        predicted: resultConciliated - Math.abs(resultNotConciliated)
+      })
     } catch (error) {
       if (error.statusCode === 404) {
         return res.status(error.statusCode).json({ message: error.message })
