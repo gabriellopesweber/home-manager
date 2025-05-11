@@ -72,7 +72,7 @@ export default {
     },
     defaultText: {
       type: String,
-      default: 'Cadastrar Receita'
+      default: 'Cadastrar'
     },
     defaultVariant: {
       type: String,
