@@ -40,19 +40,20 @@ const CategoryController = {
     }
   },
 
-  // Listar todas as categorias
+  // Listar todas as categorias (gerais + do usuário)
   async getAll(req, res) {
     try {
       const { type } = req.query
 
-      const filter = { user: req.user.id }
+      const baseFilter = [{ user: req.user.id }, { default: true }]
+      const filter = { $or: baseFilter }
 
       if (type) {
-        filter.type = type
+        filter.$or = baseFilter.map(f => ({ ...f, type }))
       }
 
-      const category = await Category.find(filter)
-      res.status(200).json(category.map(category => formatCategoryItem(category)))
+      const categories = await Category.find(filter)
+      res.status(200).json(categories.map(category => formatCategoryItem(category)))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar categorias', error })
     }
