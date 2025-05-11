@@ -31,18 +31,16 @@
             md="3"
           >
             <GlobalDataPiker
+              ref="globalDate"
               v-model="dataSend.date"
-              :configuration-btn="{ 
-                color: 'primary',
-                prependIcon: 'mdi-calendar',
-                size: 'large'
-              }"
+              :rules="[() => $validation('required', dataSend.date)]"
+              @update:model-value="afterUpdateDate"
             />
           </v-col>
 
           <v-col
             cols="12"
-            md="6"
+            md="4"
           >
             <v-autocomplete
               v-model="dataSend.origin_account"
@@ -74,7 +72,7 @@
 
           <v-col
             cols="12"
-            md="6"
+            md="4"
           >
             <v-autocomplete
               v-model="dataSend.destination_account"
@@ -92,20 +90,7 @@
 
           <v-col
             cols="12"
-            md="6"
-          >
-            <v-autocomplete
-              v-model="dataSend.status"
-              label="Status"
-              variant="outlined"
-              :items="itemsStatus"
-              :rules="[() => $validation('required', dataSend.status)]"
-            />
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="6"
+            md="4"
           >
             <v-text-field
               v-model="maskedAmount"
@@ -114,7 +99,33 @@
               variant="outlined"
               :rules="[() => $validation('required', dataSend.value)]"
               @keypress="onlyNumbers"
-            />
+            >
+              <template #append>
+                <v-fade-transition
+                  class="ml-n1"
+                  leave-absolute
+                >
+                  <v-btn
+                    v-if="!dataSend.status"
+                    v-tooltip:top="'Alterar para pendente'"
+                    icon="mdi-thumb-up"
+                    color="success"
+                    variant="text"
+                    rounded="circle"
+                    @click="dataSend.status = 1"
+                  />
+
+                  <v-btn
+                    v-else
+                    v-tooltip:top="'Alterar para pagamento efetuado'"
+                    icon="mdi-thumb-down"
+                    variant="text"
+                    rounded="circle"
+                    @click="dataSend.status = 0"
+                  />
+                </v-fade-transition>
+              </template>
+            </v-text-field>
           </v-col>
         </v-row>
       </v-form>
@@ -167,6 +178,7 @@ import TransferService from "@/services/TransferService"
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
 import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
+import dayjs from 'dayjs'
 
 export default {
   name: "TransferCreate",
@@ -206,11 +218,7 @@ export default {
         origin_account: null,
         destination_account: null
       },
-      itemsAccount: [],
-      itemsStatus: [
-        { value: 0, title: 'Pago' },
-        { value: 1, title: 'Pendente' }
-      ],
+      itemsAccount: [], 
       fabType: 'one',
       actions: [
         {
@@ -304,10 +312,7 @@ export default {
     validate() {
       this.$refs.form.validate()
 
-      if (!this.dataSend.date) {
-        this.$showMessage("Informe uma data!", "warning") 
-        return false
-      }
+      this.$refs.globalDate.validate()
      
       return this.isValid
     },
@@ -377,6 +382,17 @@ export default {
         this.$showMessage('Ocorreu um problema ao buscar o saldo da conta', 'error')
       } finally {
         this.loadingBalance = false
+      }
+    },
+    afterUpdateDate(date) {
+      if (!date) return false
+
+      if (dayjs().isBefore(dayjs(date))) {
+        this.dataSend.status = 1
+      }
+
+      if (dayjs().isSameOrAfter(dayjs(date))) {
+        this.dataSend.status = 0
       }
     }
   }

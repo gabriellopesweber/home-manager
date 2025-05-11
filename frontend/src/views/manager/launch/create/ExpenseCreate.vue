@@ -31,18 +31,14 @@
             md="3"
           >
             <GlobalDataPiker
+              ref="globalDate"
               v-model="dataSend.date"
-              :configuration-btn="{ 
-                color: 'primary',
-                prependIcon: 'mdi-calendar',
-                size: 'large'
-              }"
+              :rules="[() => $validation('required', dataSend.date)]"
               @update:model-value="afterUpdateDate"
             />
           </v-col>
 
           <v-col
-            class="d-flex"
             cols="12"
             md="4"
           >
@@ -53,30 +49,33 @@
               variant="outlined"
               :rules="[() => $validation('required', dataSend.value)]"
               @keypress="onlyNumbers"
-            />
+            >
+              <template #append>
+                <v-fade-transition 
+                  class="ml-n1"
+                  leave-absolute
+                >
+                  <v-btn
+                    v-if="!dataSend.status"
+                    v-tooltip:top="'Alterar para pendente'"
+                    icon="mdi-thumb-up"
+                    color="success"
+                    variant="text"
+                    rounded="circle"
+                    @click="dataSend.status = 1"
+                  />
 
-            <div class="ml-2">
-              <v-fade-transition leave-absolute>
-                <v-btn
-                  v-if="!dataSend.status"
-                  v-tooltip:top="'Alterar para pendente'"
-                  icon="mdi-thumb-up"
-                  color="success"
-                  variant="text"
-                  rounded="circle"
-                  @click="dataSend.status = 1"
-                />
-
-                <v-btn
-                  v-else
-                  v-tooltip:top="'Alterar para pagamento efetuado'"
-                  icon="mdi-thumb-down"
-                  variant="text"
-                  rounded="circle"
-                  @click="dataSend.status = 0"
-                />
-              </v-fade-transition>
-            </div>
+                  <v-btn
+                    v-else
+                    v-tooltip:top="'Alterar para pagamento efetuado'"
+                    icon="mdi-thumb-down"
+                    variant="text"
+                    rounded="circle"
+                    @click="dataSend.status = 0"
+                  />
+                </v-fade-transition>
+              </template>
+            </v-text-field>
           </v-col>
 
           <v-col
@@ -287,10 +286,7 @@ export default {
     validate() {
       this.$refs.form.validate()
 
-      if (!this.dataSend.date) {
-        this.$showMessage("Informe uma data!", "warning") 
-        return false
-      }
+      this.$refs.globalDate.validate()
      
       return this.isValid
     },

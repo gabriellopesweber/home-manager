@@ -7,17 +7,24 @@
     min-width="auto"
   >
     <template #activator="{ props: activation }">
-      <v-btn
-        v-bind="{ ...configurationBtn, ...activation }"
-      >
-        {{ selectedDate ? formatDate(selectedDate) : 'Selecione a data' }}
-      </v-btn>
+      <v-text-field
+        v-bind="activation"
+        :model-value="formattedDate"
+        :label="label"
+        variant="outlined"
+        readonly
+        clearable
+        :rules="rules"
+        :error="hasError"
+        :error-messages="internalErrorMessages"
+        @click:clear="clearDate"
+      />
     </template>
 
     <v-date-picker
-      v-model="selectedDate"
+      v-model="internalValue"
       show-adjacent-months
-      :rules="[() => $validation('required', selectedDate)]"
+      rounded="xl"
       @update:model-value="updateDate"
     />
   </v-menu>
@@ -25,43 +32,69 @@
 
 <script>
 import dayjs from 'dayjs'
-import { useDate } from 'vuetify'
 
 export default {
+  name: 'GlobalDataPiker',
   props: {
     modelValue: {
       type: String,
       default: ''
     },
-    configurationBtn: {
-      type: Object,
-      default: () => ({
-        color: 'primary'
-      })
+    label: {
+      type: String,
+      default: 'Selecione a data'
+    },
+    rules: {
+      type: Array,
+      default: () => []
     }
   },
   emits: ['update:model-value'],
   data() {
     return {
       menu: false,
-      selectedDate: this.modelValue,
-      formatUtil: useDate()
+      internalValue: this.modelValue,
+      hasError: false,
+      internalErrorMessages: []
+    }
+  },
+  computed: {
+    formattedDate() {
+      return this.internalValue
+        ? dayjs(this.internalValue).format('DD/MM/YYYY')
+        : ''
     }
   },
   watch: {
     modelValue(newVal) {
-      this.selectedDate = newVal
+      this.internalValue = newVal
     }
   },
   methods: {
     updateDate(value) {
-      this.selectedDate = value
+      this.internalValue = value
       this.$emit('update:model-value', dayjs(value).toISOString())
       this.menu = false
+      this.validate()
     },
-    formatDate(date) {
-      if (!date) return ''
-      return this.formatUtil.format(date, 'fullDate')
+    clearDate() {
+      this.internalValue = null
+      this.$emit('update:model-value', null)
+      this.validate()
+    },
+    validate() {
+      this.hasError = false
+      this.internalErrorMessages = []
+
+      for (const rule of this.rules) {
+        const result = rule(this.internalValue)
+        if (result !== true) {
+          this.hasError = true
+          this.internalErrorMessages.push(result)
+        }
+      }
+
+      return !this.hasError
     }
   }
 }
