@@ -487,6 +487,7 @@ export default {
         this.loading = true
         
         const dataBalance = await LaunchService.getBalanceData(this.finalPeriod)
+        console.log(await LaunchService.getDetailedBalanceData(this.finalPeriod))
         this.currentBalance = dataBalance.balance
         this.predicted = dataBalance.predicted
       } catch {

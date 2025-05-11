@@ -6,5 +6,6 @@ const router = express.Router()
 
 router.get('/', authMiddleware, LaunchController.getAll)
 router.get('/balance', authMiddleware, LaunchController.getBalanceAt)
+router.get('/balance-detailed', authMiddleware, LaunchController.getDetailedBalanceAt)
 
 export default router

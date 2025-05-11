@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import { Income, Expense, Transfer } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
 import { formatExpenseItem, formatIncomeItem, formatTransferItem } from '../utils/format.js'
-import { getBalanceAtDate } from '../utils/functions.js'
+import { getBalanceAtDate, getBalanceDetailedAtDate } from '../utils/functions.js'
 import { statusFinance } from '../constants/Finance.js'
 
 const LaunchController = {
@@ -53,11 +53,44 @@ const LaunchController = {
         predicted: resultNotConciliated
       })
     } catch (error) {
+      console.log(error)
       if (error.statusCode === 404) {
         return res.status(error.statusCode).json({ message: error.message })
       }
 
       return res.status(500).json({ message: 'Erro ao executar a busca', error })
+    }
+  },
+
+  async getDetailedBalanceAt(req, res) {
+    try {
+      const { final_date } = req.query
+      const userId = req.user.id
+
+      // Busca detalhada de lançamentos conciliados
+      const resultConciliated = await getBalanceDetailedAtDate({
+        date: final_date,
+        user: userId,
+        status: statusFinance.CONCILIATED
+      })
+
+      // Busca detalhada de lançamentos totais (conciliados + pendentes)
+      const resultNotConciliated = await getBalanceDetailedAtDate({
+        date: final_date,
+        user: userId
+      })
+
+      res.status(200).json({
+        conciliated: resultConciliated,
+        predicted: resultNotConciliated
+      })
+    } catch (error) {
+      console.log(error)
+      if (error.statusCode === 404) {
+        return res.status(error.statusCode).json({ message: error.message })
+      }
+
+      return res.status(500).json({ message: 'Erro ao executar a busca detalhada', error })
     }
   }
 }

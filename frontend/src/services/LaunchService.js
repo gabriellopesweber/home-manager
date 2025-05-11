@@ -22,6 +22,15 @@ class LaunchService {
       throw error.response.data
     }
   }
+
+  async getDetailedBalanceData(final_date) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/balance-detailed?final_date=${final_date}`)
+      return response.data
+    } catch (error) {
+      throw error.response.data
+    }
+  }
 }
 
 export default new LaunchService
