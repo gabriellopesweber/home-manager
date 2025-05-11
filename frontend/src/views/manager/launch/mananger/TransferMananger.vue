@@ -5,7 +5,7 @@
     @update:model-value="$emit('update:model-value', $event)"
   >
     <template #title>
-      <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Despesa </span>
+      <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Transferência </span>
     </template>
 
     <template #default>
@@ -42,6 +42,56 @@
             cols="12"
             md="4"
           >
+            <v-autocomplete
+              v-model="dataSend.origin_account"
+              label="Conta de Origem"
+              item-value="id"
+              item-title="name"
+              variant="outlined"
+              prepend-inner-icon="mdi-bank-transfer-out"
+              :rules="[() => $validation('required', dataSend.origin_account)]"
+              :items="itemsAccount"
+              :loading-items="loadingItems"
+              @update:model-value="async ($event) => {
+                idSelected = $event
+                dataSend.destination_account = null
+                await getBalanceOfSelected(idSelected)
+              }"
+            >
+              <template #append>
+                <v-progress-circular v-if="loadingBalance" />
+                <v-icon
+                  v-else
+                  v-tooltip:top="balance ? `Saldo: ${formatMoney(balance)}` : 'Seleciona uma conta para ver o saldo'"
+                >
+                  mdi-wallet-outline
+                </v-icon>
+              </template>
+            </v-autocomplete>
+          </v-col>
+
+          <v-col
+            cols="12"
+            md="4"
+          >
+            <v-autocomplete
+              v-model="dataSend.destination_account"
+              class="ml-1"
+              label="Conta de Destino"
+              item-value="id"
+              item-title="name"
+              variant="outlined"
+              prepend-inner-icon="mdi-bank-transfer-in"
+              :rules="[() => $validation('required', dataSend.destination_account)]"
+              :items="getAccountFiltered"
+              :loading-items="loadingItems"
+            />
+          </v-col>
+
+          <v-col
+            cols="12"
+            md="4"
+          >
             <v-text-field
               v-model="maskedAmount"
               label="Valor"
@@ -51,7 +101,7 @@
               @keypress="onlyNumbers"
             >
               <template #append>
-                <v-fade-transition 
+                <v-fade-transition
                   class="ml-n1"
                   leave-absolute
                 >
@@ -76,38 +126,6 @@
                 </v-fade-transition>
               </template>
             </v-text-field>
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-autocomplete
-              v-model="dataSend.category"
-              label="Categoria"
-              item-value="id"
-              item-title="name"
-              variant="outlined"
-              :rules="[() => $validation('required', dataSend.category)]"
-              :items="itemsCategory"
-              :loading-items="loadingItems"
-            />
-          </v-col>
-
-          <v-col
-            cols="12"
-            md="4"
-          >
-            <v-autocomplete
-              v-model="dataSend.account"
-              label="Conta"
-              item-value="id"
-              item-title="name"
-              variant="outlined"
-              :rules="[() => $validation('required', dataSend.account)]"
-              :items="itemsAccount"
-              :loading-items="loadingItems"
-            />
           </v-col>
         </v-row>
       </v-form>
@@ -155,7 +173,7 @@
 <script>
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 import AccountService from "@/services/AccountService"
-import ExpenseService from "@/services/ExpenseService"
+import TransferService from "@/services/TransferService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
@@ -163,7 +181,7 @@ import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 import dayjs from 'dayjs'
 
 export default {
-  name: "ExpenseCreate",
+  name: "TransferMananger",
   components: {
     BaseMaterialDialog,
     GlobalDataPiker,
@@ -173,10 +191,6 @@ export default {
     showDialog: {
       type: Boolean,
       required: true
-    },
-    itemsCategory:{
-      type: Array,
-      default: () => ([])
     },
     editItem: {
       type: Object,
@@ -189,19 +203,22 @@ export default {
       dialog: false,
       loading: false,
       loadingItems: false,
+      loadingBalance: false,
       isValid: false,
       amount: "0,00",
-      type: 'expense',
+      type: 'transfer',
       isEdit: false,
+      idSelected: '',
+      balance: '',
       dataSend: {
         description: '',
         date: '',
         status: null,
         value: 0,
-        category: null,
-        account: null
+        origin_account: null,
+        destination_account: null
       },
-      itemsAccount: [],
+      itemsAccount: [], 
       fabType: 'one',
       actions: [
         {
@@ -233,6 +250,15 @@ export default {
         this.dataSend.value = numeric
         this.amount = formatCurrencyMaskBR(val)
       }
+    },
+    formatMoney() {
+      return value => {
+        return 'R$: ' + formatCurrencyMaskBR(value)
+      }
+    },
+    getAccountFiltered() {
+      if (!this.idSelected) return this.itemsAccount
+      return this.itemsAccount.filter( item => item.id !== this.idSelected)
     }
   },
   watch: {
@@ -242,7 +268,7 @@ export default {
         if (Object.keys(this.editItem).length > 0) {
           this.isEdit = true
           this.dataSend = {...this.editItem}
-          this.maskedAmount = -this.editItem.value
+          this.maskedAmount = this.editItem.value
         }
         this.populateItems()
       } else {
@@ -272,13 +298,13 @@ export default {
       
       if (type === 'moreOne') {
         if (this.validate()) {
-          await this.createExpense()
+          await this.createTransfer()
         }
       }
     },
     async validateAndCreate() {
       if (this.validate()) {
-        if (await this.createExpense()) {
+        if (await this.createTransfer()) {
           this.$emit('update:model-value', false)
         }
       }
@@ -295,16 +321,17 @@ export default {
         try {
           this.loading = true
 
-          if (this.dataSend.value > 0) this.dataSend.value = -this.dataSend.value
-
-          const newItem = await ExpenseService.update(this.dataSend.id, this.dataSend)
+          const newItem = await TransferService.update(this.dataSend.id, this.dataSend)
           newItem.type = this.type
 
           this.$emit('insert:item', newItem)
           this.$showMessage("Atualizado com sucesso!", "success")
           this.$emit('update:model-value', false)
-        } catch {
-          this.$showMessage("Ocorreu um erro ao atualizar a despesa!", "error")
+        } catch (error) {
+          if (error.status === 400) {
+            return this.$showMessage("Saldo insuficiente!", "error")
+          }
+          this.$showMessage("Ocorreu um erro ao atualizar a transferência!", "error")
           return false
         } finally {
           this.loading = false
@@ -313,17 +340,18 @@ export default {
         return true
       }
     },
-    async createExpense() {
+    async createTransfer() {
       try {
         this.loading = true
 
-        if (this.dataSend.value > 0) this.dataSend.value = -this.dataSend.value
-
-        const newItem = await ExpenseService.create(this.dataSend)
+        const newItem = await TransferService.create(this.dataSend)
         newItem.type = this.type
         this.$emit('insert:item', newItem)
         this.$showMessage("Cadastro efetuado!", "success")
-      } catch {
+      } catch (error) {
+        if (error.status === 400) {
+          return this.$showMessage("Saldo insuficiente!", "error")
+        }
         this.$showMessage("Ocorreu um erro ao cadastrar Receita!", "error")
         return false
       } finally {
@@ -339,8 +367,21 @@ export default {
         date: '',
         status: null,
         value: 0,
-        category: null,
-        account: null
+        origin_account: null,
+        destination_account: null,
+      }
+    },
+    async getBalanceOfSelected(id) {
+      try {
+        this.loadingBalance = true
+        if (!id) return
+
+        const item = await AccountService.getById(id)
+        this.balance = item.balance
+      } catch {
+        this.$showMessage('Ocorreu um problema ao buscar o saldo da conta', 'error')
+      } finally {
+        this.loadingBalance = false
       }
     },
     afterUpdateDate(date) {

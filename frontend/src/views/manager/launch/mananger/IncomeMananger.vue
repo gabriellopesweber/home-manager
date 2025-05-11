@@ -163,7 +163,7 @@ import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 import dayjs from 'dayjs'
 
 export default {
-  name: "IncomeCreate",
+  name: "IncomeMananger",
   components: {
     BaseMaterialDialog,
     GlobalDataPiker,

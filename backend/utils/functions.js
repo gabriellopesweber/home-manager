@@ -46,6 +46,5 @@ export async function getBalanceAtDate({ date, id, user, status = null }) {
     openingBalance += openingBalanceAccount + totalIncome - Math.abs(totalExpense)
   }
 
-
   return openingBalance
 }
