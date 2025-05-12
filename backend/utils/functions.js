@@ -1,5 +1,6 @@
 import dayjs from "dayjs"
 import { Account, Expense, Income, Transfer } from "../models/Finance.js"
+import mongoose from "mongoose"
 
 class AppError extends Error {
   constructor(message, statusCode) {
@@ -86,11 +87,10 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
     totalExpense += expenseAgg[0]?.total || 0
   }
 
-  // Match para transferências com base na conta de origem
   const matchTransfer = {
     originAccount: { $in: accountIds },
     date: { $lte: updateDate },
-    user
+    user: new mongoose.Types.ObjectId(user)
   }
   if (status != null) matchTransfer.status = status
 
