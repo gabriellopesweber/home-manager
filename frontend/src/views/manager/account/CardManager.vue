@@ -10,14 +10,12 @@
       @update:model-value="$emit('update:model-value', $event)"
     >
       <template #title>
-        <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Conta </span>
+        <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Cartão </span>
       </template>
 
       <template #default>
         <v-row dense>
-          <v-col
-            cols="12"
-          >
+          <v-col cols="12">
             <v-text-field
               v-model="dataSend.name"
               label="Nome"
@@ -25,16 +23,35 @@
               :rules="[() => $validation('required', dataSend.name)]"
             />
           </v-col>
+
+          <v-col cols="12">
+            <v-text-field
+              v-model="maskedCardLimit"
+              label="Limite do cartão"
+              prefix="R$"
+              variant="outlined"
+              :rules="[() => $validation('required', dataSend.card_limit)]"
+              @keypress="onlyNumbers"
+            />
+          </v-col>
+
           <v-col
             cols="12"
           >
-            <v-text-field
-              v-model="maskedAmount"
-              label="Valor"
-              prefix="R$"
+            <v-number-input
+              v-model="dataSend.due_date"
+              label="Vence dia"
               variant="outlined"
-              :rules="[() => $validation('required', dataSend.balance)]"
-              @keypress="onlyNumbers"
+              :rules="[() => $validation('required', dataSend.due_date)]"
+            />
+          </v-col>
+
+          <v-col cols="12">
+            <v-number-input
+              v-model="dataSend.closing_date"
+              label="Fecha dia"
+              variant="outlined"
+              :rules="[() => $validation('required', dataSend.closing_date)]"
             />
           </v-col>
         </v-row>
@@ -49,7 +66,7 @@
             rounded="circle"
             size="large"
             :loading="loading"
-            @click="validateAndMananger"
+            @click="validateAndManager"
           />
         </div>
       </template>
@@ -59,7 +76,7 @@
 
 <script>
 import { formatCurrencyMaskBR } from '@/utils/monetary'
-import AccountService from "@/services/AccountService"
+import CardService from "@/services/CardService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 
@@ -72,6 +89,10 @@ export default {
       type: Boolean,
       default: true
     },
+    accountId: {
+      type: String,
+      default: ''
+    },
     editItem: {
       type: Object,
       default: () => ({})
@@ -83,18 +104,22 @@ export default {
       dialog: false,
       loading: false,
       isValid: false,
-      amount: "0,00",
+      cardLimit: "0,00",
       isEdit: false,
       dataSend: {
+        account_id: '',
         name: '',
-        balance: 0
+        card_limit: null,
+        due_date: null,
+        closing_date: null,
+        is_active: false
       }
     }
   },
   computed: {
-    maskedAmount: {
+    maskedCardLimit: {
       get() {
-        return this.amount
+        return this.cardLimit
       },
       set(val) {
         const cleaned = String(val).replace(/\D/g, '')
@@ -102,8 +127,8 @@ export default {
         
         if (isNaN(numeric)) numeric = 0
         
-        this.dataSend.balance = numeric
-        this.amount = formatCurrencyMaskBR(val)
+        this.dataSend.card_limit = numeric
+        this.cardLimit = formatCurrencyMaskBR(val)
       }
     }
   },
@@ -113,8 +138,8 @@ export default {
       if (value) {
         if (Object.keys(this.editItem).length > 0) {
           this.isEdit = true
-          this.dataSend = {...this.editItem}
-          this.maskedAmount = this.editItem.balance
+          this.dataSend = { ...this.editItem }
+          this.maskedCardLimit = this.editItem.card_limit
         }
       } else {
         this.isEdit = false
@@ -129,24 +154,30 @@ export default {
     },
     validate() {
       this.$refs.form.validate()
+
       return this.isValid
     },
-    async validateAndMananger() {
+    async validateAndManager() {
       if (this.validate()) {
         try {
           this.loading = true
           let newItem = null
 
           if (this.isEdit) {
-            newItem = await AccountService.update(this.dataSend.id, this.dataSend)
+            newItem = await CardService.update(this.dataSend.id, this.dataSend)
           } else {
-            newItem = await AccountService.create(this.dataSend)
+            this.dataSend.account_id = this.accountId
+            newItem = await CardService.create(this.dataSend)
           }
 
           if (!newItem) throw new Error
           
           this.$emit('insert:item', newItem)
-          this.$showMessage("Atualizado com sucesso!", "success")
+          if (this.isEdit) {
+            this.$showMessage("Atualizado com sucesso!", "success")
+          } else {
+            this.$showMessage("Cadastrado com sucesso!", "success")
+          }
           this.$emit('update:model-value', false)
         } catch {
           this.$showMessage("Ocorreu um erro ao atualizar a receita!", "error")
@@ -159,10 +190,14 @@ export default {
       }
     },
     clearForm() {
-      this.amount = "0,00"
+      this.cardLimit = "0,00"
       this.dataSend = {
+        account_id: '',
         name: '',
-        balance: 0,
+        card_limit: null,
+        due_date: null,
+        closing_date: null,
+        is_active: false
       }
     }
   }

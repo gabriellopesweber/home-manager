@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import { typeCard } from '../constants/Finance.js'
 
 const CardSchema = new mongoose.Schema({
   user: {
@@ -14,22 +13,6 @@ const CardSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true
-  },
-  brand: {
-    type: String,
-    enum: ['Visa', 'Mastercard', 'Elo', 'American Express', 'Outros'],
-    default: 'Outros'
-  },
-  type: {
-    type: Number,
-    enum: [typeCard.CREDIT, typeCard.DEBIT],
-    required: true
-  },
-  numberLast4: {
-    type: String,
-    minlength: 4,
-    maxlength: 4,
     required: true
   },
   limit: {

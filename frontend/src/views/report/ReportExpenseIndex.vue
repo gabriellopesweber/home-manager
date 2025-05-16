@@ -16,7 +16,6 @@ import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import ExpenseService from '@/services/ExpenseService'
 
 export default {
-  name: "ReportExpenseIndex",
   components: {
     BaseMaterialCard
   },

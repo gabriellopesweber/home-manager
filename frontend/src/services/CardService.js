@@ -27,7 +27,12 @@ class CardService {
 
   async getAll(id) {
     try {
-      const response = await axios.get(`${this.baseUrl}/?account_id=${id}`)
+      const filters = {}
+
+      if (id) filters.account_id = id
+
+      const queryString = new URLSearchParams(filters).toString()
+      const response = await axios.get(`${this.baseUrl}/?${queryString}`)
       return response.data
     } catch (error) {
       throw error.response.data

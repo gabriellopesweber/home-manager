@@ -181,7 +181,6 @@ import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 import dayjs from 'dayjs'
 
 export default {
-  name: "TransferMananger",
   components: {
     BaseMaterialDialog,
     GlobalDataPiker,

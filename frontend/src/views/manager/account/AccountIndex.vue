@@ -51,34 +51,46 @@
                   </v-list-item-title>
 
                   <template #append>
-                    <div class="d-flex justify-center align-center">
-                      <v-btn
+                    <v-fade-transition>
+                      <div
                         v-if="isHovering"
-                        v-tooltip:top="'Editar'"
-                        icon="mdi-pencil"
-                        rounded="circle"
-                        color="primary"
-                        size="small"
-                        @click="() => {
-                          itemMarkedToManager = account
-                          dialog = true
-                        }"
-                      />
-                      <v-btn
-                        v-if="isHovering"
-                        v-tooltip:top="'Deletar'"
-                        class="ml-2"
-                        icon="mdi-trash-can-outline"
-                        rounded="circle"
-                        color="error"
-                        size="small"
-                        @click="async () => {
-                          itemMarkedToManager = account
-                          await findAssociatedTotal(account.id)
-                          showConformEdit = true
-                        }"
-                      />
-                    </div>
+                        class="d-flex justify-center align-center"
+                      >
+                        <v-btn
+                          v-tooltip:top="isCardCreated[account.id] ? 'Editar Cartão' : 'Cadastrar Cartão'"
+                          icon="mdi-credit-card-outline"
+                          rounded="circle"
+                          color="primary"
+                          size="small"
+                          @click="handleShowEditCard(account.id)"
+                        />
+                        <v-btn
+                          v-tooltip:top="'Editar'"
+                          class="ml-2"
+                          icon="mdi-pencil"
+                          rounded="circle"
+                          color="primary"
+                          size="small"
+                          @click="() => {
+                            itemMarkedToManager = account
+                            dialog = true
+                          }"
+                        />
+                        <v-btn
+                          v-tooltip:top="'Deletar'"
+                          class="ml-2"
+                          icon="mdi-trash-can-outline"
+                          rounded="circle"
+                          color="error"
+                          size="small"
+                          @click="async () => {
+                            itemMarkedToManager = account
+                            await findAssociatedTotal(account.id)
+                            showConformEdit = true
+                          }"
+                        />
+                      </div>
+                    </v-fade-transition>
                   </template>
                 </v-list-item>
               </v-list>
@@ -124,18 +136,25 @@
       >
         <span class="font-weight-black"> A exclusão da conta é permanente </span>
         
-        <ul
-          v-if="associatedTotal > 0"
-          style="list-style: disc; padding-left: 1.5rem;"
-        >
-          <li>
+        <ul style="list-style: disc; padding-left: 1.5rem;">
+          <li v-if="associatedTotal > 0">
             Ao excluir será removido {{ `${associatedTotal} ${associatedTotal > 1 ? 'lançamentos' : 'lançamento'}` }} 
+          </li>
+          <li v-if="isCardAssociated">
+            Existe um cartão associado que será excluido
           </li>
         </ul>
       </v-alert>
     </GlobalConfirmEdit>
     
-    <AccountMananger 
+    <CardManager 
+      v-model="showCardManager"
+      :edit-item="itemMarkedToManager"
+      :account-id="accountId"
+      @update:model-value="itemMarkedToManager = {}"
+      @insert:item="searchCards"
+    />
+    <AccountManager 
       v-model="dialog"
       :edit-item="itemMarkedToManager"
       @update:model-value="itemMarkedToManager = {}"
@@ -145,18 +164,20 @@
 </template>
 
 <script>
+import AccountService from '../../../services/AccountService'
+import CardService from '../../../services/CardService'
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
-import AccountService from '../../../services/AccountService'
-import AccountMananger from './AccountMananger.vue'
+import AccountManager from '@/views/manager/account/AccountManager.vue'
+import CardManager from '@/views/manager/account/CardManager.vue'
 import GlobalConfirmEdit from '@/components/GlobalConfirmEdit.vue'
 
 export default {
-  name: "AccountIndex",
   components: {
     BaseMaterialCard,
-    AccountMananger,
+    AccountManager,
+    CardManager,
     GlobalConfirmEdit
   },
   data() {
@@ -164,9 +185,13 @@ export default {
       loading: false,
       dialog: false,
       showConformEdit: false,
+      showCardManager: false,
       itemMarkedToManager: {},
       itemsAccount: [],
+      itemsCard: [],
+      isCardCreated: [],
       loadingItem: [],
+      accountId: '',
       associatedTotal: 0
     }
   },
@@ -174,18 +199,25 @@ export default {
     formatAmount() {
       return value => formatCurrencyMaskBR(value)
     },
-  },
-  async created() {
-    try {
-      this.loading = true
-      this.itemsAccount = await AccountService.getAll()
-    } catch {
-      this.$showMessage('Ocorreu um problema ao buscar contas', 'error')
-    } finally {
-      this.loading = false
+    isCardAssociated() {
+      return this.itemsCard.some(card => card.account === this.itemMarkedToManager.id)
     }
   },
+  created() {
+    this.init()
+  },
   methods: {
+    async init() {
+      try {
+        this.loading = true
+        this.itemsAccount = await AccountService.getAll()
+        await this.searchCards()
+      } catch {
+        this.$showMessage('Ocorreu um problema ao buscar contas', 'error')
+      } finally {
+        this.loading = false
+      }
+    },
     eventAfterCreate(event) {
       const index = this.itemsAccount.findIndex(i => i.id === event.id)
       
@@ -199,7 +231,15 @@ export default {
       const id = this.itemMarkedToManager.id
       try {
         this.loadingItem[id] = true
-        await AccountService.deleteById(id)
+        if (await AccountService.deleteById(id)) {
+          throw new Error
+        }
+
+        if (this.isCardAssociated) {
+          if (await CardService.deleteById(id)) {
+            throw new Error
+          }
+        }
 
         this.itemsAccount = this.itemsAccount.filter(item => item.id !== id)
         
@@ -223,6 +263,26 @@ export default {
       } finally {
         this.loadingItem[id] = false
       }
+    },
+    handleShowEditCard(accountId) {
+      const find = this.itemsCard.find(card => card.account === accountId)
+      if (find) {
+        this.itemMarkedToManager = find
+      } else {
+        this.accountId = accountId
+      }
+      
+      this.showCardManager = true
+    },
+    async searchCards() {
+      this.itemsCard = await CardService.getAll()
+      
+      this.itemsAccount.map(account => {
+        const find = this.itemsCard.some(card => account.id === card.account)
+        if (find) {
+          this.isCardCreated[account.id] = true
+        }
+      })
     }
   }
 }

@@ -5,7 +5,7 @@
     @update:model-value="$emit('update:model-value', $event)"
   >
     <template #title>
-      <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Despesa </span>
+      <span class="d-flex justify-center"> {{ isEdit ? 'Editar' : 'Cadastrar' }} Receita </span>
     </template>
 
     <template #default>
@@ -155,7 +155,7 @@
 <script>
 import { formatCurrencyMaskBR } from '@/utils/monetary'
 import AccountService from "@/services/AccountService"
-import ExpenseService from "@/services/ExpenseService"
+import IncomeService from "@/services/IncomeService"
 
 import BaseMaterialDialog from '@/components/BaseMaterialDialog.vue'
 import GlobalDataPiker from '@/components/GlobalDataPiker.vue'
@@ -163,7 +163,6 @@ import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
 import dayjs from 'dayjs'
 
 export default {
-  name: "ExpenseMananger",
   components: {
     BaseMaterialDialog,
     GlobalDataPiker,
@@ -191,12 +190,12 @@ export default {
       loadingItems: false,
       isValid: false,
       amount: "0,00",
-      type: 'expense',
+      type: 'income',
       isEdit: false,
       dataSend: {
         description: '',
         date: '',
-        status: null,
+        status: 0,
         value: 0,
         category: null,
         account: null
@@ -236,15 +235,15 @@ export default {
     }
   },
   watch: {
-    showDialog(value) {
+    async showDialog(value) {
       this.dialog = value
       if (value) {
         if (Object.keys(this.editItem).length > 0) {
           this.isEdit = true
           this.dataSend = {...this.editItem}
-          this.maskedAmount = -this.editItem.value
+          this.maskedAmount = this.editItem.value
         }
-        this.populateItems()
+        await this.populateItems()
       } else {
         this.isEdit = false
         this.clearForm()
@@ -272,13 +271,13 @@ export default {
       
       if (type === 'moreOne') {
         if (this.validate()) {
-          await this.createExpense()
+          await this.createIncome()
         }
       }
     },
     async validateAndCreate() {
       if (this.validate()) {
-        if (await this.createExpense()) {
+        if (await this.createIncome()) {
           this.$emit('update:model-value', false)
         }
       }
@@ -295,16 +294,14 @@ export default {
         try {
           this.loading = true
 
-          if (this.dataSend.value > 0) this.dataSend.value = -this.dataSend.value
-
-          const newItem = await ExpenseService.update(this.dataSend.id, this.dataSend)
+          const newItem = await IncomeService.update(this.dataSend.id, this.dataSend)
           newItem.type = this.type
 
           this.$emit('insert:item', newItem)
           this.$showMessage("Atualizado com sucesso!", "success")
           this.$emit('update:model-value', false)
         } catch {
-          this.$showMessage("Ocorreu um erro ao atualizar a despesa!", "error")
+          this.$showMessage("Ocorreu um erro ao atualizar a receita!", "error")
           return false
         } finally {
           this.loading = false
@@ -313,18 +310,17 @@ export default {
         return true
       }
     },
-    async createExpense() {
+    async createIncome() {
       try {
         this.loading = true
 
-        if (this.dataSend.value > 0) this.dataSend.value = -this.dataSend.value
-
-        const newItem = await ExpenseService.create(this.dataSend)
+        const newItem = await IncomeService.create(this.dataSend)
         newItem.type = this.type
+
         this.$emit('insert:item', newItem)
         this.$showMessage("Cadastro efetuado!", "success")
       } catch {
-        this.$showMessage("Ocorreu um erro ao cadastrar Receita!", "error")
+        this.$showMessage("Ocorreu um erro ao cadastrar a receita!", "error")
         return false
       } finally {
         this.loading = false

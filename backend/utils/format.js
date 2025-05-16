@@ -29,7 +29,7 @@ export function formatCardItem(card) {
     brand: card.brand,
     type: card.type,
     last_four_digits: card.numberLast4,
-    limit: card.limit,
+    card_limit: card.limit,
     due_date: card.dueDate,
     closing_date: card.closingDate,
     is_active: card.isActive,

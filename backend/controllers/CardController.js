@@ -10,9 +10,6 @@ const CardController = {
       const {
         account_id,
         name,
-        brand,
-        type,
-        last_four_digits,
         card_limit,
         due_date,
         closing_date,
@@ -23,8 +20,6 @@ const CardController = {
       const validation = validateRequiredFields({
         account_id,
         name,
-        brand,
-        last_four_digits,
         due_date,
         closing_date,
         is_active
@@ -34,9 +29,9 @@ const CardController = {
         return res.status(400).json({ message: validation.message })
       }
 
-      if (isInvalidType(card_limit, 'number')) return res.status(400).json({ message: '`card_limit` deve ser um numero valido' })
-      if (isInvalidType(type, 'number')) return res.status(400).json({ message: '`type` deve ser um numero valido' })
-      if (type < 1 || type > 2) return res.status(400).json({ message: '`type` somente aceita 1 (credito) e 2 (debito)' })
+      if (isInvalidType(card_limit, 'number')) {
+        return res.status(400).json({ message: '`card_limit` deve ser um numero valido' })
+      }
       if (isInvalidType(is_active, 'boolean')) {
         return res.status(400).json({ message: '`is_active` deve ser um booleano (true ou false).' })
       }
@@ -45,9 +40,6 @@ const CardController = {
         user,
         account: account_id,
         name,
-        brand,
-        type,
-        numberLast4: last_four_digits,
         limit: card_limit,
         dueDate: due_date,
         closingDate: closing_date,
@@ -63,7 +55,20 @@ const CardController = {
     try {
       const { account_id } = req.query
 
-      const cards = await Card.find({ user: req.user.id, account: account_id }).sort({ name: 1 })
+      const filter = { user: req.user.id }
+
+      if (account_id) {
+        if (account_id === 'null' || account_id === 'undefined') {
+          return res.status(400).json({
+            message: "O account_id esta invalido"
+          })
+        }
+        filter.account = account_id
+      }
+
+      console.log(filter)
+
+      const cards = await Card.find(filter).sort({ name: 1 })
       res.status(200).json(cards.map(card => formatCardItem(card)))
     } catch (error) {
       res.status(500).json({ message: 'Erro ao listar cartão', error })

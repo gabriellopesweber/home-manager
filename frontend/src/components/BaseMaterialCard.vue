@@ -47,7 +47,6 @@
 
 <script>
 export default {
-  name: "BaseMaterialCard",
   props: {
     title: {
       type: String,

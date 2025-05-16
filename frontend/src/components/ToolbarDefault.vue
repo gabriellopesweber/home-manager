@@ -54,7 +54,7 @@
         />
       </v-list-group>
       <v-list-group
-        value="mananger"
+        value="manager"
         prepend-icon="mdi-cash-multiple"
         color="primary"
       >

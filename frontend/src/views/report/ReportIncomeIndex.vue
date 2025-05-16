@@ -16,7 +16,6 @@ import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import IncomeService from '@/services/IncomeService'
 
 export default {
-  name: "ReportIncomeIndex",
   components: {
     BaseMaterialCard
   },

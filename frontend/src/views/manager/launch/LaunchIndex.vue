@@ -187,7 +187,7 @@
       @cancel="itemMarkedForDeletion = {}"
     />
 
-    <IncomeMananger
+    <IncomeManager
       :show-dialog="showIncome"
       :items-category="itemsCategoryIncome"
       :edit-item="itemMarkedForEdit"
@@ -198,7 +198,7 @@
       @insert:item="eventAfterCreate"
     />
 
-    <ExpenseMananger
+    <ExpenseManager
       :show-dialog="showExpense"
       :items-category="itemsCategoryExpense"
       :edit-item="itemMarkedForEdit"
@@ -209,7 +209,7 @@
       @insert:item="eventAfterCreate"
     />
 
-    <TransferMananger
+    <TransferManager
       :show-dialog="showTransfer"
       :edit-item="itemMarkedForEdit"
       @update:model-value="($event) => { 
@@ -236,17 +236,16 @@ import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import GlobalSelectPeriod from '@/components/GlobalSelectPeriod.vue'
 import GlobalConfirmEdit from '@/components/GlobalConfirmEdit.vue'
 import ActionSpeedDial from '@/components/ActionSpeedDial.vue'
-import IncomeMananger from '@/views/manager/launch/mananger/IncomeMananger.vue'
-import ExpenseMananger from '@/views/manager/launch/mananger/ExpenseMananger.vue'
-import TransferMananger from '@/views/manager/launch/mananger/TransferMananger.vue'
+import IncomeManager from '@/views/manager/launch/manager/IncomeManager.vue'
+import ExpenseManager from '@/views/manager/launch/manager/ExpenseManager.vue'
+import TransferManager from '@/views/manager/launch/manager/TransferManager.vue'
 
 export default {
-  name: "LaunchIndex",
   components: {
     BaseMaterialCard,
-    IncomeMananger,
-    ExpenseMananger,
-    TransferMananger,
+    IncomeManager,
+    ExpenseManager,
+    TransferManager,
     GlobalSelectPeriod,
     ActionSpeedDial,
     GlobalConfirmEdit
