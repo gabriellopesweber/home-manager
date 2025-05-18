@@ -135,10 +135,15 @@ const AccountController = {
 
       const isDeletedIncome = await Income.deleteMany({ user: req.user.id, account: id })
       const isDeletedExpense = await Expense.deleteMany({ user: req.user.id, account: id })
-      const isDeletedTransfer = await Transfer.deleteMany({ user: req.user.id, account: id })
+      const isDeletedTransferO = await Transfer.deleteMany({ user: req.user.id, originAccount: id })
+      const isDeletedTransferD = await Transfer.deleteMany({ user: req.user.id, destinationAccount: id })
 
-      if (!isDeletedIncome || !isDeletedExpense || !isDeletedTransfer) {
-        return res.status(400).json({ message: 'Falha ao excluir itens!' })
+      switch (false) {
+        case isDeletedIncome:
+        case isDeletedExpense:
+        case isDeletedTransferO:
+        case isDeletedTransferD:
+          return res.status(400).json({ message: 'Falha ao excluir itens!' })
       }
 
       const deletedAccount = await Account.findByIdAndDelete({ _id: id, user: req.user.id })

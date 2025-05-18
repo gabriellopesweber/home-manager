@@ -231,14 +231,18 @@ export default {
       const id = this.itemMarkedToManager.id
       try {
         this.loadingItem[id] = true
-        if (await AccountService.deleteById(id)) {
-          throw new Error
-        }
 
         if (this.isCardAssociated) {
-          if (await CardService.deleteById(id)) {
+
+        const cardId = this.itemsCard.find(card => card.account = id)
+
+        if (!await CardService.deleteById(cardId.id)) {
             throw new Error
           }
+        }
+        
+        if (!await AccountService.deleteById(id)) {
+          throw new Error
         }
 
         this.itemsAccount = this.itemsAccount.filter(item => item.id !== id)

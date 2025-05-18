@@ -2,21 +2,13 @@ import dayjs from "dayjs"
 import { Account, Expense, Income, Transfer } from "../models/Finance.js"
 import mongoose from "mongoose"
 
-class AppError extends Error {
-  constructor(message, statusCode) {
-    super(message)
-    this.name = 'AppError'
-    this.statusCode = statusCode
-  }
-}
-
 export async function getBalanceAtDate({ date, id, user, status = null }) {
   const accountQuery = { user }
   if (id) accountQuery._id = id
 
   const accounts = await Account.find(accountQuery)
 
-  if (accounts.length === 0) throw new AppError('Conta não encontrada!', 404)
+  if (accounts.length === 0) return 0
 
   let openingBalance = 0
 
@@ -56,16 +48,19 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
 
   const accounts = await Account.find(accountQuery)
 
-  if (accounts.length === 0) throw new AppError('Conta não encontrada!', 404)
+  if (accounts.length === 0) return 0
 
   const accountIds = accounts.map(acc => acc._id)
   const updateDate = dayjs(date).endOf('day').toDate()
 
+  let openingBalance = 0
   let totalIncome = 0
   let totalExpense = 0
   let totalTransfer = 0
 
   for (const account of accounts) {
+    const openingBalanceAccount = account.openingBalance || 0
+
     const matchBase = {
       account: account._id,
       date: { $lte: updateDate }
@@ -85,7 +80,13 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
 
     totalIncome += incomeAgg[0]?.total || 0
     totalExpense += expenseAgg[0]?.total || 0
+
+    console.log(openingBalanceAccount, totalIncome, totalExpense)
+    openingBalance += openingBalanceAccount + totalIncome - Math.abs(totalExpense)
+    console.log(openingBalance)
   }
+
+  console.log(openingBalance)
 
   const matchTransfer = {
     originAccount: { $in: accountIds },
@@ -103,6 +104,7 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
   return {
     income: totalIncome,
     expense: totalExpense,
-    transfer: totalTransfer
+    transfer: totalTransfer,
+    balance: openingBalance
   }
 }

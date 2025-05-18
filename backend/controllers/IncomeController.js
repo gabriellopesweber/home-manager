@@ -19,7 +19,6 @@ const IncomeController = {
         return res.status(400).json({ message: validation.message })
       }
 
-
       // Valida o tipo dos parametros recebidos
       if (typeof (category) !== "string") return res.status(400).json({ message: 'O parametro `category` deve ser do tipo String!' })
       if (typeof (value) !== "number") return res.status(400).json({ message: 'O parametro `value` deve ser do tipo Number!' })

@@ -155,6 +155,13 @@ export default {
     validate() {
       this.$refs.form.validate()
 
+      if (this.dataSend.closing_date && this.dataSend.due_date) {
+        if (this.dataSend.closing_date >= this.dataSend.due_date) {
+          this.$showMessage('A data de fechamento não pode ser maior ou igual a data de vencimento', 'warning')
+          return false
+        }
+      }
+
       return this.isValid
     },
     async validateAndManager() {

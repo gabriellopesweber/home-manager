@@ -44,6 +44,7 @@ const LaunchController = {
       const { final_date } = req.query
       const userId = req.user.id
 
+
       const resultConciliated = await getBalanceAtDate({ date: final_date, user: userId, status: statusFinance.CONCILIATED })
       const resultNotConciliated = await getBalanceAtDate({ date: final_date, user: userId })
 
@@ -53,11 +54,6 @@ const LaunchController = {
         predicted: resultNotConciliated
       })
     } catch (error) {
-      console.log(error)
-      if (error.statusCode === 404) {
-        return res.status(error.statusCode).json({ message: error.message })
-      }
-
       return res.status(500).json({ message: 'Erro ao executar a busca', error })
     }
   },
@@ -85,11 +81,6 @@ const LaunchController = {
         predicted: resultNotConciliated
       })
     } catch (error) {
-      console.log(error)
-      if (error.statusCode === 404) {
-        return res.status(error.statusCode).json({ message: error.message })
-      }
-
       return res.status(500).json({ message: 'Erro ao executar a busca detalhada', error })
     }
   }

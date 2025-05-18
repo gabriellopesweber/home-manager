@@ -30,7 +30,7 @@
           >
             <v-text-field
               v-model="maskedAmount"
-              label="Valor"
+              label="Saldo"
               prefix="R$"
               variant="outlined"
               :rules="[() => $validation('required', dataSend.balance)]"

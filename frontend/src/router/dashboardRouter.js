@@ -1,4 +1,4 @@
-import DashboardIndex from '@/views/DashboardIndex.vue'
+import DashboardIndex from '@/views/dashboard/DashboardIndex.vue'
 
 const dashboardRouter = [
   {

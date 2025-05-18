@@ -25,6 +25,8 @@
               <ActionSpeedDial
                 direction="left center"
                 default-tooltip-location="top"
+                default-color="error"
+                default-icon="mdi-cash-minus"
                 open-on-hover
                 :actions="actions"
                 :curenty-type="fabType"
@@ -252,8 +254,8 @@ export default {
   },
   data() {
     return {
-      fabType: 'receita',
-      actionsType: 'receita',
+      fabType: 'despesa',
+      actionsType: '',
       currentBalance: 0,
       predicted: 0,
       showIncome: false,
@@ -281,7 +283,7 @@ export default {
         {
           icon: 'mdi-cash-minus',
           text: 'Cadastrar Despesa',
-          color: 'red',
+          color: 'error',
           type: 'despesa'
         },
         {
@@ -459,6 +461,8 @@ export default {
           await IncomeService.update(item.id, item)
         else if (item.type === 'expense')
           await ExpenseService.update(item.id, item)
+        else if (item.type === 'transfer')
+          await TransferService.update(item.id, item)
         this.$showMessage('Status atualizado com sucesso!', 'success')
 
         await this.financialStatement()

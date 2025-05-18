@@ -66,8 +66,6 @@ const CardController = {
         filter.account = account_id
       }
 
-      console.log(filter)
-
       const cards = await Card.find(filter).sort({ name: 1 })
       res.status(200).json(cards.map(card => formatCardItem(card)))
     } catch (error) {
