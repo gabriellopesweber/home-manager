@@ -205,17 +205,30 @@
                       <v-row no-gutters>
                         <v-col
                           class="d-flex justify-end"
-                          cols="6"
+                          cols="2"
                         >
-                          <span class="font-weight-medium">
-                            Atual: 
+                          <v-icon
+                            icon="mdi-menu-up"
+                            color="success"
+                          />
+                        </v-col>
+                        <v-col class="d-flex justify-start ml-2">
+                          <span class="text-primary">
+                            {{ formatMoney(balanceDetailed.conciliated.transfer.in) }}
                           </span>
                         </v-col>
                         <v-col
-                          class="d-flex justify-start ml-2"
+                          class="d-flex justify-end"
+                          cols="2"
                         >
+                          <v-icon
+                            icon="mdi-menu-up"
+                            color="success"
+                          />
+                        </v-col>
+                        <v-col class="d-flex justify-start ml-2">
                           <span class="text-primary">
-                            {{ formatMoney(balanceDetailed.conciliated.transfer) }}
+                            {{ formatMoney(balanceDetailed.predicted.transfer.in) }}
                           </span>
                         </v-col>
                       </v-row>
@@ -224,17 +237,34 @@
                       <v-row no-gutters>
                         <v-col
                           class="d-flex justify-end"
-                          cols="6"
+                          cols="2"
                         >
-                          <span class="font-weight-medium">
-                            Previsto: 
-                          </span>
+                          <v-icon
+                            icon="mdi-menu-down"
+                            color="error"
+                          />
                         </v-col>
                         <v-col
                           class="d-flex justify-start ml-2"
                         >
                           <span class="text-primary">
-                            {{ formatMoney(balanceDetailed.predicted.transfer) }}
+                            {{ formatMoney(balanceDetailed.conciliated.transfer.out) }}
+                          </span>
+                        </v-col>
+                        <v-col
+                          class="d-flex justify-end"
+                          cols="2"
+                        >
+                          <v-icon
+                            icon="mdi-menu-down"
+                            color="error"
+                          />
+                        </v-col>
+                        <v-col
+                          class="d-flex justify-start ml-2"
+                        >
+                          <span class="text-primary">
+                            {{ formatMoney(balanceDetailed.predicted.transfer.total) }}
                           </span>
                         </v-col>
                       </v-row>

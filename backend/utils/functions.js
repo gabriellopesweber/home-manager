@@ -47,7 +47,6 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
   if (id) accountQuery._id = id
 
   const accounts = await Account.find(accountQuery)
-
   if (accounts.length === 0) return 0
 
   const accountIds = accounts.map(acc => acc._id)
@@ -56,7 +55,6 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
   let openingBalance = 0
   let totalIncome = 0
   let totalExpense = 0
-  let totalTransfer = 0
 
   for (const account of accounts) {
     const openingBalanceAccount = account.openingBalance || 0
@@ -78,33 +76,44 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
       ])
     ])
 
-    totalIncome += incomeAgg[0]?.total || 0
-    totalExpense += expenseAgg[0]?.total || 0
+    const income = incomeAgg[0]?.total || 0
+    const expense = expenseAgg[0]?.total || 0
 
-    console.log(openingBalanceAccount, totalIncome, totalExpense)
-    openingBalance += openingBalanceAccount + totalIncome - Math.abs(totalExpense)
-    console.log(openingBalance)
+    totalIncome += income
+    totalExpense += expense
+
+    openingBalance += openingBalanceAccount + income - Math.abs(expense)
   }
 
-  console.log(openingBalance)
-
-  const matchTransfer = {
-    originAccount: { $in: accountIds },
+  const baseMatch = {
     date: { $lte: updateDate },
     user: new mongoose.Types.ObjectId(user)
   }
-  if (status != null) matchTransfer.status = status
+  if (status != null) baseMatch.status = status
 
-  const transferAgg = await Transfer.aggregate([
-    { $match: matchTransfer },
-    { $group: { _id: null, total: { $sum: '$value' } } }
+  const [transferOutAgg, transferInAgg] = await Promise.all([
+    Transfer.aggregate([
+      { $match: { ...baseMatch, originAccount: { $in: accountIds } } },
+      { $group: { _id: null, total: { $sum: '$value' } } }
+    ]),
+    Transfer.aggregate([
+      { $match: { ...baseMatch, destinationAccount: { $in: accountIds } } },
+      { $group: { _id: null, total: { $sum: '$value' } } }
+    ])
   ])
-  totalTransfer = transferAgg[0]?.total || 0
+
+  const transferOut = transferOutAgg[0]?.total || 0
+  const transferIn = transferInAgg[0]?.total || 0
 
   return {
     income: totalIncome,
     expense: totalExpense,
-    transfer: totalTransfer,
+    transfer: {
+      in: transferIn,
+      out: transferOut,
+      total: transferIn + transferOut
+    },
     balance: openingBalance
   }
 }
+
