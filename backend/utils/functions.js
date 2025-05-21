@@ -111,7 +111,6 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
     transfer: {
       in: transferIn,
       out: transferOut,
-      total: transferIn + transferOut
     },
     balance: openingBalance
   }

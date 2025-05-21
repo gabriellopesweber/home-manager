@@ -89,7 +89,7 @@
               md="4"
             >
               <v-card
-                class="pa-2 text-center"
+                class="pa-2 text-center h-100"
                 border
               >
                 <v-card-subtitle>Receitas</v-card-subtitle>
@@ -100,8 +100,9 @@
                         <v-col
                           class="d-flex justify-end"
                           cols="6"
+                          align-self="center"
                         >
-                          <span class="font-weight-medium">
+                          <span class="text-body-1">
                             Atual: 
                           </span>
                         </v-col>
@@ -119,8 +120,9 @@
                         <v-col
                           class="d-flex justify-end"
                           cols="6"
+                          align-self="center"
                         >
-                          <span class="font-weight-medium">
+                          <span class="text-body-1">
                             Previsto: 
                           </span>
                         </v-col>
@@ -142,7 +144,7 @@
               md="4"
             >
               <v-card
-                class="pa-2 text-center"
+                class="pa-2 text-center h-100"
                 border
               >
                 <v-card-subtitle>Despesas</v-card-subtitle>
@@ -153,8 +155,9 @@
                         <v-col
                           class="d-flex justify-end"
                           cols="6"
+                          align-self="center"
                         >
-                          <span class="font-weight-medium">
+                          <span class="text-body-1">
                             Atual: 
                           </span>
                         </v-col>
@@ -172,8 +175,9 @@
                         <v-col
                           class="d-flex justify-end"
                           cols="6"
+                          align-self="center"
                         >
-                          <span class="font-weight-medium">
+                          <span class="text-body-1">
                             Previsto: 
                           </span>
                         </v-col>
@@ -203,6 +207,18 @@
                   <v-row no-gutters>
                     <v-col cols="12">
                       <v-row no-gutters>
+                        <v-col
+                          cols="12"
+                          md="6"
+                        > 
+                          <span class="text-body-1"> Atual </span>
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          md="6"
+                        > 
+                          <span class="text-body-1"> Previsto </span>
+                        </v-col>
                         <v-col
                           class="d-flex justify-end"
                           cols="2"
@@ -264,7 +280,7 @@
                           class="d-flex justify-start ml-2"
                         >
                           <span class="text-primary">
-                            {{ formatMoney(balanceDetailed.predicted.transfer.total) }}
+                            {{ formatMoney(balanceDetailed.predicted.transfer.out) }}
                           </span>
                         </v-col>
                       </v-row>
@@ -287,6 +303,7 @@ import { formatCurrencyMaskBR } from '@/utils/monetary.js'
 
 import LineChart from '@/components/LineChart.vue'
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
+import dashboardService from '@/services/dashboardService'
 
 export default {
   components: { BaseMaterialCard, LineChart },
@@ -323,9 +340,10 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
     this.getDataBalance()
     this.carregarDados()
+    console.log(await dashboardService.lastThreeTransactions())
   },
   methods: {
     async getDataBalance() {
