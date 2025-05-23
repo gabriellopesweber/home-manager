@@ -56,14 +56,14 @@
                         v-if="isHovering"
                         class="d-flex justify-center align-center"
                       >
-                        <v-btn
+                        <!-- <v-btn
                           v-tooltip:top="isCardCreated[account.id] ? 'Editar Cartão' : 'Cadastrar Cartão'"
                           icon="mdi-credit-card-outline"
                           rounded="circle"
                           color="primary"
                           size="small"
                           @click="handleShowEditCard(account.id)"
-                        />
+                        /> -->
                         <v-btn
                           v-tooltip:top="'Editar'"
                           class="ml-2"
@@ -268,16 +268,17 @@ export default {
         this.loadingItem[id] = false
       }
     },
-    handleShowEditCard(accountId) {
-      const find = this.itemsCard.find(card => card.account === accountId)
-      if (find) {
-        this.itemMarkedToManager = find
-      } else {
-        this.accountId = accountId
-      }
+    // Deixando comentada pois não há tempo para desenvolver o restante da logica para faturas
+    // handleShowEditCard(accountId) {
+    //   const find = this.itemsCard.find(card => card.account === accountId)
+    //   if (find) {
+    //     this.itemMarkedToManager = find
+    //   } else {
+    //     this.accountId = accountId
+    //   }
       
-      this.showCardManager = true
-    },
+    //   this.showCardManager = true
+    // },
     async searchCards() {
       this.itemsCard = await CardService.getAll()
       
