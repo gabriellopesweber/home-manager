@@ -4,8 +4,22 @@
     elevation="2"
     :title="title"
   >
+    <!-- Loader -->
+    <div v-if="loading">
+      <v-skeleton-loader
+        v-for="n in 3"
+        :key="n"
+        type="list-item-three-line"
+        class="ma-2"
+        elevation="2"
+        rounded="lg"
+        :loading="true"
+        boilerplate
+      />
+    </div>
+
     <v-list
-      v-if="lastThreeTransactions.length > 0"
+      v-else-if="lastThreeTransactions.length > 0"
       density="compact"
     >
       <v-list-item

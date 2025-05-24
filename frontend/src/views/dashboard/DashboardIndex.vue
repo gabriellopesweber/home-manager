@@ -24,11 +24,27 @@
         md="6"
       >
         <BaseMaterialCard
+          v-if="!loadingDataset"
           class="pa-4 h-100"
           elevation="2"
           title="Gráfico Financeiro"
         >
-          <LineChart :data="graficoSaldo" />
+          <v-row dense>
+            <v-col
+              class="d-flex justify-end"
+              cols="12"
+            >
+              <v-checkbox
+                v-model="statusMode"
+                label="Considerar movimentações não pagas"
+                hide-details
+                @update:model-value="updateStatus"
+              />
+            </v-col>
+            <v-col>
+              <BarChart :data="data" />
+            </v-col>
+          </v-row>
         </BaseMaterialCard>
       </v-col>
       
@@ -43,8 +59,9 @@
 <script>
 import dayjs from 'dayjs'
 import LaunchService from '@/services/LaunchService'
+import dashboardService from '@/services/dashboardService'
 
-import LineChart from '@/components/LineChart.vue'
+import BarChart from '@/components/BarChart.vue'
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import BalanceView from '@/views/dashboard/BalanceView.vue'
 import LastThreeTransactionsView from '@/views/dashboard/LastThreeTransactionsView.vue'
@@ -53,76 +70,67 @@ import FinancialSummary from '@/views/dashboard/FinancialSummary.vue'
 export default {
   components: {
     BaseMaterialCard,
-    LineChart,
+    BarChart,
     BalanceView,
     LastThreeTransactionsView,
     FinancialSummary
   },
   data() {
     return {
-      saldoAtual: 0,
       balanceDetailed: {
         conciliated: {
           income: 0,
           expense: 0,
-          transfer: 0,
+          transfer: {},
           balance: 0
         },
         predicted: {
           income: 0,
           expense: 0,
-          transfer: 0,
+          transfer: {},
           balance: 0
         }
       },
-      graficoSaldo: {},
-      resumo: {
-        receitas: 0,
-        despesas: 0,
-        investimentos: 0,
-      },
+      data: [],
+      statusMode: true,
+      status: null,
+      loadingDataset: false,
+      loadingBalance: false
     }
   },
   created() {
     this.getDataBalance()
-    this.carregarDados()
+    this.loadDatasets(this.status)
   },
   methods: {
     async getDataBalance() {
       try {
-        this.loading = true
+        this.loadingBalance = true
         this.balanceDetailed = await LaunchService.getDetailedBalanceData(dayjs().endOf('month').format('YYYY-MM-DD'))
       } catch {
-        this.$showMessage('Ocorre um erro inesperado ao carregar os dados', 'error')
+        this.$showMessage('Ocorre um erro inesperado ao buscar lançamentos', 'error')
       } finally {
-        this.loading = false
+        this.loadingBalance = false
       }
     },
-    async carregarDados() {
-      // Simulação de carregamento de dados (iremos substituir pela API real)
-      this.saldoAtual = 5000
-      this.ultimasTransacoes = [
-        { descricao: 'Salário', valor: '3000' },
-        { descricao: 'Aluguel', valor: '-1200' },
-        { descricao: 'Supermercado', valor: '400' },
-      ]
-      this.graficoSaldo = {
-        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
-        datasets: [{
-          label: 'Saldo',
-          data: [3000, 3500, 2800, 3200, 5000],
-          borderColor: 'blue'
-        }, { 
-          label: 'Despesas',
-          data: [1200, 1500, 1300, 1700, 2500],
-          borderColor: 'red'
-        }, { 
-          label: 'Receitas',
-          data: [4000, 5000, 4500, 5200, 6000],
-          borderColor: 'green'
-        }]
+    async loadDatasets(status) {
+      try {
+        this.loadingDataset = true
+        this.data = await dashboardService.getDatasets(status)
+      } catch {
+        this.$showMessage('Ocorre um erro inesperado ao carregar os dados do dashboard', 'error')
+      } finally {
+        this.loadingDataset = false
       }
-      this.resumo = { receitas: 6000, despesas: 2500, investimentos: 1500 }
+    },
+    updateStatus(selected) {
+      if (!selected) {
+        this.status = 0
+      } else {
+        this.status = null
+      }
+
+      this.loadDatasets(this.status)
     }
   }
 }

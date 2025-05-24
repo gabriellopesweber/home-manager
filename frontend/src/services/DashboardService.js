@@ -14,6 +14,18 @@ class DashboardService {
     }
   }
 
+  async getDatasets(status) {
+    try {
+      const filters = {}
+      if (typeof status === "number") filters.status = status
+
+      const queryString = new URLSearchParams(filters).toString()
+      const response = await axios.get(`${this.baseUrl}/datasets/?${queryString}`)
+      return response.data
+    } catch (error) {
+      throw error.response?.data || error
+    }
+  }
 
 }
 

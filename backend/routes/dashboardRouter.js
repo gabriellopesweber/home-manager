@@ -6,5 +6,6 @@ const router = express.Router()
 
 /**Rotas protegidas */
 router.get('/last-three-transactions', authMiddleware, DashboardController.lastThree)
+router.get('/datasets', authMiddleware, DashboardController.getDatasets)
 
 export default router
