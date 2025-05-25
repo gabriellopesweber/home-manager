@@ -47,7 +47,7 @@ export async function getBalanceDetailedAtDate({ date, id, user, status = null }
   if (id) accountQuery._id = id
 
   const accounts = await Account.find(accountQuery)
-  if (accounts.length === 0) return 0
+  if (accounts.length === 0) return null
 
   const accountIds = accounts.map(acc => acc._id)
   const updateDate = dayjs(date).endOf('day').toDate()

@@ -65,11 +65,11 @@ export default {
     },
     actual: {
       type: Number,
-      required: true
+      default: 0
     },
     predicted: {
       type: Number,
-      required: true
+      default: 0
     },
     icon: {
       type: String,

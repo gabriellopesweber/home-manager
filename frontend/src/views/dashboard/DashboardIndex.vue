@@ -5,8 +5,8 @@
       <!-- Saldo Atual -->
       <v-col cols="12">
         <BalanceView
-          :balance="balanceDetailed.conciliated.balance"
-          :predicted="balanceDetailed.predicted.balance"
+          :balance="balanceDetailed?.conciliated?.balance"
+          :predicted="balanceDetailed?.predicted?.balance"
         />
       </v-col>
       
@@ -77,20 +77,7 @@ export default {
   },
   data() {
     return {
-      balanceDetailed: {
-        conciliated: {
-          income: 0,
-          expense: 0,
-          transfer: {},
-          balance: 0
-        },
-        predicted: {
-          income: 0,
-          expense: 0,
-          transfer: {},
-          balance: 0
-        }
-      },
+      balanceDetailed: null,
       data: [],
       statusMode: true,
       status: null,
@@ -107,6 +94,9 @@ export default {
       try {
         this.loadingBalance = true
         this.balanceDetailed = await LaunchService.getDetailedBalanceData(dayjs().endOf('month').format('YYYY-MM-DD'))
+        if (Object.keys(this.balanceDetailed).length === 0) {
+          this.balanceDetailed = null
+        }
       } catch {
         this.$showMessage('Ocorre um erro inesperado ao buscar lançamentos', 'error')
       } finally {

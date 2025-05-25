@@ -47,11 +47,11 @@ export default {
   props: {
     balance: {
       type: Number,
-      required: true
+      default: 0
     },
     predicted: {
       type: Number,
-      required: true
+      default: 0
     }
   },
   data() {

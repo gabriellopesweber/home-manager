@@ -26,7 +26,7 @@
                 color="success"
                 class="mr-1"
               />
-              {{ formatMoney(transferConciliated.transfer.in) }}
+              {{ formatMoney(transferConciliated?.transfer?.in) }}
             </span>
           </v-col>
           <v-col
@@ -40,7 +40,7 @@
                 color="success"
                 class="mr-1"
               />
-              {{ formatMoney(transferPredicted.transfer.in) }}
+              {{ formatMoney(transferPredicted?.transfer?.in) }}
             </span>
           </v-col>
 
@@ -56,7 +56,7 @@
                 color="error"
                 class="mr-1"
               />
-              {{ formatMoney(transferConciliated.transfer.out) }}
+              {{ formatMoney(transferConciliated?.transfer?.out) }}
             </span>
           </v-col>
           <v-col
@@ -70,7 +70,7 @@
                 color="error"
                 class="mr-1"
               />
-              {{ formatMoney(transferPredicted.transfer.out) }}
+              {{ formatMoney(transferPredicted?.transfer?.out) }}
             </span>
           </v-col>
         </v-row>

@@ -7,22 +7,22 @@
     <v-row dense>
       <SummaryCard
         title="Receitas"
-        :actual="balanceDetailed.conciliated.income"
-        :predicted="balanceDetailed.predicted.income"
+        :actual="balanceDetailed?.conciliated?.income"
+        :predicted="balanceDetailed?.predicted?.income"
         icon="mdi-arrow-up-bold"
         color="success"
       />
       <SummaryCard
         title="Despesas"
-        :actual="balanceDetailed.conciliated.expense"
-        :predicted="balanceDetailed.predicted.expense"
+        :actual="balanceDetailed?.conciliated?.expense"
+        :predicted="balanceDetailed?.predicted?.expense"
         icon="mdi-arrow-down-bold"
         color="error"
       />
       
       <TransferCard 
-        :transfer-conciliated="balanceDetailed.conciliated"
-        :transfer-predicted="balanceDetailed.predicted"
+        :transfer-conciliated="balanceDetailed?.conciliated"
+        :transfer-predicted="balanceDetailed?.predicted"
       />
     </v-row>
   </BaseMaterialCard>
@@ -43,7 +43,7 @@ export default {
   props: {
     balanceDetailed: {
       type: Object,
-      required: true
+      default: () => ({})
     }
   },
   data() {

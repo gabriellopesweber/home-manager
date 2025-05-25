@@ -76,6 +76,10 @@ const LaunchController = {
         user: userId
       })
 
+      if (!resultConciliated || !resultNotConciliated) {
+        return res.status(200).json({})
+      }
+
       res.status(200).json({
         conciliated: resultConciliated,
         predicted: resultNotConciliated
