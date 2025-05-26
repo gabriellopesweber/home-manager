@@ -1,8 +1,8 @@
 import ReportIndex from '@/views/report/ReportIndex.vue'
 
 const reportRouter = [{
-  path: '/relatorio',
-  name: "report",
+  path: '/relatorios',
+  name: "reports",
   component: ReportIndex,
   meta: {
     requiresAuth: true

@@ -1,7 +1,15 @@
 <template>
   <BarChart
+    v-if="hasData"
     :data="chartData"
     :options="chartOptions"
+  />
+  <v-alert
+    v-else
+    type="info"
+    variant="outlined"
+    class="my-4"
+    text="Sem dados disponíveis para exibir o gráfico."
   />
 </template>
 
@@ -29,11 +37,20 @@ export default {
     }
   },
   computed: {
+    hasData() {
+      return (
+        this.data &&
+        Array.isArray(this.data.labels) &&
+        this.data.labels.length > 0 &&
+        Array.isArray(this.data.datasets) &&
+        this.data.datasets.length > 0
+      )
+    },
     chartData() {
       return {
-        labels: this.data.labels,
-        datasets: this.data.datasets.map((dataset) => {
-          const baseColor = dataset.borderColor || '#000000'
+        labels: this.data?.labels,
+        datasets: this.data?.datasets?.map((dataset) => {
+          const baseColor = dataset?.borderColor || '#000000'
 
           return {
             ...dataset,

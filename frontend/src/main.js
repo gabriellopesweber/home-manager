@@ -20,9 +20,11 @@ app.use(vuetify)
 app.use(router)
 app.use(messagePlugin)
 app.use(validationPlugin)
+
 dayjs.extend(customParseFormat)
 dayjs.extend(isSameOrAfter)
 dayjs.extend(isSameOrBefore)
+dayjs.locale('pt-br')
 
 setupInterceptors()
 

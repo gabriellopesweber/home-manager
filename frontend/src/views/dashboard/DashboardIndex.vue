@@ -106,7 +106,9 @@ export default {
     async loadDatasets(status) {
       try {
         this.loadingDataset = true
-        this.data = await dashboardService.getDatasets(status)
+        const start = dayjs().startOf('year').format('YYYY-MM-DD')
+        const end = dayjs().endOf('year').format('YYYY-MM-DD')
+        this.data = await dashboardService.getDatasets(status, start, end)
       } catch {
         this.$showMessage('Ocorre um erro inesperado ao carregar os dados do dashboard', 'error')
       } finally {

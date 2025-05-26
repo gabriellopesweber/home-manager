@@ -2,8 +2,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/pt-br.js'
 import mongoose from 'mongoose'
 import { Expense, Income, Transfer } from '../models/Finance.js'
-
-dayjs.locale('pt-br')
+import { validateRequiredFields } from '../utils/validations.js'
 
 const DashboardController = {
   async lastThree(req, res) {
@@ -67,14 +66,26 @@ const DashboardController = {
   async getDatasets(req, res) {
     try {
       const userId = req.user.id
-      const { status } = req.query
+      const { initial_date, final_date, status } = req.query
 
-      const start = dayjs().startOf('year').toDate()
-      const end = dayjs().endOf('year').toDate()
+      const validation = validateRequiredFields({ initial_date, final_date })
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message })
+      }
 
-      const monthLabels = Array.from({ length: 12 }, (_, i) =>
-        dayjs().month(i).format('MMMM')
-      )
+      const start = dayjs(initial_date).startOf('day').toDate()
+      const end = dayjs(final_date).endOf('day').toDate()
+
+      const monthLabels = []
+      let current = dayjs(initial_date).startOf('month')
+      const last = dayjs(final_date).startOf('month')
+
+      while (current.isBefore(last) || current.isSame(last, 'month')) {
+        monthLabels.push(current.locale('pt-br').format('MMMM'))
+        current = current.add(1, 'month')
+      }
+
+      const firstMonth = dayjs(initial_date).startOf('month').month()
 
       // Filtro base
       const baseMatch = {
@@ -86,7 +97,6 @@ const DashboardController = {
         baseMatch.status = Number(status)
       }
 
-      // Aggregation de receitas
       const incomes = await Income.aggregate([
         { $match: baseMatch },
         {
@@ -97,7 +107,6 @@ const DashboardController = {
         }
       ])
 
-      // Aggregation de despesas
       const expenses = await Expense.aggregate([
         { $match: baseMatch },
         {
@@ -108,11 +117,13 @@ const DashboardController = {
         }
       ])
 
-      const mapTo12Months = (data) => {
-        const result = new Array(12).fill(0)
+      const mapToPeriod = (data) => {
+        const result = new Array(monthLabels.length).fill(0)
         data.forEach(item => {
-          const monthIndex = item._id - 1
-          result[monthIndex] = Math.abs(item.total)
+          const relativeIndex = item._id - 1 - firstMonth
+          if (relativeIndex >= 0 && relativeIndex < result.length) {
+            result[relativeIndex] = Math.abs(item.total)
+          }
         })
         return result
       }
@@ -120,12 +131,12 @@ const DashboardController = {
       const datasets = [
         {
           label: 'Receitas',
-          data: mapTo12Months(incomes),
+          data: mapToPeriod(incomes),
           borderColor: 'green'
         },
         {
           label: 'Despesas',
-          data: mapTo12Months(expenses),
+          data: mapToPeriod(expenses),
           borderColor: 'red'
         }
       ]

@@ -14,10 +14,12 @@ class DashboardService {
     }
   }
 
-  async getDatasets(status) {
+  async getDatasets(status, initial_date, final_date) {
     try {
       const filters = {}
       if (typeof status === "number") filters.status = status
+      filters.initial_date = initial_date
+      filters.final_date = final_date
 
       const queryString = new URLSearchParams(filters).toString()
       const response = await axios.get(`${this.baseUrl}/datasets/?${queryString}`)

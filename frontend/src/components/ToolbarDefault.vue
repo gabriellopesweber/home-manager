@@ -32,7 +32,7 @@
         link
         prepend-icon="mdi-receipt-text-outline"
         title="Relatórios"
-        :to="{ name: 'report' }"
+        :to="{ name: 'reports' }"
         active-class="text-primary"
       />
 
