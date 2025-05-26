@@ -1,58 +1,42 @@
 <template>
-  <v-navigation-drawer v-model="menu">
+  <v-navigation-drawer
+    v-model="menu"
+    :rail="!menu"
+    expand-on-hover
+  >
     <v-list
       density="comfortable"
       nav
     >
+      <!-- Logo -->
       <v-list-item>
-        <template #title>
-          <div class="d-flex align-center justify-center">
-            <img
-              class="mx-auto"
-              :src="myLogo"
-              style="height: 75px"
-            >
-          </div>
-        </template>
+        <v-img
+          :src="myLogo"
+          height="75"
+          class="mx-auto"
+          alt="Logo"
+        />
       </v-list-item>
+
       <v-divider class="mb-2" />
-      <v-list-item 
+
+      <!-- Itens de Navegação -->
+      <v-list-item
         link
         prepend-icon="mdi-view-dashboard"
-        color="primary"
         title="Dashboard"
         :to="{ name: 'dashboard' }"
+        active-class="text-primary"
       />
-      <v-list-group
-        value="reports"
+      <v-list-item
+        link
         prepend-icon="mdi-receipt-text-outline"
-        color="primary"
-      >
-        <template #activator="{ props }">
-          <v-list-item
-            v-bind="props"
-            link
-            color="primary"
-            title="Relatórios"
-          />
-        </template>
+        title="Relatórios"
+        :to="{ name: 'report' }"
+        active-class="text-primary"
+      />
 
-        <v-list-item
-          prepend-icon="mdi-receipt-text-arrow-right-outline"
-          title="Receitas"
-          color="primary"
-          link
-          :to="{ name: 'report.income' }"
-        />
-        
-        <v-list-item
-          link 
-          prepend-icon="mdi-receipt-text-arrow-left-outline"
-          title="Despesas"
-          color="primary"
-          :to="{ name: 'report.expense' }"
-        />
-      </v-list-group>
+      <!-- Subgrupo: Gerenciamento -->
       <v-list-group
         value="manager"
         prepend-icon="mdi-cash-multiple"
@@ -62,48 +46,54 @@
           <v-list-item
             v-bind="props"
             title="Gerenciamento"
-            color="primary"
             link
+            active-class="text-primary"
           />
         </template>
 
         <v-list-item
           title="Lançamentos"
           prepend-icon="mdi-finance"
-          color="primary"
           link
           :to="{ name: 'manager.launch' }"
+          active-class="text-primary"
         />
         <v-list-item
-          prepend-icon="mdi-bank"
           title="Contas"
-          color="primary"
+          prepend-icon="mdi-bank"
           link
           :to="{ name: 'manager.account' }"
+          active-class="text-primary"
         />
       </v-list-group>
     </v-list>
   </v-navigation-drawer>
 
-  <v-app-bar>
+  <!-- Barra Superior -->
+  <v-app-bar elevation="2">
     <v-btn
       v-tooltip:right="!menu ? 'Abrir menu lateral' : 'Fechar menu lateral'"
       :icon="menu ? 'mdi-menu-open' : 'mdi-menu-close'"
       rounded="circle"
+      aria-label="Alternar menu lateral"
       @click="menu = !menu"
     />
+
     <v-spacer />
-    <v-list>
-      <v-list-item>
+
+    <v-tooltip location="bottom">
+      <template #activator="{ props }">
         <v-btn
           v-if="authStore.isAuthenticated"
+          icon
+          v-bind="props"
           @click="logout"
         >
-          <v-icon> mdi-logout </v-icon>
-          Sair
+          <v-icon>mdi-logout</v-icon>
         </v-btn>
-      </v-list-item>
-    </v-list>
+      </template>
+      <span>Sair</span>
+    </v-tooltip>
   </v-app-bar>
 </template>
 
@@ -126,10 +116,15 @@ export default {
   methods: {
     logout () {
       this.authStore.logout()
-      this.router.push({
-        name: 'login'
-      })
+      this.router.push({ name: 'login' })
     }
   }
 }
 </script>
+
+<style scoped>
+/* Se quiser uma aparência mais moderna com bordas arredondadas, adicione aqui */
+.v-navigation-drawer {
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+</style>
