@@ -1,10 +1,8 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/pt-br.js'
 import mongoose from 'mongoose'
-import { Expense, Income, Transfer } from '../models/Finance.js'
+import { Account, Expense, Income, Transfer } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
-import { getBalanceAtDate } from '../utils/functions.js'
-import { statusFinance } from '../constants/Finance.js'
 
 const DashboardController = {
   async lastThree(req, res) {
@@ -78,16 +76,20 @@ const DashboardController = {
       const start = dayjs(initial_date).startOf('day')
       const end = dayjs(final_date).endOf('day')
 
+      // 1. Buscar contas do usuário e somar os saldos iniciais
+      const accounts = await Account.find({ user: userId })
+      const totalOpeningBalance = accounts.reduce((sum, acc) => sum + (acc.openingBalance || 0), 0)
+
+      // 2. Construir filtro base
       const baseMatch = {
         user: new mongoose.Types.ObjectId(userId),
         date: { $gte: start.toDate(), $lte: end.toDate() }
       }
-
       if (status !== undefined) {
         baseMatch.status = Number(status)
       }
 
-      // Função utilitária para agregação mensal
+      // 3. Função para agregação por mês
       const getMonthlyAggregates = async ({ model, match }) => {
         return model.aggregate([
           { $match: match },
@@ -103,28 +105,25 @@ const DashboardController = {
         ])
       }
 
-      // Busca receitas e despesas agregadas por mês
       const [incomesAgg, expensesAgg] = await Promise.all([
         getMonthlyAggregates({ model: Income, match: baseMatch }),
         getMonthlyAggregates({ model: Expense, match: baseMatch })
       ])
 
-      // Mapeia os dados para cada mês
+      // 4. Mapear dados mensais
       const monthlyData = {}
-
       incomesAgg.forEach(({ _id, total }) => {
         const key = `${_id.year}-${_id.month}`
         if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 }
         monthlyData[key].income = total
       })
-
       expensesAgg.forEach(({ _id, total }) => {
         const key = `${_id.year}-${_id.month}`
         if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 }
         monthlyData[key].expense = total
       })
 
-      // Construção dos arrays de saída
+      // 5. Construir arrays de saída
       const monthLabels = []
       const incomeData = []
       const expenseData = []
@@ -132,16 +131,22 @@ const DashboardController = {
 
       let current = start.startOf('month')
       const last = end.startOf('month')
+      let accumulatedBalance = totalOpeningBalance
 
       while (current.isBefore(last) || current.isSame(last, 'month')) {
         const key = `${current.year()}-${current.month() + 1}`
         const label = current.locale('pt-br').format('MMMM')
         const data = monthlyData[key] || { income: 0, expense: 0 }
 
+        const income = data.income
+        const expense = data.expense
+
+        accumulatedBalance += income - Math.abs(expense)
+
         monthLabels.push(label)
-        incomeData.push(data.income)
-        expenseData.push(data.expense)
-        balanceData.push(data.income - data.expense)
+        incomeData.push(income)
+        expenseData.push(-expense)
+        balanceData.push(accumulatedBalance)
 
         current = current.add(1, 'month')
       }

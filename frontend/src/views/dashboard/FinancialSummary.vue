@@ -33,7 +33,6 @@ import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import SummaryCard from '@/views/dashboard/SummaryCard.vue'
 import TransferCard from '@/views/dashboard/TransferCard.vue'
 
-
 export default {
   components: {
     BaseMaterialCard,

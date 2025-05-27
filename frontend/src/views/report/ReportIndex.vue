@@ -69,6 +69,7 @@
           <v-data-table
             :headers="header"
             :items="itemsByLabels"
+            hover
           />
         </v-tabs-window-item>
         <v-tabs-window-item value="two">
@@ -131,12 +132,13 @@ export default {
             income: formatCurrencyMaskBR(income),
             expense: formatCurrencyMaskBR(expense),
             result: formatCurrencyMaskBR(result),
-            balance: formatCurrencyMaskBR(balance)
+            resultClass: result >= 0 ? 'text-green' : 'text-error',
+            balance: formatCurrencyMaskBR(balance),
+            balanceClass: balance >= 0 ? 'text-green' : 'text-error',
           }
         })
       })
     }
-
   },
   methods: {
     async searchDatasets(status) {
