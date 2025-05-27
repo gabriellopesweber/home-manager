@@ -9,6 +9,7 @@
     type="info"
     variant="outlined"
     class="my-4"
+    prominent
     text="Sem dados disponíveis para exibir o gráfico."
   />
 </template>
@@ -65,7 +66,7 @@ export default {
     chartOptions() {
       return {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: false,
         plugins: {
           tooltip: {
             backgroundColor: '#1e1e2f',

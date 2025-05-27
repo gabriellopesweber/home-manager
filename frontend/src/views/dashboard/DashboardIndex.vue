@@ -42,7 +42,10 @@
               />
             </v-col>
             <v-col>
-              <BarChart :data="data" />
+              <BarChart
+                height="300"
+                :data="data"
+              />
             </v-col>
           </v-row>
         </BaseMaterialCard>

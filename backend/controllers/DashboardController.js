@@ -3,6 +3,8 @@ import 'dayjs/locale/pt-br.js'
 import mongoose from 'mongoose'
 import { Expense, Income, Transfer } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
+import { getBalanceAtDate } from '../utils/functions.js'
+import { statusFinance } from '../constants/Finance.js'
 
 const DashboardController = {
   async lastThree(req, res) {
@@ -73,48 +75,55 @@ const DashboardController = {
         return res.status(400).json({ message: validation.message })
       }
 
-      const start = dayjs(initial_date).startOf('day').toDate()
-      const end = dayjs(final_date).endOf('day').toDate()
+      const start = dayjs(initial_date).startOf('day')
+      const end = dayjs(final_date).endOf('day')
 
       const monthLabels = []
-      let current = dayjs(initial_date).startOf('month')
-      const last = dayjs(final_date).startOf('month')
+      const balanceByMonth = []
+
+      let current = start.startOf('month')
+      const last = end.startOf('month')
 
       while (current.isBefore(last) || current.isSame(last, 'month')) {
         monthLabels.push(current.locale('pt-br').format('MMMM'))
+
+        const lastDayOfMonth = current.endOf('month').format("YYYY-MM-DD")
+        const balance = await getBalanceAtDate({ date: lastDayOfMonth, user: userId, status: statusFinance.PENDING })
+        balanceByMonth.push(balance)
+
         current = current.add(1, 'month')
       }
 
-      const firstMonth = dayjs(initial_date).startOf('month').month()
+      const firstMonth = start.startOf('month').month()
 
-      // Filtro base
       const baseMatch = {
         user: new mongoose.Types.ObjectId(userId),
-        date: { $gte: start, $lte: end }
+        date: { $gte: start.toDate(), $lte: end.toDate() }
       }
 
       if (status !== undefined) {
         baseMatch.status = Number(status)
       }
 
-      const incomes = await Income.aggregate([
-        { $match: baseMatch },
-        {
-          $group: {
-            _id: { $month: '$date' },
-            total: { $sum: '$value' }
+      const [incomes, expenses] = await Promise.all([
+        Income.aggregate([
+          { $match: baseMatch },
+          {
+            $group: {
+              _id: { $month: '$date' },
+              total: { $sum: '$value' }
+            }
           }
-        }
-      ])
-
-      const expenses = await Expense.aggregate([
-        { $match: baseMatch },
-        {
-          $group: {
-            _id: { $month: '$date' },
-            total: { $sum: '$value' }
+        ]),
+        Expense.aggregate([
+          { $match: baseMatch },
+          {
+            $group: {
+              _id: { $month: '$date' },
+              total: { $sum: '$value' }
+            }
           }
-        }
+        ])
       ])
 
       const mapToPeriod = (data) => {
@@ -141,8 +150,9 @@ const DashboardController = {
         }
       ]
 
-      return res.json({ labels: monthLabels, datasets })
+      return res.json({ labels: monthLabels, datasets, balances: balanceByMonth })
     } catch (error) {
+      console.error(error)
       return res.status(500).json({ message: 'Erro ao listar dados de montagem para dashboard' })
     }
   }
