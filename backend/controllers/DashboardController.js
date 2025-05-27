@@ -78,24 +78,6 @@ const DashboardController = {
       const start = dayjs(initial_date).startOf('day')
       const end = dayjs(final_date).endOf('day')
 
-      const monthLabels = []
-      const balanceByMonth = []
-
-      let current = start.startOf('month')
-      const last = end.startOf('month')
-
-      while (current.isBefore(last) || current.isSame(last, 'month')) {
-        monthLabels.push(current.locale('pt-br').format('MMMM'))
-
-        const lastDayOfMonth = current.endOf('month').format("YYYY-MM-DD")
-        const balance = await getBalanceAtDate({ date: lastDayOfMonth, user: userId, status: statusFinance.PENDING })
-        balanceByMonth.push(balance)
-
-        current = current.add(1, 'month')
-      }
-
-      const firstMonth = start.startOf('month').month()
-
       const baseMatch = {
         user: new mongoose.Types.ObjectId(userId),
         date: { $gte: start.toDate(), $lte: end.toDate() }
@@ -105,52 +87,84 @@ const DashboardController = {
         baseMatch.status = Number(status)
       }
 
-      const [incomes, expenses] = await Promise.all([
-        Income.aggregate([
-          { $match: baseMatch },
+      // Função utilitária para agregação mensal
+      const getMonthlyAggregates = async ({ model, match }) => {
+        return model.aggregate([
+          { $match: match },
           {
             $group: {
-              _id: { $month: '$date' },
-              total: { $sum: '$value' }
-            }
-          }
-        ]),
-        Expense.aggregate([
-          { $match: baseMatch },
-          {
-            $group: {
-              _id: { $month: '$date' },
-              total: { $sum: '$value' }
+              _id: {
+                year: { $year: "$date" },
+                month: { $month: "$date" }
+              },
+              total: { $sum: "$value" }
             }
           }
         ])
+      }
+
+      // Busca receitas e despesas agregadas por mês
+      const [incomesAgg, expensesAgg] = await Promise.all([
+        getMonthlyAggregates({ model: Income, match: baseMatch }),
+        getMonthlyAggregates({ model: Expense, match: baseMatch })
       ])
 
-      const mapToPeriod = (data) => {
-        const result = new Array(monthLabels.length).fill(0)
-        data.forEach(item => {
-          const relativeIndex = item._id - 1 - firstMonth
-          if (relativeIndex >= 0 && relativeIndex < result.length) {
-            result[relativeIndex] = Math.abs(item.total)
-          }
-        })
-        return result
+      // Mapeia os dados para cada mês
+      const monthlyData = {}
+
+      incomesAgg.forEach(({ _id, total }) => {
+        const key = `${_id.year}-${_id.month}`
+        if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 }
+        monthlyData[key].income = total
+      })
+
+      expensesAgg.forEach(({ _id, total }) => {
+        const key = `${_id.year}-${_id.month}`
+        if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 }
+        monthlyData[key].expense = total
+      })
+
+      // Construção dos arrays de saída
+      const monthLabels = []
+      const incomeData = []
+      const expenseData = []
+      const balanceData = []
+
+      let current = start.startOf('month')
+      const last = end.startOf('month')
+
+      while (current.isBefore(last) || current.isSame(last, 'month')) {
+        const key = `${current.year()}-${current.month() + 1}`
+        const label = current.locale('pt-br').format('MMMM')
+        const data = monthlyData[key] || { income: 0, expense: 0 }
+
+        monthLabels.push(label)
+        incomeData.push(data.income)
+        expenseData.push(data.expense)
+        balanceData.push(data.income - data.expense)
+
+        current = current.add(1, 'month')
       }
 
       const datasets = [
         {
           label: 'Receitas',
-          data: mapToPeriod(incomes),
+          data: incomeData,
           borderColor: 'green'
         },
         {
           label: 'Despesas',
-          data: mapToPeriod(expenses),
+          data: expenseData,
           borderColor: 'red'
+        },
+        {
+          label: 'Saldo',
+          data: balanceData,
+          borderColor: 'blue'
         }
       ]
 
-      return res.json({ labels: monthLabels, datasets, balances: balanceByMonth })
+      return res.json({ labels: monthLabels, datasets })
     } catch (error) {
       console.error(error)
       return res.status(500).json({ message: 'Erro ao listar dados de montagem para dashboard' })

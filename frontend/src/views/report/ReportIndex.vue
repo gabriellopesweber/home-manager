@@ -113,27 +113,30 @@ export default {
       if (!Array.isArray(this.items) || this.items.length === 0) return []
 
       return this.items.flatMap(item => {
-        const { labels, datasets, balances } = item
+        const { labels, datasets } = item
         if (!Array.isArray(labels) || !Array.isArray(datasets)) return []
 
         const receitas = datasets.find(ds => ds.label === 'Receitas')?.data || []
         const despesas = datasets.find(ds => ds.label === 'Despesas')?.data || []
+        const saldo = datasets.find(ds => ds.label === 'Saldo')?.data || []
 
         return labels.map((month, index) => {
           const income = receitas[index] || 0
-          const expense = -despesas[index] || 0
+          const expense = despesas[index] || 0
           const result = income - Math.abs(expense)
-          const balanceR = balances[index] || 0
+          const balance = saldo[index] || 0
+
           return {
             month: month.charAt(0).toUpperCase() + month.slice(1),
             income: formatCurrencyMaskBR(income),
             expense: formatCurrencyMaskBR(expense),
             result: formatCurrencyMaskBR(result),
-            balance: formatCurrencyMaskBR(balanceR)
+            balance: formatCurrencyMaskBR(balance)
           }
         })
       })
     }
+
   },
   methods: {
     async searchDatasets(status) {
