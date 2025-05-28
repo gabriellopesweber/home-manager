@@ -1,21 +1,31 @@
 import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router/router'
-import 'vuetify/styles'
-import '@mdi/font/css/materialdesignicons.css'
-import { createVuetify } from 'vuetify'
-import 'vuetify/styles'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+import { createPinia } from "pinia"
 
-const vuetify = createVuetify({
-    components,
-    directives,
-})
+import App from './App.vue'
+import router from './router/index'
+import vuetify from './plugins/vuetify'
+import validationPlugin from "@/plugins/validationPlugin"
+import messagePlugin from "@/plugins/messagePlugin"
+import { setupInterceptors } from './services/interceptor'
+import '@/assets/global.css'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 
 const app = createApp(App)
 
+app.use(createPinia())
 app.use(vuetify)
 app.use(router)
+app.use(messagePlugin)
+app.use(validationPlugin)
+
+dayjs.extend(customParseFormat)
+dayjs.extend(isSameOrAfter)
+dayjs.extend(isSameOrBefore)
+dayjs.locale('pt-br')
+
+setupInterceptors()
 
 app.mount('#app')

@@ -1,9 +1,6 @@
 # Node.js (Frontend e Backend)
 node_modules/
 dist/
-.env
-.env.local
-.env.*.local
 
 # Logs
 npm-debug.log*
@@ -33,3 +30,8 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 jest/
+
+# Envs
+.env.development
+.env.release
+.env.production
