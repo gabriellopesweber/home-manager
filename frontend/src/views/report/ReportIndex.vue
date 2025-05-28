@@ -36,9 +36,6 @@
         <v-tab value="one">
           Entrada X Saida
         </v-tab>
-        <v-tab value="two">
-          Contas
-        </v-tab>
       </v-tabs>
 
       <v-tabs-window v-model="tab">
@@ -69,11 +66,9 @@
           <v-data-table
             :headers="header"
             :items="itemsByLabels"
+            :cell-props="customCell"
             hover
           />
-        </v-tabs-window-item>
-        <v-tabs-window-item value="two">
-          Contas
         </v-tabs-window-item>
       </v-tabs-window>
     </BaseMaterialCard>
@@ -132,9 +127,9 @@ export default {
             income: formatCurrencyMaskBR(income),
             expense: formatCurrencyMaskBR(expense),
             result: formatCurrencyMaskBR(result),
-            resultClass: result >= 0 ? 'text-green' : 'text-error',
             balance: formatCurrencyMaskBR(balance),
-            balanceClass: balance >= 0 ? 'text-green' : 'text-error',
+            resultRaw: result,
+            balanceRaw: balance
           }
         })
       })
@@ -170,6 +165,19 @@ export default {
       this.finalDate = period.finalPeriod
       this.searchDatasets(this.status)
     },
+    customCell({ column, item }) {
+      if (!item || !column) return {}
+
+      if (column.value === 'result') {
+        return { class: Number(item.resultRaw) >= 0 ? 'text-green' : 'text-error' }
+      }
+
+      if (column.value === 'balance') {
+        return { class: Number(item.balanceRaw) >= 0 ? 'text-green' : 'text-error' }
+      }
+
+      return {}
+    }
   }
 }
 </script>

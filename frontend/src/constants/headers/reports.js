@@ -18,15 +18,9 @@ const headerReports = [{
 }, {
   title: 'Resultado',
   value: 'result',
-  cellProps: item => ({
-    class: item.resultClass,
-  })
 }, {
   title: 'Saldo',
   value: 'balance',
-  cellProps: item => ({
-    class: item.balanceClass,
-  })
 }].map(h => ({ ...h, nowrap: true }))
 
 export { headerReports }
