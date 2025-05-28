@@ -139,7 +139,7 @@ export default {
     async searchDatasets(status) {
       try {
         this.loading = true
-        console.log("OI")
+
         if (this.initialDate && this.finalDate) {
           this.data = await dashboardService.getDatasets(status, this.initialDate, this.finalDate)
           this.items = [this.data]
