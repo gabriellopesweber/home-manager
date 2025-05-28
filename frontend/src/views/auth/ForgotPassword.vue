@@ -68,7 +68,7 @@
 
 <script>
 import BaseMaterialCard from "@/components/BaseMaterialCard.vue"
-import AuthService from "@/services/AuthService"
+import AuthService from "@/services/authService"
 
 export default {
   components: {

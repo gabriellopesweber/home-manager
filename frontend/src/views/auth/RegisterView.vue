@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import AuthService from "@/services/authService.js"
+import AuthService from "@/services/authService"
 
 import BaseMaterialCard from "@/components/BaseMaterialCard.vue"
 

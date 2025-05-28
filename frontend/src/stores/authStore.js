@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import AuthService from "@/services/AuthService"
+import AuthService from "@/services/authService"
 import dayjs from "dayjs"
 
 export const useAuthStore = defineStore("authorization", {
