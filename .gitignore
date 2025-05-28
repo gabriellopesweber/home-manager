@@ -1,5 +1,6 @@
 # Node.js (Frontend e Backend)
 node_modules/
+dist/
 
 # Logs
 npm-debug.log*
