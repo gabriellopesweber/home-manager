@@ -11,7 +11,7 @@
             md="3"
             class="d-flex align-center"
           >
-            <span> Relatórios </span>
+            <span> Relatórios </span> 
           </v-col>
 
           <v-col
