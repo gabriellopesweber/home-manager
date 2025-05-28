@@ -98,7 +98,7 @@
 import { formatCurrencyMaskBR } from '@/utils/monetary.js'
 
 import dayjs from 'dayjs'
-import dashboardService from '@/services/dashboardService'
+import dashboardService from '@/services/DashboardService'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 
