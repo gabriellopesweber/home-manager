@@ -14,8 +14,6 @@ export async function getBalanceAtDate({ date, id, user, status = null }) {
 
   for (const account of accounts) {
     const updateDate = dayjs(date).endOf('day').toDate()
-    console.log(account.name)
-    console.log(dayjs(date).endOf('day').format('YYYY-MM-DD'))
     const openingBalanceAccount = account.openingBalance || 0
 
     const matchBase = {
@@ -39,8 +37,6 @@ export async function getBalanceAtDate({ date, id, user, status = null }) {
     const totalExpense = expenseAgg[0]?.total || 0
 
     openingBalance += openingBalanceAccount + totalIncome - Math.abs(totalExpense)
-
-    console.log("Balance:", openingBalance)
   }
 
   return openingBalance

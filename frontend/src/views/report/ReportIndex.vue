@@ -143,7 +143,6 @@ export default {
         if (this.initialDate && this.finalDate) {
           this.data = await dashboardService.getDatasets(status, this.initialDate, this.finalDate)
           this.items = [this.data]
-          console.log()
         }
       } catch {
         this.$showMessage('Ocorre um problema ao buscar dados do grafico!', 'error')
