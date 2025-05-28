@@ -1,0 +1,35 @@
+name: Deploy Frontend (develop) to GitHub Pages
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Instalar dependências do frontend
+        working-directory: ./frontend
+        run: yarn
+
+      - name: Gerar build do frontend
+        working-directory: ./frontend
+        run: yarn run build
+
+      - name: Deploy para GitHub Pages (pasta /develop)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
+          destination_dir: develop
+          publish_branch: gh-pages
