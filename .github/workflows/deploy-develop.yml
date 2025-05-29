@@ -24,7 +24,9 @@ jobs:
 
       - name: Gerar build do frontend
         working-directory: ./frontend
-        run: yarn run build
+        run: yarn run build --mode development
+        env:
+          VITE_API_URL: https://home-manager-q581.onrender.com
 
       - name: Deploy para GitHub Pages (pasta /develop)
         uses: peaceiris/actions-gh-pages@v3
