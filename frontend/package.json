@@ -9,7 +9,10 @@
     "build-release": "vite build --mode release",
     "build-prod": "vite build --mode production",
     "build-code": "vite build --mode code",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test:e2e": "start-server-and-test dev http://localhost:5173 cy:run"
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
@@ -25,9 +28,12 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "5.2.3",
     "concurrently": "9.1.2",
+    "cypress": "^14.4.0",
+    "dotenv": "^16.5.0",
     "eslint": "9.24.0",
     "eslint-plugin-vue": "10.0.0",
     "eslint-plugin-vuetify": "2.5.2",
+    "start-server-and-test": "^2.0.12",
     "vite": "6.3.2",
     "vite-plugin-checker": "0.9.1",
     "vite-plugin-static-copy": "^3.0.0",

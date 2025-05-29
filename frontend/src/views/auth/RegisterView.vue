@@ -36,6 +36,7 @@
                 v-model="name"
                 variant="outlined"
                 label="Seu nome"
+                name="name"
                 clearable
                 :rules="[() => $validation('required', name)]"
                 @keyup.enter="register"
@@ -48,6 +49,7 @@
                 v-model="email"
                 variant="outlined"
                 label="E-mail"
+                name="email"
                 clearable
                 :rules="[() => $validation('required', email), () => $validation('email', email)]"
                 @keyup.enter="register"
@@ -61,6 +63,7 @@
                 type="password"
                 variant="outlined"
                 label="Senha"
+                name="senha"
                 clearable
                 :rules="[() => $validation('required', password), () => $validation('passwordStrength', password)]"
                 @keyup.enter="register"
@@ -82,6 +85,7 @@
                 <v-btn
                   class="bg-success"
                   :loading="loading"
+                  type="submit"
                   @click="register"
                 >
                   Cadastrar

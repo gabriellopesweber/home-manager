@@ -35,6 +35,7 @@
                 v-model="email"
                 variant="outlined"
                 label="E-mail"
+                name="email"
                 clearable
                 :rules="[() => $validation('required', email), () => $validation('email', email)]"
                 @keyup.enter="login"
@@ -49,6 +50,7 @@
                 variant="outlined"
                 clearable
                 label="Senha"
+                name="senha"
                 :rules="[() => $validation('required', password)]"
                 @keyup.enter="login"
               />
@@ -59,6 +61,7 @@
               <v-btn
                 color="primary"
                 :loading="loading"
+                type="submit"
                 @click="login"
               >
                 <span> Entrar </span>

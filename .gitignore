@@ -27,9 +27,9 @@ frontend/dist/
 
 # Testes e cobertura de código
 coverage/
-cypress/videos/
-cypress/screenshots/
-jest/
+frontend/cypress/videos/
+frontend/cypress/screenshots/
+backend/jest/
 
 # Envs
 .env.development
