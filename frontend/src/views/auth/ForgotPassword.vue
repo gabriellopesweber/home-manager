@@ -9,6 +9,7 @@
       justify="center"
     >
       <BaseMaterialCard
+        elevation="5"
         width="500"
       >
         <template #title>
