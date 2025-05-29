@@ -120,12 +120,28 @@ const UserController = {
       })
 
       // Envia o e-mail com o link de redefinição
-      const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`
+      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
+
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.email,
         subject: "Recuperação de Senha - HomeManager",
-        text: `Clique no link para redefinir sua senha: ${resetLink}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #ddd;">
+            <h2 style="color: #4CAF50;">Olá, ${user.name || ''}!</h2>
+            <p>Recebemos uma solicitação para redefinir a sua senha no <strong>HomeManager</strong>.</p>
+            <p>Para redefinir, clique no botão abaixo:</p>
+            <p style="text-align: center;">
+              <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+                Redefinir Senha
+              </a>
+            </p>
+            <p>Se você não solicitou essa alteração, pode ignorar este e-mail.</p>
+            <p style="font-size: 12px; color: #888;">Este link expira em 1 hora por motivos de segurança.</p>
+            <hr />
+            <p style="font-size: 12px; color: #888;">HomeManager - Gerencie suas finanças com simplicidade</p>
+          </div>
+        `
       })
 
       res.json({ message: "E-mail de recuperação enviado!" })

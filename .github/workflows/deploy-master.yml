@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [develop]
+    branches: [master]
 
 jobs:
   build-and-deploy:
@@ -19,16 +19,16 @@ jobs:
         working-directory: ./frontend
         run: yarn
 
-      - name: Build (modo development)
+      - name: Build (modo produção)
         working-directory: ./frontend
-        run: yarn build-dev && cp dist/index.html dist/404.html
+        run: yarn build-prod && cp dist/index.html dist/404.html
         env:
           VITE_API_URL: https://home-manager-q581.onrender.com
 
-      - name: Deploy no gh-pages/develop
+      - name: Deploy no gh-pages/masters
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token:   ${{ secrets.GITHUB_TOKEN }}
           publish_dir:    frontend/dist
           publish_branch: gh-pages
-          destination_dir: develop
+          destination_dir: master

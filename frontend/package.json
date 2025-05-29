@@ -4,14 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"yarn vite\" \"cd ../backend && yarn dev\"",
+    "dev": "concurrently \"yarn vite --mode code\" \"cd ../backend && yarn dev\"",
     "build-dev": "vite build --mode development",
     "build-release": "vite build --mode release",
     "build-prod": "vite build --mode production",
     "build-code": "vite build --mode code",
-    "preview": "vite preview",
-    "lint": "eslint src --ext .js,.vue",
-    "lint:fix": "eslint src --ext .js,.vue --fix"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
