@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Checker from 'vite-plugin-checker'
@@ -22,7 +23,14 @@ export default defineConfig(({ mode }) => ({
         lintCommand: 'eslint "./src/**/*.{ts,js,vue}"',
         useFlatConfig: true,
       }
-    })
+    }),
+    viteStaticCopy({
+      targets: [{
+        src: 'index.html',
+        dest: '.',
+        rename: '404.html',
+      }],
+    }),
   ],
   build: {
     rollupOptions: {

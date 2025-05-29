@@ -1,9 +1,6 @@
-name: Deploy Frontend (develop) to GitHub Pages
-
 on:
   push:
-    branches:
-      - develop
+    branches: [develop]
 
 jobs:
   build-and-deploy:
@@ -15,23 +12,23 @@ jobs:
 
       - name: Instalar Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: 18
+        with: 
+            node-version: 18
 
-      - name: Instalar dependências do frontend
+      - name: Instalar dependências
         working-directory: ./frontend
         run: yarn
 
-      - name: Gerar build do frontend
+      - name: Build (modo development)
         working-directory: ./frontend
         run: yarn build-dev
         env:
           VITE_API_URL: https://home-manager-q581.onrender.com
 
-      - name: Deploy para GitHub Pages (pasta /develop)
+      - name: Deploy no gh-pages/develop
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/dist
-          destination_dir: develop
+          github_token:   ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:    frontend/dist
           publish_branch: gh-pages
+          destination_dir: develop
