@@ -1,13 +1,15 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import Checker from 'vite-plugin-checker';
-import path from 'path';
+import Checker from 'vite-plugin-checker'
+import path from 'path'
 
+// Mapas de base para ambientes diferentes
 const baseMap = {
   development: '/home-manager/develop/',
   release: '/home-manager/release/',
   production: '/home-manager/master/',
+  code: '/'
 }
 
 export default defineConfig(({ mode }) => ({

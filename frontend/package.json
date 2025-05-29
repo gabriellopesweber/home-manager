@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "concurrently \"yarn vite\" \"cd ../backend && yarn dev\"",
     "build-dev": "vite build --mode development",
-    "build-rc": "vite build --mode release",
-    "build": "vite build --mode production",
+    "build-release": "vite build --mode release",
+    "build-prod": "vite build --mode production",
+    "build-code": "vite build --mode code",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.vue",
     "lint:fix": "eslint src --ext .js,.vue --fix"
