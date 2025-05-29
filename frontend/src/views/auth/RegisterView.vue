@@ -110,7 +110,7 @@ export default {
       password: "",
       valid: false,
       loading: false,
-      myLogo: "/img/HomeManager-Black.svg",
+      myLogo: `${import.meta.env.BASE_URL}img/HomeManager-Black.svg`,
     }
   },
   methods: {

@@ -110,7 +110,7 @@ export default {
   },
   data () {
     return {
-      myLogo: "/img/HM-Black-old.png",
+      myLogo: `${import.meta.env.BASE_URL}img/HM-Black-old.png`,
       menu: true
     }
   },
