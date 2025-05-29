@@ -14,6 +14,7 @@
           :src="myLogo"
           height="75"
           class="mx-auto"
+          type="image/png"
           alt="Logo"
         />
       </v-list-item>

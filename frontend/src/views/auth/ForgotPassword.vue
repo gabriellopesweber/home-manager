@@ -17,6 +17,7 @@
               class="mx-auto"
               :src="myLogo"
               style="height: 75px; width: 200px;"
+              type="image/svg"
             >
             <div>
               Esqueceu sua senha?
