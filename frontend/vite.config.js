@@ -4,7 +4,14 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import Checker from 'vite-plugin-checker';
 import path from 'path';
 
-export default defineConfig({
+const baseMap = {
+  development: '/home-manager/develop/',
+  release: '/home-manager/release/',
+  production: '/home-manager/master/',
+}
+
+export default defineConfig(({ mode }) => ({
+  base: baseMap[mode] || '/',
   plugins: [
     vue({ template: { transformAssetUrls } }),
     vuetify(),
@@ -29,4 +36,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
-})
+}))

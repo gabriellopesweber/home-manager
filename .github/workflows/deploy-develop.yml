@@ -24,7 +24,7 @@ jobs:
 
       - name: Gerar build do frontend
         working-directory: ./frontend
-        run: yarn run build --mode development
+        run: yarn run build-dev
         env:
           VITE_API_URL: https://home-manager-q581.onrender.com
 
