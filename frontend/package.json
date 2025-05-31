@@ -15,7 +15,6 @@
     "cy:run": "cypress run",
     "test:e2e-local": "start-server-and-test dev http://localhost:5173 cy:run",
     "test:e2e-ci": "start-server-and-test dev-ci http://localhost:5173 cy:run",
-    "test:e2e": "start-server-and-test preview http://localhost:4173/ 'cypress run --config baseUrl=http://localhost:4173'",
     "test:ci": "CYPRESS_ENV=development yarn test:e2e-ci"
   },
   "dependencies": {
