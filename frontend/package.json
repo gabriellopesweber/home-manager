@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"yarn vite --mode code\" \"cd ../backend && yarn dev\"",
+    "dev-ci": "yarn vite --mode code",
     "build-dev": "vite build --mode development",
     "build-release": "vite build --mode release",
     "build-prod": "vite build --mode production",
@@ -13,8 +14,9 @@
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "test:e2e-local": "start-server-and-test dev http://localhost:5173 cy:run",
+    "test:e2e-ci": "start-server-and-test dev-ci http://localhost:5173 cy:run",
     "test:e2e": "start-server-and-test preview http://localhost:4173/ 'cypress run --config baseUrl=http://localhost:4173'",
-    "test:ci": "CYPRESS_ENV=development yarn test:e2e"
+    "test:ci": "CYPRESS_ENV=development yarn test:e2e-ci"
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
