@@ -20,16 +20,17 @@ jobs:
         working-directory: ./frontend
         run: yarn
 
-      - name: Rodar testes E2E
-        working-directory: ./frontend
-        run: yarn test:ci
-        env:
-          CYPRESS_ENV: develop
-
       - name: Build (modo development)
         working-directory: ./frontend
         run: yarn build-dev && cp dist/index.html dist/404.html
         env:
+          VITE_API_URL: https://home-manager-q581.onrender.com
+
+      - name: Rodar testes E2E
+        working-directory: ./frontend
+        run: yarn test:ci
+        env:
+          CYPRESS_ENV: development
           VITE_API_URL: https://home-manager-q581.onrender.com
 
       - name: Deploy no gh-pages/develop
