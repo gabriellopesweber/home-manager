@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test:e2e": "start-server-and-test dev http://localhost:5173 cy:run"
+    "test:e2e": "start-server-and-test dev http://localhost:5173 cy:run",
+    "test:ci": "CYPRESS_ENV=code yarn test:e2e"
   },
   "dependencies": {
     "@mdi/font": "7.4.47",

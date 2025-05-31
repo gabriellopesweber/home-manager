@@ -26,6 +26,7 @@
         link
         prepend-icon="mdi-view-dashboard"
         title="Dashboard"
+        name="dashboard"
         :to="{ name: 'dashboard' }"
         active-class="text-primary"
       />
@@ -33,6 +34,7 @@
         link
         prepend-icon="mdi-receipt-text-outline"
         title="Relatórios"
+        name="report"
         :to="{ name: 'reports' }"
         active-class="text-primary"
       />
@@ -47,6 +49,7 @@
           <v-list-item
             v-bind="props"
             title="Gerenciamento"
+            name="manager"
             link
             active-class="text-primary"
           />
@@ -56,6 +59,7 @@
           title="Lançamentos"
           prepend-icon="mdi-finance"
           link
+          name="manager.launch"
           :to="{ name: 'manager.launch' }"
           active-class="text-primary"
         />
@@ -63,6 +67,7 @@
           title="Contas"
           prepend-icon="mdi-bank"
           link
+          name="manager.account"
           :to="{ name: 'manager.account' }"
           active-class="text-primary"
         />
@@ -76,6 +81,7 @@
       v-tooltip:right="!menu ? 'Abrir menu lateral' : 'Fechar menu lateral'"
       :icon="menu ? 'mdi-menu-open' : 'mdi-menu-close'"
       rounded="circle"
+      :name="menu ? 'menu-open' : 'menu-close'"
       aria-label="Alternar menu lateral"
       @click="menu = !menu"
     />
@@ -88,6 +94,7 @@
           v-if="authStore.isAuthenticated"
           icon
           v-bind="props"
+          name="logout"
           @click="logout"
         >
           <v-icon>mdi-logout</v-icon>

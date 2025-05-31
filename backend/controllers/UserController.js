@@ -2,6 +2,7 @@ import User from '../models/User.js'
 import jwt from 'jsonwebtoken'
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
+import { validateRequiredFields } from '../utils/validations.js'
 
 const UserController = {
   async register(req, res) {
@@ -24,6 +25,11 @@ const UserController = {
     try {
       const { email, password } = req.body
 
+      const validation = validateRequiredFields({ email, password })
+      if (!validation.valid) {
+        return res.status(400).json({ message: validation.message })
+      }
+
       // Verifica se o usuário existe
       const user = await User.findOne({ email })
       if (!user) return res.status(400).json({ message: "Usuário não encontrado!" })
@@ -35,7 +41,7 @@ const UserController = {
       // Gera o token JWT
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h" })
 
-      res.json({ message: "Login realizado com sucesso!", token })
+      res.status(200).json({ message: "Login realizado com sucesso!", token })
     } catch (error) {
       res.status(500).json({ message: "Erro ao fazer login", error })
     }

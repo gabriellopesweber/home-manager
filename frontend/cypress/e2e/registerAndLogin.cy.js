@@ -1,24 +1,34 @@
 describe('Fluxo completo: cadastro e login', () => {
-  const name = 'Usuario de teste';
-  const email = 'skailaini@gmail.com';
-  const senha = 'S123456';
+  const name = 'home manager teste'
+  const email = 'homemanagerdev@gmail.com'
+  const pass = 'S123456'
+  const isRegistered = true
 
+  // Para remover o usuario no inicio do teste
   before(() => {
-    cy.resetUsuario(email, senha);
-  });
+    cy.resetUser(email, pass)
+  })
 
-  it('deve cadastrar e fazer login com o mesmo usuário', () => {
-    cy.visit('/register');
+  // Para remover o usuario de teste após o teste
+  after(() => {
+    cy.resetUser(email, pass)
+  })
 
-    cy.get('input[name="name"]').type(email);
-    cy.get('input[name="email"]').type(email);
-    cy.get('input[name="senha"]').type(senha);
-    cy.get('button[type="submit"]').click();
+  it('Deve cadastrar, fazer o login, deslogar e deletar o usuario', () => {
+    cy.intercept('POST', `${Cypress.env('VITE_API_URL')}/authorization/register`).as('registerReq')
+    cy.intercept('POST', `${Cypress.env('VITE_API_URL')}/authorization/login`).as('loginReq')
 
-    cy.url().should('include', '/login');
+    cy.register(name, email, pass)
 
-    cy.login(email, senha);
+    cy.wait('@registerReq').its('response.statusCode').should('eq', 201)
 
-    cy.url().should('include', '/dashboard');
-  });
-});
+    cy.login(isRegistered, email, pass)
+
+    cy.wait('@loginReq').its('response.statusCode').should('eq', 200)
+    cy.url().should('include', '/')
+
+    cy.get('button[name="logout"]').click()
+
+    cy.url().should('include', '/login')
+  })
+})
