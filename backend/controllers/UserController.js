@@ -2,7 +2,23 @@ import User from '../models/User.js'
 import jwt from 'jsonwebtoken'
 import bcryptjs from 'bcryptjs'
 import nodemailer from 'nodemailer'
+
+import { Category } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
+import { incomes, expenses } from '../constants/Categorys.js'
+
+async function createCategorys(name, type) {
+  return await Category.findOneAndUpdate(
+    { name },
+    { $setOnInsert: { name, default: true, type } },
+    { upsert: true, new: true }
+  )
+}
+
+function executeCreateCateogry() {
+  incomes.map(income => createCategorys(income, 'receita'))
+  expenses.map(expense => createCategorys(expense, 'despesa'))
+}
 
 const UserController = {
   async register(req, res) {
@@ -14,6 +30,8 @@ const UserController = {
       if (existingUser) return res.status(400).json({ message: "E-mail já cadastrado!" })
 
       const newUser = await User.create({ name, email, password })
+
+      executeCreateCateogry()
 
       res.status(201).json({ message: "Usuário cadastrado com sucesso!", user: newUser })
     } catch (error) {
