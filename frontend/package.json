@@ -9,11 +9,11 @@
     "build-release": "vite build --mode release",
     "build-prod": "vite build --mode production",
     "build-code": "vite build --mode code",
-    "preview": "vite preview",
+    "preview": "vite preview --mode code",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "test:e2e-local": "start-server-and-test dev http://localhost:5173 cy:run",
-    "test:e2e": "start-server-and-test preview --mode development http://localhost:4173/ cy:run",
+    "test:e2e": "start-server-and-test preview http://localhost:4173/ 'cypress run --config baseUrl=http://localhost:4173''",
     "test:ci": "CYPRESS_ENV=development yarn test:e2e"
   },
   "dependencies": {
