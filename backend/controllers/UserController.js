@@ -17,6 +17,7 @@ const UserController = {
 
       res.status(201).json({ message: "Usuário cadastrado com sucesso!", user: newUser })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao cadastrar usuário", error })
     }
   },
@@ -43,6 +44,7 @@ const UserController = {
 
       res.status(200).json({ message: "Login realizado com sucesso!", token })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao fazer login", error })
     }
   },
@@ -53,6 +55,7 @@ const UserController = {
       const users = await User.find().select("-password") // Remove a senha da resposta
       res.json(users)
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao buscar usuários", error })
     }
   },
@@ -66,6 +69,7 @@ const UserController = {
       }
       res.json(user)
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao buscar usuário", error })
     }
   },
@@ -83,6 +87,7 @@ const UserController = {
         user: { id: newUser.id, name: newUser.name, createdAt: newUser.createdAt }
       })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao atualizar usuário", error })
     }
   },
@@ -96,6 +101,7 @@ const UserController = {
       }
       res.json({ message: "Usuário deletado com sucesso" })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao deletar usuário", error })
     }
   },
@@ -152,6 +158,7 @@ const UserController = {
 
       res.json({ message: "E-mail de recuperação enviado!" })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao solicitar redefinição de senha", error })
     }
   },
@@ -177,6 +184,7 @@ const UserController = {
 
       res.json({ message: "Senha redefinida com sucesso!" })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao redefinir senha", error })
     }
   },
@@ -195,6 +203,7 @@ const UserController = {
 
       return res.status(200).json({ message: "Token atualizado com sucesso!", token: newToken })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: "Erro ao redefinir senha", error })
     }
   }

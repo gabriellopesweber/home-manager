@@ -53,6 +53,7 @@ const TransferController = {
 
       return res.status(201).json(formatTransferItem(transfer))
     } catch (error) {
+      console.log(error)
       // Roolback nos saldos se erro após alteração
       if (origin_account && destination_account && value) {
         if (updatedBalanceOrigin) await Account.findByIdAndUpdate(origin_account, { $inc: { balance: value } })
@@ -78,6 +79,7 @@ const TransferController = {
 
       return res.status(200).json(transfers.map(transfer => formatTransferItem(transfer)))
     } catch (error) {
+      console.log(error)
       return res.status(500).json({ message: 'Erro ao buscar transferências', error })
     }
   },
@@ -94,6 +96,7 @@ const TransferController = {
 
       return res.status(200).json(formatTransferItem(transfer))
     } catch (error) {
+      console.log(error)
       return res.status(500).json({ message: 'Erro ao buscar transferência', error })
     }
   },
@@ -252,6 +255,7 @@ const TransferController = {
 
       return res.status(200).json({ message: 'Transferência removida com sucesso' })
     } catch (error) {
+      console.log(error)
       return res.status(500).json({ message: 'Erro ao remover transferência', error })
     }
   }
