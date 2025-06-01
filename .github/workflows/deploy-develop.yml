@@ -36,7 +36,7 @@ jobs:
         working-directory: ./backend
         env:
           MONGO_URL: mongodb://localhost:27017/homemanager_test
-          CI: true
+          CI: "true"
         run: yarn test
 
       ### ⬇️ FRONTEND: TESTES, BUILD E DEPLOY
