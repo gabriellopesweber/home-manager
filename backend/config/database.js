@@ -1,20 +1,15 @@
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 
-const isCI = process.env.CI === 'true'
 const env = process.env.NODE_ENV || 'development'
 
-if (!isCI) {
-  dotenv.config({ path: `.env.${env}` })
-} else {
-  console.log('🧪 Rodando em CI: dotenv ignorado')
-}
+dotenv.config({ path: `.env.${env}` })
 
-const MONGO_URI = process.env.MONGO_URI
+const MONGO_URL = process.env.MONGO_URL
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(MONGO_URL)
     console.log(`🔥 Conectado ao MongoDB [${env}]!`)
   } catch (error) {
     console.error(`❌ Erro ao conectar ao MongoDB [${env}]:`, error)
