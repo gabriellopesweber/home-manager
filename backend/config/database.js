@@ -1,8 +1,12 @@
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 
-const env = process.env.NODE_ENV || "development"
-dotenv.config({ path: `.env.${env}` })
+const isCI = process.env.CI === "true"
+
+if (!isCI) {
+  const env = process.env.NODE_ENV || "development"
+  dotenv.config({ path: `.env.${env}` })
+}
 
 const MONGO_URI = process.env.MONGO_URI
 
