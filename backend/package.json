@@ -1,4 +1,17 @@
 {
+  "name": "home-maganer",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon NODE_ENV=development node server.js",
+    "release": "NODE_ENV=release node server.js",
+    "master": "NODE_ENV=production node server.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules NODE_ENV=development jest"
+  },
+  "author": "Gabriel Lopes Weber",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
     "bcryptjs": "3.0.2",
     "cors": "2.8.5",
@@ -13,16 +26,9 @@
     "path": "0.12.7",
     "uuid": "^11.1.0"
   },
-  "name": "home-maganer",
-  "type": "module",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon NODE_ENV=development node server.js",
-    "release": "NODE_ENV=release node server.js",
-    "master": "NODE_ENV=production node server.js"
-  },
-  "author": "Gabriel Lopes Weber",
-  "license": "ISC",
-  "description": ""
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^7.1.1"
+  }
 }

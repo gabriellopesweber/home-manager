@@ -70,7 +70,14 @@ const UserController = {
   // Listar todos os usuários
   async getUsers(req, res) {
     try {
-      const users = await User.find().select("-password") // Remove a senha da resposta
+      const { email } = req.body
+
+      const filters = {}
+
+      if (email) {
+        filters.email = email
+      }
+      const users = await User.find(filters).select("-password") // Remove a senha da resposta
       res.json(users)
     } catch (error) {
       console.log(error)
