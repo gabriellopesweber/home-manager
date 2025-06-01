@@ -5,7 +5,18 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: develop 
+    environment: develop
+
+    services:
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout código
@@ -16,6 +27,18 @@ jobs:
         with: 
           node-version: 18
 
+      ### ⬇️ TESTES DO BACKEND
+      - name: Instalar dependências backend
+        working-directory: ./backend
+        run: yarn
+
+      - name: Rodar testes do backend
+        working-directory: ./backend
+        env:
+          MONGO_URL: mongodb://localhost:27017/homemanager_test
+        run: yarn test
+
+      ### ⬇️ FRONTEND: TESTES, BUILD E DEPLOY
       - name: Instalar dependências
         working-directory: ./frontend
         run: yarn
