@@ -100,6 +100,7 @@
               color="success"
               variant="text"
               rounded="circle"
+              :data-cy="`update-status-${item.type}-${item.id}`"
               :loading="loadingUpdateStatus[item.id]"
               @click="updateStatus(1, item)"
             />
@@ -110,6 +111,7 @@
               icon="mdi-thumb-down"
               variant="text"
               rounded="circle"
+              :data-cy="`update-status-${item.type}-${item.id}`"
               :loading="loadingUpdateStatus[item.id]"
               @click="updateStatus(0, item)"
             />

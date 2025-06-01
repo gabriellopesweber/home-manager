@@ -1,12 +1,11 @@
 <template>
-  <div :data-cy="`speed-dial-${curentyType}`">
+  <div>
     <v-speed-dial
       :key="localKey"
       v-model="openSpeed"
       :location="direction"
       :transition="transition"
       :open-on-hover="openOnHover"
-      data-cy="speed-dial"
     >
       <template #activator="{ props: speedDial }">
         <div v-bind="speedDial">

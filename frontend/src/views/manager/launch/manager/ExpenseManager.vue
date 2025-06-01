@@ -74,6 +74,7 @@
                     icon="mdi-thumb-down"
                     variant="text"
                     rounded="circle"
+                    name="status"
                     @click="dataSend.status = 0"
                   />
                 </v-fade-transition>
