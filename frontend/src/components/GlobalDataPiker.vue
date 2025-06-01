@@ -14,6 +14,7 @@
         variant="outlined"
         readonly
         clearable
+        name="date"
         :rules="rules"
         :error="hasError"
         :error-messages="internalErrorMessages"
@@ -24,6 +25,7 @@
     <v-date-picker
       v-model="internalValue"
       show-adjacent-months
+      data-cy="date-picker"
       rounded="xl"
       @update:model-value="updateDate"
     />

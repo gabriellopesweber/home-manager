@@ -112,6 +112,7 @@
               class="my-2"
               icon="mdi-plus"
               rounded="circle"
+              data-cy="openCreateAccount"
               @click="dialog = true"
             />
           </v-card>

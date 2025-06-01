@@ -20,6 +20,7 @@
           >
             <v-text-field
               v-model="dataSend.description"
+              name="description"
               label="Descrição"
               variant="outlined"
             />
@@ -47,6 +48,7 @@
               label="Valor"
               prefix="R$"
               variant="outlined"
+              name="value"
               :rules="[() => $validation('required', dataSend.value)]"
               @keypress="onlyNumbers"
             >
@@ -62,6 +64,7 @@
                     color="success"
                     variant="text"
                     rounded="circle"
+                    name="status"
                     @click="dataSend.status = 1"
                   />
 
@@ -88,10 +91,18 @@
               item-value="id"
               item-title="name"
               variant="outlined"
+              name="category"
               :rules="[() => $validation('required', dataSend.category)]"
               :items="itemsCategory"
               :loading-items="loadingItems"
-            />
+            >
+              <template #item="{ props, item }">
+                <v-list-item
+                  v-bind="props"
+                  :data-cy="'category-option-' + item.raw.id"
+                />
+              </template>
+            </v-autocomplete>
           </v-col>
 
           <v-col
@@ -104,10 +115,18 @@
               item-value="id"
               item-title="name"
               variant="outlined"
+              name="account"
               :rules="[() => $validation('required', dataSend.account)]"
               :items="itemsAccount"
               :loading-items="loadingItems"
-            />
+            >
+              <template #item="{ props, item }">
+                <v-list-item
+                  v-bind="props"
+                  :data-cy="'account-option-' + item.raw.id"
+                />
+              </template>
+            </v-autocomplete>
           </v-col>
         </v-row>
       </v-form>
@@ -116,6 +135,7 @@
     <template #actions>
       <div class="d-flex justify-space-between w-100 mb-2">
         <v-btn
+          name="clear"
           @click="clearForm"
         >
           Limpar
@@ -143,6 +163,7 @@
             icon="mdi-check"
             class="bg-success"
             rounded="circle"
+            data-cy="save"
             :loading="loading"
             @click="validateAndUpdate"
           />

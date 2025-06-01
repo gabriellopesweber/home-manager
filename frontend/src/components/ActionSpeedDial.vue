@@ -1,10 +1,12 @@
 <template>
-  <div>
+  <div :data-cy="`speed-dial-${curentyType}`">
     <v-speed-dial
       :key="localKey"
+      v-model="openSpeed"
       :location="direction"
       :transition="transition"
       :open-on-hover="openOnHover"
+      data-cy="speed-dial"
     >
       <template #activator="{ props: speedDial }">
         <div v-bind="speedDial">
@@ -17,6 +19,7 @@
                 :color="colorAction"
                 :variant="defaultVariant"
                 :aria-label="`Executar ação de ${textAction}`"
+                :data-cy="`open-create-${curentyType}`"
                 :loading="loading"
                 @click="autoUpdateActivator? executeAction(fabIcon): () => ({}) "
               />
@@ -25,7 +28,6 @@
           </v-tooltip>
         </div>
       </template>
-
       <v-btn
         v-for="(action) in availableActions"
         :key="action.type"
@@ -34,6 +36,7 @@
           location: defaultTooltipLocation
         }"
         rounded="circle"
+        :data-cy="`open-create-${action.type}`"
         :icon="action.icon"
         :color="action.color"
         @click="handleActionClick(action)"
@@ -93,9 +96,13 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    open: {
+      type: Boolean,
+      default: false
     }
   },
-  emits: ['action', 'update:curenty-type'],
+  emits: ['action', 'update:curenty-type', 'update:open'],
   data() {
     return {
       fabIcon: this.defaultIcon,
@@ -109,6 +116,14 @@ export default {
       if (this.autoUpdateActivator) return this.actions.filter(action => action.type !== this.curentyType)
       
       return this.actions
+    },
+    openSpeed: {
+      get() {
+        return this.open
+      },
+      set(value) {
+        this.$emit('update:open', value)
+      }
     }
   },
   methods: {
