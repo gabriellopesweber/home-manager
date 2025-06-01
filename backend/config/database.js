@@ -1,11 +1,13 @@
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 
-const isCI = process.env.CI === "true"
+const isCI = process.env.CI === 'true'
+const env = process.env.NODE_ENV || 'development'
 
 if (!isCI) {
-  const env = process.env.NODE_ENV || "development"
   dotenv.config({ path: `.env.${env}` })
+} else {
+  console.log('🧪 Rodando em CI: dotenv ignorado')
 }
 
 const MONGO_URI = process.env.MONGO_URI
