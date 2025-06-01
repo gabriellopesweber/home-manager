@@ -1,4 +1,4 @@
-const isCI = process.env.CI === true
+const isCI = process.env.CI === "true"
 
 console.log(isCI)
 
