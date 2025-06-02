@@ -27,7 +27,7 @@ jobs:
         with: 
             node-version: 18
 
-        ### ⬇️ TESTES DO BACKEND
+      ### ⬇️ TESTES DO BACKEND
       - name: Instalar dependências backend
         working-directory: ./backend
         run: yarn
@@ -40,6 +40,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: yarn test
 
+      ### ⬇️ FRONTEND: TESTES, BUILD E DEPLOY
       - name: Instalar dependências
         working-directory: ./frontend
         run: yarn
