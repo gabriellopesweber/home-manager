@@ -62,7 +62,7 @@
 <script>
 import dayjs from 'dayjs'
 import LaunchService from '@/services/LaunchService'
-import dashboardService from '@/services/dashboardService'
+import dashboardService from '@/services/DashboardService'
 
 import BarChart from '@/components/BarChart.vue'
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'

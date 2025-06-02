@@ -28,10 +28,12 @@
                 default-color="error"
                 default-icon="mdi-cash-minus"
                 open-on-hover
+                :open="openManager"
                 :actions="actions"
                 :curenty-type="fabType"
                 @action="executeAction(fabType)"
                 @update:curenty-type="fabType = $event"
+                @update:open="openManager = $event"
               />
             </v-col>
           </v-row>
@@ -98,6 +100,7 @@
               color="success"
               variant="text"
               rounded="circle"
+              :data-cy="`update-status-${item.type}-${item.id}`"
               :loading="loadingUpdateStatus[item.id]"
               @click="updateStatus(1, item)"
             />
@@ -108,6 +111,7 @@
               icon="mdi-thumb-down"
               variant="text"
               rounded="circle"
+              :data-cy="`update-status-${item.type}-${item.id}`"
               :loading="loadingUpdateStatus[item.id]"
               @click="updateStatus(0, item)"
             />
@@ -121,12 +125,13 @@
               default-text="Ações"
               default-color="primary"
               default-variant="text"
-              open-on-hover
+              :open="openAction[item.id] || false"
               :auto-update-activator="false"
               :actions="actionsItem"
               :curenty-type="actionsType"
               @action="executeActionByItem(actionsType, item)"
               @update:curenty-type="actionsType = $event"
+              @update:open="openAction[item.id] = $event"
             />
           </template>
 
@@ -263,7 +268,9 @@ export default {
       showTransfer: false,
       showConformEdit: false,
       loading: false,
+      openManager: false,
       loadingUpdateStatus: [],
+      openAction: [],
       warningToShow: [],
       items: [],
       itemsCategory: [],

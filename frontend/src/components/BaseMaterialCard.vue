@@ -3,6 +3,7 @@
     v-bind="$attrs"
     :title="title"
     :subtitle="subtitle"
+    data-cy="card"
   >
     <template
       v-if="$slots.title"

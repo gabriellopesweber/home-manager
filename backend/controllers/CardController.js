@@ -47,6 +47,7 @@ const CardController = {
       })
       res.status(201).json(formatCardItem(newCard))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao criar cartão', error })
     }
   },
@@ -69,6 +70,7 @@ const CardController = {
       const cards = await Card.find(filter).sort({ name: 1 })
       res.status(200).json(cards.map(card => formatCardItem(card)))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar cartão', error })
     }
   },
@@ -83,6 +85,7 @@ const CardController = {
 
       res.status(200).json(formatCardItem(card))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao buscar cartão', error })
     }
   },
@@ -136,6 +139,7 @@ const CardController = {
 
       res.status(200).json(formatCardItem(updateCard))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao atualizar cartão', error })
     }
   },
@@ -150,6 +154,7 @@ const CardController = {
 
       res.status(200).json({ message: 'Cartão removido com sucesso!' })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao remover Cartão', error })
     }
   }

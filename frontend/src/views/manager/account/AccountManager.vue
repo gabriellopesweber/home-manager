@@ -22,6 +22,7 @@
               v-model="dataSend.name"
               label="Nome"
               variant="outlined"
+              data-cy="accountName"
               :rules="[() => $validation('required', dataSend.name)]"
             />
           </v-col>
@@ -33,6 +34,7 @@
               label="Saldo"
               prefix="R$"
               variant="outlined"
+              data-cy="accountBalance"
               :rules="[() => $validation('required', dataSend.balance)]"
               @keypress="onlyNumbers"
             />
@@ -48,6 +50,7 @@
             icon="mdi-check"
             rounded="circle"
             size="large"
+            data-cy="createAccount"
             :loading="loading"
             @click="validateAndManager"
           />
@@ -146,7 +149,11 @@ export default {
           if (!newItem) throw new Error
           
           this.$emit('insert:item', newItem)
-          this.$showMessage("Atualizado com sucesso!", "success")
+          if (this.isEdit) {
+            this.$showMessage("Atualizado com sucesso!", "success")
+          } else {
+            this.$showMessage("Cadastrado com sucesso!", "success")
+          }
           this.$emit('update:model-value', false)
         } catch {
           this.$showMessage("Ocorreu um erro ao atualizar a receita!", "error")

@@ -79,7 +79,7 @@
 import { headerReports } from '../../constants/headers/reports'
 import { formatCurrencyMaskBR } from '@/utils/monetary.js'
 
-import dashboardService from '@/services/dashboardService'
+import dashboardService from '@/services/DashboardService'
 
 import BaseMaterialCard from '@/components/BaseMaterialCard.vue'
 import GlobalSelectPeriod from '@/components/GlobalSelectPeriod.vue'
@@ -143,7 +143,6 @@ export default {
         if (this.initialDate && this.finalDate) {
           this.data = await dashboardService.getDatasets(status, this.initialDate, this.finalDate)
           this.items = [this.data]
-          console.log()
         }
       } catch {
         this.$showMessage('Ocorre um problema ao buscar dados do grafico!', 'error')

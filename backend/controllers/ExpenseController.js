@@ -63,6 +63,7 @@ const ExpenseController = {
 
       res.status(201).json(formatExpenseItem(newExpense))
     } catch (error) {
+      console.log(error)
       if (updateBalanceSuccessfully) {
         // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
         const { account } = req.body
@@ -89,6 +90,7 @@ const ExpenseController = {
 
       res.status(200).json(expenses.map(expense => formatExpenseItem(expense)))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar despesas', error })
     }
   },
@@ -103,6 +105,7 @@ const ExpenseController = {
 
       res.status(200).json(formatExpenseItem(expense))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao buscar despesa', error })
     }
   },
@@ -216,6 +219,7 @@ const ExpenseController = {
 
       return res.status(200).json(formatExpenseItem(updatedExpense))
     } catch (error) {
+      console.log(error)
       const { account } = req.body
 
       if (updateBalanceSuccessfully) {

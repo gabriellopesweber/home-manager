@@ -18,6 +18,7 @@
               class="mx-auto"
               :src="myLogo"
               style="height: 75px; width: 200px;"
+              type="image/svg"
             >
             <div>
               Seja bem vindo
@@ -34,6 +35,7 @@
                 v-model="email"
                 variant="outlined"
                 label="E-mail"
+                name="login-email"
                 clearable
                 :rules="[() => $validation('required', email), () => $validation('email', email)]"
                 @keyup.enter="login"
@@ -48,6 +50,7 @@
                 variant="outlined"
                 clearable
                 label="Senha"
+                name="login-pass"
                 :rules="[() => $validation('required', password)]"
                 @keyup.enter="login"
               />
@@ -58,6 +61,7 @@
               <v-btn
                 color="primary"
                 :loading="loading"
+                name="login"
                 @click="login"
               >
                 <span> Entrar </span>
@@ -117,7 +121,7 @@ export default {
       password: "",
       valid: false,
       loading: false,
-      myLogo: "/img/HomeManager-Black.svg",
+      myLogo: `${import.meta.env.BASE_URL}img/HomeManager-Black.svg`,
     }
   },
   methods: {

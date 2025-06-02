@@ -13,6 +13,7 @@
         justify="center"
       >
         <BaseMaterialCard
+          elevation="5"
           width="500"
         >
           <template #title>
@@ -21,6 +22,7 @@
                 class="mx-auto"
                 :src="myLogo"
                 style="height: 75px; width: 200px;"
+                type="image/svg"
               >
               <div>
                 Redefinição de senha
@@ -85,7 +87,7 @@
 
 <script>
 import BaseMaterialCard from "@/components/BaseMaterialCard.vue"
-import AuthService from "@/services/AuthService"
+import AuthService from "@/services/authService"
 
 export default {
   components: {
@@ -98,7 +100,7 @@ export default {
       confirmationPassword: "",
       valid: false,
       loading: false,
-      myLogo: "/img/HomeManager-Black.svg",
+      myLogo: `${import.meta.env.BASE_URL}img/HomeManager-Black.svg`,
     }
   },
   created () {

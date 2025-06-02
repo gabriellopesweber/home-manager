@@ -2,6 +2,7 @@
   <v-dialog
     v-model="showDialog"
     rounded="xl"
+    data-cy="dialog"
   >
     <template 
       v-if="showInternalBtn"

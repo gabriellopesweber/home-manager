@@ -36,6 +36,7 @@ const CategoryController = {
       const newCategory = await Category.create({ name, type, default: false, user })
       res.status(201).json(formatCategoryItem(newCategory))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao criar categoria', error })
     }
   },
@@ -55,6 +56,7 @@ const CategoryController = {
       const categories = await Category.find(filter)
       res.status(200).json(categories.map(category => formatCategoryItem(category)))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar categorias', error })
     }
   },
@@ -69,6 +71,7 @@ const CategoryController = {
 
       res.status(200).json(formatCategoryItem(category))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao buscar categoria', error })
     }
   },
@@ -112,6 +115,7 @@ const CategoryController = {
 
       res.status(200).json(formatCategoryItem(updateCategory))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao atualizar categoria', error })
     }
   },
@@ -126,6 +130,7 @@ const CategoryController = {
 
       res.status(200).json({ message: 'Categoria removida com sucesso!' })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao remover categoria', error })
     }
   }

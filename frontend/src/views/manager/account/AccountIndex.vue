@@ -28,6 +28,7 @@
               v-bind="props"
               elevation="4"
               :loading="loadingItem[account.id]"
+              :data-cy="`card-account-${account.id}`"
             >
               <v-list>
                 <v-list-item>
@@ -71,6 +72,7 @@
                           rounded="circle"
                           color="primary"
                           size="small"
+                          :data-cy="`edit-account-${account.id}`"
                           @click="() => {
                             itemMarkedToManager = account
                             dialog = true
@@ -83,6 +85,7 @@
                           rounded="circle"
                           color="error"
                           size="small"
+                          :data-cy="`delete-account-${account.id}`"
                           @click="async () => {
                             itemMarkedToManager = account
                             await findAssociatedTotal(account.id)
@@ -112,6 +115,7 @@
               class="my-2"
               icon="mdi-plus"
               rounded="circle"
+              data-cy="openCreateAccount"
               @click="dialog = true"
             />
           </v-card>

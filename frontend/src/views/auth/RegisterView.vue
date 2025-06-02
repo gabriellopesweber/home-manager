@@ -13,6 +13,7 @@
         v-model="valid"
       >
         <BaseMaterialCard
+          elevation="5"
           width="500"
         >
           <template #title>
@@ -21,6 +22,7 @@
                 class="mx-auto"
                 :src="myLogo"
                 style="height: 75px; width: 200px;"
+                type="image/svg"
               >
               <div>
                 Crie uma conta
@@ -34,6 +36,7 @@
                 v-model="name"
                 variant="outlined"
                 label="Seu nome"
+                name="register-name"
                 clearable
                 :rules="[() => $validation('required', name)]"
                 @keyup.enter="register"
@@ -46,6 +49,7 @@
                 v-model="email"
                 variant="outlined"
                 label="E-mail"
+                name="register-email"
                 clearable
                 :rules="[() => $validation('required', email), () => $validation('email', email)]"
                 @keyup.enter="register"
@@ -59,6 +63,7 @@
                 type="password"
                 variant="outlined"
                 label="Senha"
+                name="register-pass"
                 clearable
                 :rules="[() => $validation('required', password), () => $validation('passwordStrength', password)]"
                 @keyup.enter="register"
@@ -71,6 +76,7 @@
               <v-col class="d-flex justify-space-evenly">
                 <v-btn
                   variant="outlined"
+                  name="toLogin"
                   :to="{
                     name: 'login'
                   }"
@@ -80,6 +86,7 @@
                 <v-btn
                   class="bg-success"
                   :loading="loading"
+                  name="register"
                   @click="register"
                 >
                   Cadastrar
@@ -94,8 +101,9 @@
 </template>
 
 <script>
+import AuthService from "@/services/authService"
+
 import BaseMaterialCard from "@/components/BaseMaterialCard.vue"
-import AuthService from "../../services/AuthService"
 
 export default {
   components: {
@@ -108,7 +116,7 @@ export default {
       password: "",
       valid: false,
       loading: false,
-      myLogo: "/img/HomeManager-Black.svg",
+      myLogo: `${import.meta.env.BASE_URL}img/HomeManager-Black.svg`,
     }
   },
   methods: {

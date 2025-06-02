@@ -65,6 +65,7 @@ const IncomeController = {
 
       res.status(201).json(formatIncomeItem(newIncome))
     } catch (error) {
+      console.log(error)
       if (updateBalanceSuccessfully) {
         // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
         const { account } = req.body
@@ -91,6 +92,7 @@ const IncomeController = {
 
       res.status(200).json(incomes.map(income => formatIncomeItem(income)))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar receitas', error })
     }
   },
@@ -105,6 +107,7 @@ const IncomeController = {
 
       res.status(200).json(formatIncomeItem(income))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao buscar receita', error })
     }
   },
@@ -220,6 +223,7 @@ const IncomeController = {
       return res.status(200).json(formatIncomeItem(updatedIncome))
 
     } catch (error) {
+      console.log(error)
       const { account } = req.body
 
       if (updateBalanceSuccessfully) {
@@ -274,6 +278,7 @@ const IncomeController = {
 
       res.status(200).json({ message: 'Receita removida com sucesso!' })
     } catch (error) {
+      console.log(error)
       if (updateBalanceSuccessfully) {
         await Account.findOneAndUpdate(
           { _id: roolbackAccount, user: req.user.id },

@@ -1,0 +1,35 @@
+on:
+  push:
+    branches: [release]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: release
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with: 
+            node-version: 18
+
+      - name: Instalar dependências
+        working-directory: ./frontend
+        run: yarn
+
+      - name: Build (modo release)
+        working-directory: ./frontend
+        run: yarn build-release && cp dist/index.html dist/404.html
+        env:
+          VITE_API_URL: https://home-manager-q581.onrender.com
+
+      - name: Deploy no gh-pages/release
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token:   ${{ secrets.GITHUB_TOKEN }}
+          publish_dir:    frontend/dist
+          publish_branch: gh-pages
+          destination_dir: release

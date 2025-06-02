@@ -23,6 +23,7 @@ const AccountController = {
       const newAccount = await Account.create({ name, balance, openingBalance, user })
       res.status(201).json(formatAccountItem(newAccount))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao criar conta', error })
     }
   },
@@ -33,6 +34,7 @@ const AccountController = {
       const accounts = await Account.find({ user: req.user.id })
       res.status(200).json(accounts.map(account => formatAccountItem(account)))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao listar conta', error })
     }
   },
@@ -47,6 +49,7 @@ const AccountController = {
 
       res.status(200).json(formatAccountItem(account))
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao buscar conta', error })
     }
   },
@@ -97,6 +100,7 @@ const AccountController = {
 
       res.status(200).json(formatAccountItem(updatedAccount))
     } catch (error) {
+      console.log(error)
       if (error.statusCode === 404) {
         return res.status(error.statusCode).json({ message: error.message })
       }
@@ -124,6 +128,7 @@ const AccountController = {
 
       res.status(200).json({ quantity })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao buscar total de contas bancarias associadas', error })
     }
   },
@@ -152,6 +157,7 @@ const AccountController = {
 
       res.status(200).json({ message: 'Conta removida com sucesso!' })
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: 'Erro ao remover Conta', error })
     }
   }
