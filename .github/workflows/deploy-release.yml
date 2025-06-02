@@ -7,6 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
 
+    services:
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -16,9 +27,28 @@ jobs:
         with: 
             node-version: 18
 
+        ### ⬇️ TESTES DO BACKEND
+      - name: Instalar dependências backend
+        working-directory: ./backend
+        run: yarn
+
+      - name: Rodar testes do backend
+        working-directory: ./backend
+        env:
+          MONGO_URL: mongodb://localhost:27017/homemanager_test
+          CI: true
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: yarn test
+
       - name: Instalar dependências
         working-directory: ./frontend
         run: yarn
+
+      - name: Rodar testes E2E
+        working-directory: ./frontend
+        run: yarn test:ci
+        env:
+          VITE_API_URL: https://home-manager-q581.onrender.com
 
       - name: Build (modo release)
         working-directory: ./frontend
