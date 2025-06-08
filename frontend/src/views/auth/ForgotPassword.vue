@@ -1,70 +1,66 @@
 <template>
   <v-container
-    class="d-flex justify-center fill-height"
+    class="d-flex justify-center align-center fill-height"
     fluid
   >
-    <v-row
-      dense
-      align="center"
-      justify="center"
+    <BaseMaterialCard
+      class="pa-6"
+      max-width="500"
+      width="500"
+      elevation="10"
+      rounded="xl"
     >
-      <BaseMaterialCard
-        elevation="5"
-        width="500"
-      >
-        <template #title>
-          <div class="text-center">
-            <img
-              class="mx-auto"
-              :src="myLogo"
-              style="height: 75px; width: 200px;"
-              type="image/svg"
-            >
-            <div>
-              Esqueceu sua senha?
-            </div>
-          </div>
-        </template>
+      <template #title>
+        <div class="text-center mb-4">
+          <img
+            :src="myLogo"
+            alt="Logo"
+            class="mx-auto mb-2"
+            style="height: 75px; width: 200px;"
+          >
+          <h2 class="text-h6 font-weight-medium text-grey-darken-2">
+            Esqueceu sua senha?
+          </h2>
+        </div>
+      </template>
 
-        <template #subtitle>
-          <div class="text-center">
-            <span> Informe o seu e-mail </span>
-          </div>
-        </template>
-        <v-form 
-          ref="form"
-          v-model="valid"
-        >
-          <v-row dense>
-            <v-col class="d-flex justify-center">
-              <v-text-field
-                v-model="email"
-                variant="outlined"
-                density="comfortable"
-                label="E-mail"
-                clearable
-                :rules="[() => $validation('required', email), () => $validation('email', email)]"
-                @keyup.enter="updatePass"
-              />
-            </v-col>
-          </v-row>
-        </v-form>
-        <template #actions>
-          <v-row dense>
-            <v-col class="d-flex justify-space-evenly">
-              <v-btn
-                class="bg-primary"
-                type="submite"
-                :loading="loading"
-                @click="updatePass"
-              >
-                Solicitar redefinição
-              </v-btn>
-            </v-col>
-          </v-row>
-        </template>
-      </BaseMaterialCard>
-    </v-row>
+      <template #subtitle>
+        <div class="text-center mb-4 text-body-2 text-grey-darken-1">
+          Informe o seu e-mail para redefinir sua senha
+        </div>
+      </template>
+
+      <v-form
+        ref="form"
+        v-model="valid"
+      >
+        <v-text-field
+          v-model="email"
+          variant="outlined"
+          density="comfortable"
+          label="E-mail"
+          prepend-inner-icon="mdi-email-outline"
+          clearable
+          :rules="[() => $validation('required', email), () => $validation('email', email)]"
+          class="mb-4"
+          @keyup.enter="updatePass"
+        />
+      </v-form>
+
+      <template #actions>
+        <v-row justify="center">
+          <v-btn
+            class="bg-primary"
+            type="submit"
+            append-icon="mdi-email-fast-outline"
+            :loading="loading"
+            @click="updatePass"
+          >
+            Solicitar redefinição
+          </v-btn>
+        </v-row>
+      </template>
+    </BaseMaterialCard>
   </v-container>
 </template>
 

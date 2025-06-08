@@ -263,13 +263,24 @@ const IncomeController = {
         roolbackAccount = income.account
         roolbackValue = income.value
 
-        const updateBalance = await Account.findOneAndUpdate(
-          { _id: income.account, user: req.user.id },
-          { $inc: { balance: -income.value } }
-        )
-        if (!updateBalance) {
-          return res.status(404).json({ message: 'Conta informada não existe. O saldo não foi alterado.' })
+        const account = await Account.findOne({
+          _id: income.account,
+          user: req.user.id
+        })
+        if (!account) {
+          return res.status(404).json({ message: 'Conta associada não existe. O saldo não foi alterado.' })
         }
+
+        if (income.value > 0)
+          account.balance = account.balance - income.value
+        else {
+          account.balance = account.balance + Math.abs(income.value)
+        }
+
+        if (!await account.save()) {
+          throw new Error()
+        }
+
         updateBalanceSuccessfully = true
       }
 

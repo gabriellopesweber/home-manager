@@ -1,102 +1,113 @@
 <template>
   <v-container
-    class="d-flex justify-center fill-height"
+    class="d-flex justify-center align-center fill-height"
     fluid
   >
-    <v-row
-      dense
-      align="center"
-      justify="center"
+    <BaseMaterialCard
+      class="pa-6"
+      max-width="500"
+      width="500"
+      elevation="10"
+      rounded="xl"
     >
-      <v-form 
+      <!-- Título -->
+      <template #title>
+        <div class="text-center mb-4">
+          <img
+            :src="myLogo"
+            alt="Logo"
+            class="mx-auto mb-2"
+            style="height: 75px; width: 200px;"
+          >
+          <h2 class="text-h6 font-weight-medium text-grey-darken-2">
+            Crie uma conta
+          </h2>
+        </div>
+      </template>
+
+      <!-- Formulário -->
+      <v-form
         ref="form"
         v-model="valid"
       >
-        <BaseMaterialCard
-          elevation="5"
-          width="500"
-        >
-          <template #title>
-            <div class="text-center">
-              <img
-                class="mx-auto"
-                :src="myLogo"
-                style="height: 75px; width: 200px;"
-                type="image/svg"
-              >
-              <div>
-                Crie uma conta
-              </div>
-            </div>
-          </template>
-        
-          <v-row dense>
-            <v-col class="d-flex align-center justify-center">
-              <v-text-field
-                v-model="name"
-                variant="outlined"
-                label="Seu nome"
-                name="register-name"
-                clearable
-                :rules="[() => $validation('required', name)]"
-                @keyup.enter="register"
-              />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex align-center justify-center">
-              <v-text-field
-                v-model="email"
-                variant="outlined"
-                label="E-mail"
-                name="register-email"
-                clearable
-                :rules="[() => $validation('required', email), () => $validation('email', email)]"
-                @keyup.enter="register"
-              />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex justify-center">
-              <v-text-field
-                v-model="password"
-                type="password"
-                variant="outlined"
-                label="Senha"
-                name="register-pass"
-                clearable
-                :rules="[() => $validation('required', password), () => $validation('passwordStrength', password)]"
-                @keyup.enter="register"
-              />
-            </v-col>
-          </v-row>
-        
-          <template #actions>
-            <v-row dense>
-              <v-col class="d-flex justify-space-evenly">
-                <v-btn
-                  variant="outlined"
-                  name="toLogin"
-                  :to="{
-                    name: 'login'
-                  }"
-                >
-                  Voltar
-                </v-btn>
-                <v-btn
-                  class="bg-success"
-                  :loading="loading"
-                  name="register"
-                  @click="register"
-                >
-                  Cadastrar
-                </v-btn>
-              </v-col>
-            </v-row>
-          </template>
-        </BaseMaterialCard>
+        <v-text-field
+          v-model="name"
+          variant="outlined"
+          label="Seu nome"
+          prepend-inner-icon="mdi-account-outline"
+          name="register-name"
+          clearable
+          :rules="[() => $validation('required', name)]"
+          class="mb-4"
+          @keyup.enter="register"
+        />
+
+        <v-text-field
+          v-model="email"
+          variant="outlined"
+          label="E-mail"
+          prepend-inner-icon="mdi-email-outline"
+          name="register-email"
+          clearable
+          :rules="[() => $validation('required', email), () => $validation('email', email)]"
+          class="mb-4"
+          @keyup.enter="register"
+        />
+
+        <v-text-field
+          v-model="password"
+          type="password"
+          variant="outlined"
+          label="Senha"
+          prepend-inner-icon="mdi-lock-outline"
+          name="register-pass"
+          clearable
+          :rules="[() => $validation('required', password), () => $validation('passwordStrength', password)]"
+          class="mb-6"
+          @keyup.enter="register"
+        />
       </v-form>
-    </v-row>
+
+      <!-- Ações -->
+      <template #actions>
+        <v-row justify="space-between">
+          <v-col
+            cols="6"
+            class="pa-0 pr-1"
+          >
+            <v-btn
+              block
+              variant="outlined"
+              color="grey"
+              name="toLogin"
+              :to="{ name: 'login' }"
+            >
+              Voltar
+            </v-btn>
+          </v-col>
+          <v-col
+            cols="6"
+            class="pa-0 pl-1"
+          >
+            <v-btn
+              block
+              class="bg-success"
+              name="register"
+              :loading="loading"
+              @click="register"
+            >
+              Cadastrar
+              <v-icon
+                end
+                class="ml-2"
+              >
+                mdi-account-plus
+              </v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </template>
+    </BaseMaterialCard>
   </v-container>
 </template>
 
