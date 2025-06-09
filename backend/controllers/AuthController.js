@@ -2,6 +2,7 @@ import User from '../models/User.js'
 import bcryptjs from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
+import { v4 as uuidv4 } from 'uuid'
 
 import { Category } from '../models/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
@@ -55,10 +56,14 @@ const AuthController = {
 
       // Compara a senha fornecida com a senha criptografada no banco
       const isMatch = await bcryptjs.compare(password, user.password)
-      if (!isMatch) return res.status(400).json({ message: "Senha incorreta!" })
+      if (!isMatch) return res.status(401).json({ message: "Dados invalidos!" })
 
       // Gera o token JWT
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h" })
+      const token = jwt.sign(
+        { id: user._id, refreshNonce: uuidv4() },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" }
+      )
 
       res.status(200).json({ message: "Login realizado com sucesso!", token })
     } catch (error) {
@@ -78,7 +83,7 @@ const AuthController = {
 
       // Gera um token de redefinição de senha
       const resetToken = jwt.sign(
-        { id: user._id, iat: Date.now() },
+        { id: user._id, refreshNonce: uuidv4() },
         process.env.JWT_SECRET,
         { expiresIn: "15m" }
       )
@@ -110,7 +115,7 @@ const AuthController = {
               </a>
             </p>
             <p>Se você não solicitou essa alteração, pode ignorar este e-mail.</p>
-            <p style="font-size: 12px; color: #888;">Este link expira em 1 hora por motivos de segurança.</p>
+            <p style="font-size: 12px; color: #888;">Este link expira em 15 minutos por motivos de segurança.</p>
             <hr />
             <p style="font-size: 12px; color: #888;">HomeManager - Gerencie suas finanças com simplicidade</p>
           </div>
@@ -160,7 +165,11 @@ const AuthController = {
       const user = await User.findById(decoded.id)
       if (!user) return res.status(400).json({ message: "Token inválido ou expirado!" })
 
-      const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "2h" })
+      const newToken = jwt.sign(
+        { id: user._id, refreshNonce: uuidv4() },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" }
+      )
 
       return res.status(200).json({ message: "Token atualizado com sucesso!", token: newToken })
     } catch (error) {

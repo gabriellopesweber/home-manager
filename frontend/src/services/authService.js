@@ -65,7 +65,7 @@ class AuthService {
 
   async refreshToken(token) {
     try {
-      const response = await AuthAPI.post(`${this.baseUrl}/refresh-password`, { token })
+      const response = await AuthAPI.post(`${this.baseUrl}/refresh-token`, { token })
       return response.data
     } catch (error) {
       if (error.response) {

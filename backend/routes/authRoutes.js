@@ -11,6 +11,6 @@ router.post("/login", AuthController.login)
 
 router.post("/forgot-password", AuthController.forgotPassword) // Solicita a redefinição da senha do usuario
 router.post("/reset-password", AuthController.resetPassword) // Redefine a senha do usuario
-router.post("/refresh-password", AuthController.refreshToken) // Redefine a senha do usuario
+router.post("/refresh-token", AuthController.refreshToken) // Redefine a senha do usuario
 
 export default router
