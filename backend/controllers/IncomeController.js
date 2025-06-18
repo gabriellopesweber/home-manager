@@ -12,7 +12,7 @@ const IncomeController = {
     const user = req.user.id
 
     try {
-      const { category, status, value, date: stringDate, description, account } = req.body
+      const { category, status, value, date: stringDate, description, account, is_recurring, recurrence_type, recurrence_end_date } = req.body
 
       const validation = validateRequiredFields({ category, value, stringDate, account })
       if (!validation.valid) {
@@ -30,6 +30,15 @@ const IncomeController = {
       if (status) {
         if (typeof (status) !== "number") return res.status(400).json({ message: 'O parametro `status` deve ser do tipo number!' })
       }
+      if (is_recurring && typeof is_recurring !== "boolean") return res.status(400).json({
+        message: 'O parametro `is_recurring` deve ser do tipo boolean!'
+      })
+      if (recurrence_type && typeof recurrence_type !== "string") return res.status(400).json({
+        message: 'O parametro `recurrence_type` deve ser do tipo String!'
+      })
+      if (recurrence_end_date && typeof recurrence_end_date !== "string") return res.status(400).json({
+        message: 'O parametro `recurrence_end_date` deve ser do tipo String!'
+      })
 
       // Valida as regras de negocio
       if (value < 0) return res.status(400).json({ message: 'O parametro `value` deve ser um valor positivo.' })
@@ -52,18 +61,55 @@ const IncomeController = {
         updateBalanceSuccessfully = true
       }
 
-      const newIncome = await Income.create({
-        category: categoryById.id,
-        value,
-        status,
-        executionDate: updateBalanceSuccessfully ? dateNow : null,
-        date: date.toDate(),
-        description,
-        account,
-        user
-      })
+      let incomes = []
 
-      res.status(201).json(formatIncomeItem(newIncome))
+      if (is_recurring && recurrence_end_date) {
+        // Lógica para criar receitas recorrentes
+        const recurrenceEndDate = dayjs(recurrence_end_date)
+        if (!recurrenceEndDate.isValid()) return res.status(400).json({ message: 'Data de término da recorrência inválida.' })
+
+        // Cria as receitas para cada período de recorrência
+        let currentDate = dateNow
+
+        while (currentDate.isBefore(recurrenceEndDate)) {
+          const newIncome = {
+            category: categoryById.id,
+            value,
+            status,
+            executionDate: updateBalanceSuccessfully ? currentDate : null,
+            date: currentDate.toDate(),
+            description,
+            account,
+            user
+          }
+          incomes.push(newIncome)
+
+          // Avança para o próximo período de recorrência
+          if (recurrence_type === 'mensal') {
+            currentDate = currentDate.add(1, 'month')
+          } else if (recurrence_type === 'semanal') {
+            currentDate = currentDate.add(1, 'week')
+          } else if (recurrence_type === 'anual') {
+            currentDate = currentDate.add(1, 'year')
+          }
+        }
+
+        // Cria todas as receitas de uma vez
+        incomes.push(...await Income.insertMany(incomes))
+      } else {
+        incomes.push(await Income.create({
+          category: categoryById.id,
+          value,
+          status,
+          executionDate: updateBalanceSuccessfully ? dateNow : null,
+          date: date.toDate(),
+          description,
+          account,
+          user
+        }))
+      }
+
+      res.status(201).json(incomes.map(income => formatIncomeItem(income)))
     } catch (error) {
       console.log(error)
       if (updateBalanceSuccessfully) {
