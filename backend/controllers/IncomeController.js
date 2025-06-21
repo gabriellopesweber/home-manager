@@ -2,6 +2,7 @@ import { Account, Category, Income } from '../models/Finance.js'
 import { statusFinance } from '../constants/Finance.js'
 import { validateRequiredFields } from '../utils/validations.js'
 import { formatIncomeItem } from '../utils/format.js'
+import mongoose from 'mongoose'
 import dayjs from 'dayjs'
 
 const IncomeController = {
@@ -12,7 +13,17 @@ const IncomeController = {
     const user = req.user.id
 
     try {
-      const { category, status, value, date: stringDate, description, account, is_recurring, recurrence_type, recurrence_end_date } = req.body
+      const {
+        category,
+        status,
+        value,
+        date: stringDate,
+        description,
+        account,
+        is_recurring,
+        recurrence_type,
+        recurrence_end_date
+      } = req.body
 
       const validation = validateRequiredFields({ category, value, stringDate, account })
       if (!validation.valid) {
@@ -24,34 +35,24 @@ const IncomeController = {
       if (typeof (value) !== "number") return res.status(400).json({ message: 'O parametro `value` deve ser do tipo Number!' })
       if (typeof (stringDate) !== "string") return res.status(400).json({ message: 'O parametro `date` deve ser do tipo String!' })
       if (typeof (account) !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
-      if (description) {
-        if (typeof (description) !== "string") return res.status(400).json({ message: 'O parametro `description` deve ser do tipo String!' })
-      }
-      if (status) {
-        if (typeof (status) !== "number") return res.status(400).json({ message: 'O parametro `status` deve ser do tipo number!' })
-      }
-      if (is_recurring && typeof is_recurring !== "boolean") return res.status(400).json({
-        message: 'O parametro `is_recurring` deve ser do tipo boolean!'
-      })
-      if (recurrence_type && typeof recurrence_type !== "string") return res.status(400).json({
-        message: 'O parametro `recurrence_type` deve ser do tipo String!'
-      })
-      if (recurrence_end_date && typeof recurrence_end_date !== "string") return res.status(400).json({
-        message: 'O parametro `recurrence_end_date` deve ser do tipo String!'
-      })
+      if (description && typeof (description) !== "string") return res.status(400).json({ message: 'O parametro `description` deve ser do tipo String!' })
+      if (status && typeof (status) !== "number") return res.status(400).json({ message: 'O parametro `status` deve ser do tipo number!' })
+      if (is_recurring && typeof is_recurring !== "boolean") return res.status(400).json({ message: 'O parametro `is_recurring` deve ser do tipo boolean!' })
+      if (recurrence_type && typeof recurrence_type !== "string") return res.status(400).json({ message: 'O parametro `recurrence_type` deve ser do tipo String!' })
+      if (recurrence_end_date && typeof recurrence_end_date !== "string") return res.status(400).json({ message: 'O parametro `recurrence_end_date` deve ser do tipo String!' })
 
-      // Valida as regras de negocio
       if (value < 0) return res.status(400).json({ message: 'O parametro `value` deve ser um valor positivo.' })
 
-      const date = dayjs(stringDate)
+      let date = dayjs(stringDate).startOf('day')
       if (!date.isValid()) return res.status(400).json({ message: 'Data invalida.' })
+      const dateStr = date.format('YYYY-MM-DD')
 
       const categoryById = await Category.findById({ _id: category, user, type: 'receita' })
       if (!categoryById) return res.status(404).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo receita!' })
 
-      const dateNow = dayjs()
+      const dateNow = dayjs().startOf('day')
       // Se a data passada, for a de hoje e status conciliado deve adicionar o valor a conta.
-      if ((dateNow.isSame(stringDate, 'day') && status === statusFinance.CONCILIATED) || status === statusFinance.CONCILIATED) {
+      if ((dateNow.isSame(date, 'day') && status === statusFinance.CONCILIATED) || status === statusFinance.CONCILIATED) {
         roolbackValue = value
         const updateBalance = await Account.findByIdAndUpdate(
           { _id: account, user: req.user.id },
@@ -61,23 +62,27 @@ const IncomeController = {
         updateBalanceSuccessfully = true
       }
 
-      let incomes = []
+      let newIncomes = []
 
       if (is_recurring && recurrence_end_date) {
-        // Lógica para criar receitas recorrentes
-        const recurrenceEndDate = dayjs(recurrence_end_date)
+        let recurrenceGroupId = new mongoose.Types.ObjectId()
+        let recurrenceEndDate = dayjs(recurrence_end_date).startOf('day')
         if (!recurrenceEndDate.isValid()) return res.status(400).json({ message: 'Data de término da recorrência inválida.' })
 
-        // Cria as receitas para cada período de recorrência
-        let currentDate = dateNow
+        let currentDate = date.clone()
+        let incomes = []
 
-        while (currentDate.isBefore(recurrenceEndDate)) {
+        while (currentDate.isSameOrBefore(recurrenceEndDate, 'day')) {
           const newIncome = {
             category: categoryById.id,
             value,
             status,
-            executionDate: updateBalanceSuccessfully ? currentDate : null,
-            date: currentDate.toDate(),
+            executionDate: updateBalanceSuccessfully ? currentDate.format('YYYY-MM-DD') : null,
+            recurrenceGroupId,
+            isRecurring: true,
+            recurrenceType: recurrence_type,
+            recurrenceEndDate: recurrenceEndDate.format('YYYY-MM-DD'),
+            date: currentDate.format('YYYY-MM-DD'),
             description,
             account,
             user
@@ -91,29 +96,30 @@ const IncomeController = {
             currentDate = currentDate.add(1, 'week')
           } else if (recurrence_type === 'anual') {
             currentDate = currentDate.add(1, 'year')
+          } else {
+            break
           }
         }
 
-        // Cria todas as receitas de uma vez
-        incomes.push(...await Income.insertMany(incomes))
+        newIncomes.push(...await Income.insertMany(incomes))
       } else {
-        incomes.push(await Income.create({
+        newIncomes.push(await Income.create({
           category: categoryById.id,
           value,
           status,
-          executionDate: updateBalanceSuccessfully ? dateNow : null,
-          date: date.toDate(),
+          executionDate: updateBalanceSuccessfully ? dateStr : null,
+          isRecurring: false,
+          date: dateStr,
           description,
           account,
           user
         }))
       }
 
-      res.status(201).json(incomes.map(income => formatIncomeItem(income)))
+      res.status(201).json(newIncomes.map(income => formatIncomeItem(income)))
     } catch (error) {
       console.log(error)
       if (updateBalanceSuccessfully) {
-        // Caso ocorra algum erro, mas o valor da conta foi atualizado, desfaz
         const { account } = req.body
         await Account.findOneAndUpdate(
           { _id: account, user: req.user.id },
@@ -168,22 +174,39 @@ const IncomeController = {
     let status
 
     try {
-      const { category, status: statusBody, value, date: stringDate, description, account } = req.body
-      const { id } = req.params
+      const {
+        category,
+        status: statusBody,
+        value,
+        date: stringDate,
+        description,
+        account,
+        is_only_this_recurrence,
+        recurrence_type,
+        recurrence_end_date
+      } = req.body
+      const { id, recurrence_group_id } = req.params
+
+      if (!id && !recurrence_group_id) {
+        return res.status(400).json({ message: 'O parametro `id` ou `recurrence_group_id` deve ser informado!' })
+      }
 
       // Valida os tipos
-      if (typeof category !== "string") return res.status(400).json({ message: 'O parametro `category` deve ser do tipo String!' })
-      if (typeof value !== "number") return res.status(400).json({ message: 'O parametro `value` deve ser do tipo Number!' })
-      if (typeof stringDate !== "string") return res.status(400).json({ message: 'O parametro `date` deve ser do tipo String!' })
-      if (typeof account !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
+      if (category && typeof category !== "string") return res.status(400).json({ message: 'O parametro `category` deve ser do tipo String!' })
+      if (value && typeof value !== "number") return res.status(400).json({ message: 'O parametro `value` deve ser do tipo Number!' })
+      if (stringDate & typeof stringDate !== "string") return res.status(400).json({ message: 'O parametro `date` deve ser do tipo String!' })
+      if (account & typeof account !== "string") return res.status(400).json({ message: 'O parametro `account` deve ser do tipo String!' })
       if (description && typeof description !== "string") return res.status(400).json({ message: 'O parametro `description` deve ser do tipo String!' })
       if (statusBody && typeof statusBody !== "number") return res.status(400).json({ message: 'O parametro `status` deve ser do tipo number!' })
+      if (is_only_this_recurrence && typeof is_only_this_recurrence !== "boolean") return res.status(400).json({ message: 'O parametro `is_only_this_recurrence` deve ser do tipo boolean!' })
+      if (recurrence_type && typeof recurrence_type !== "string") return res.status(400).json({ message: 'O parametro `recurrence_type` deve ser do tipo String!' })
+      if (recurrence_end_date && typeof recurrence_end_date !== "string") return res.status(400).json({ message: 'O parametro `recurrence_end_date` deve ser do tipo String!' })
 
-      // Valida regras de negócio
-      if (value < 0) return res.status(400).json({ message: 'O parametro `value` deve ser um valor positivo.' })
+      if (value && value < 0) return res.status(400).json({ message: 'O parametro `value` deve ser um valor positivo.' })
 
-      const date = dayjs(stringDate)
+      const date = dayjs(stringDate).startOf('day')
       if (!date.isValid()) return res.status(400).json({ message: 'Data inválida.' })
+      const dateStr = date.format('YYYY-MM-DD')
 
       const categoryByName = await Category.findById({ _id: category, type: 'receita', user })
       if (!categoryByName) return res.status(404).json({ message: 'A categoria informada não esta cadastrada ou não pertence ao tipo receita!' })
@@ -196,7 +219,8 @@ const IncomeController = {
 
       const currentyValue = income.value
       const currentyStatus = income.status
-      const dateNow = dayjs()
+      const dateNow = dayjs().startOf('day')
+      const dateNowStr = dateNow.format('YYYY-MM-DD')
 
       if (typeof statusBody !== "number") {
         status = currentyStatus
@@ -207,12 +231,12 @@ const IncomeController = {
       valueDifference = value - currentyValue
 
       // 1. Se valor mudou E status é conciliado
-      if ((dateNow.isSame(stringDate, 'day') && status === statusFinance.CONCILIATED) || status === statusFinance.CONCILIATED) {
+      if ((dateNow.isSame(date, 'day') && status === statusFinance.CONCILIATED) || status === statusFinance.CONCILIATED) {
         if (currentyStatus !== statusFinance.CONCILIATED) {
           roolbackValue = value
 
           accountByName.balance += value
-          accountByName.updateDate = dateNow
+          accountByName.updateDate = dateNowStr
           await accountByName.save()
 
           updateBalanceSuccessfully = true
@@ -221,7 +245,7 @@ const IncomeController = {
           roolbackValue = valueDifference
 
           accountByName.balance += valueDifference
-          accountByName.updateDate = dateNow
+          accountByName.updateDate = dateNowStr
           await accountByName.save()
 
           updateBalanceSuccessfully = true
@@ -231,11 +255,11 @@ const IncomeController = {
 
       // 2. Se status mudou de CONCILIATED para outro (mesmo valor)
       if (valueDifference === 0 && currentyStatus !== status && !updateBalanceSuccessfully) {
-        if ((status === statusFinance.CONCILIATED && dateNow.isSame(stringDate, 'day')) || status === statusFinance.CONCILIATED) {
+        if ((status === statusFinance.CONCILIATED && dateNow.isSame(date, 'day')) || status === statusFinance.CONCILIATED) {
           roolbackValue = value
 
           accountByName.balance += value
-          accountByName.updateDate = dateNow
+          accountByName.updateDate = dateNowStr
           await accountByName.save()
 
           updateBalanceSuccessfully = true
@@ -248,26 +272,51 @@ const IncomeController = {
         roolbackValue = currentyValue
 
         accountByName.balance -= currentyValue
-        accountByName.updateDate = dateNow
+        accountByName.updateDate = dateNowStr
         await accountByName.save()
 
         updateBalanceSuccessfully = true
         rollbackType = 'onlyStatusRemoved'
       }
 
-      const updatedIncome = await Income.findByIdAndUpdate(id, {
-        category: categoryByName.id,
-        value,
-        status,
-        executionDate: updateBalanceSuccessfully ? dateNow : null,
-        date,
-        description,
-        account: accountByName.id,
-        user
-      }, { new: true })
+      const returnUpdateIncome = []
+      if (recurrence_group_id) {
+        const incomes = await Income.find({ recurrenceGroupId: recurrence_group_id, user })
+        if (!incomes.length) return res.status(404).json({ message: 'Nenhuma receita recorrente encontrada.' })
 
-      return res.status(200).json(formatIncomeItem(updatedIncome))
+        for (const [i, income] of incomes) {
+          if (category) income.category = category
+          if (value) income.value = value
+          if (status) {
+            if (i === 0) {
+              income.status = status
+            } else {
+              income.status = statusFinance.PENDING
+            }
+          }
+          if (description) income.description = description
+          if (account) income.account = account
+          if (recurrence_type) income.recurrenceType = recurrence_type
+          if (recurrence_end_date) income.recurrenceEndDate = recurrence_end_date
 
+          returnUpdateIncome.push(await income.save())
+        }
+      } else {
+        const income = await Income.find({ id, user })
+        if (!income.length) return res.status(404).json({ message: 'Nenhuma receita recorrente encontrada.' })
+
+        if (category) income.category = category
+        if (value) income.value = value
+        if (status) income.status = status
+        if (description) income.description = description
+        if (account) income.account = account
+        if (dateStr) income.date = dateStr
+        if (updateBalanceSuccessfully) income.executionDate = dateNowStr
+
+        returnUpdateIncome.push(await income.save())
+      }
+
+      return res.status(200).json(updatedIncomes.map(formatIncomeItem))
     } catch (error) {
       console.log(error)
       const { account } = req.body
@@ -330,7 +379,6 @@ const IncomeController = {
         updateBalanceSuccessfully = true
       }
 
-      // Deleta a receita
       await Income.findByIdAndDelete({ _id: id, user: req.user.id })
 
       res.status(200).json({ message: 'Receita removida com sucesso!' })

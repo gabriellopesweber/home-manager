@@ -76,6 +76,11 @@ const IncomeSchema = new mongoose.Schema({
   recurrenceEndDate: {
     type: Date,
     default: null
+  },
+  recurrenceGroupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Income',
+    default: null
   }
 })
 
