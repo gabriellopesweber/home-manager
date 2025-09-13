@@ -2,6 +2,10 @@ import express from 'express'
 import cors from 'cors'
 import { connectDB } from './config/database.js'
 import dotenv from 'dotenv'
+import dayjs from 'dayjs'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter.js'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore.js'
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
 
 const env = process.env.NODE_ENV || "development"
 dotenv.config({ path: `.env.${env}` })
@@ -20,6 +24,11 @@ import dashboardRouter from './routes/dashboardRouter.js'
 const app = express()
 
 connectDB()
+
+dayjs.extend(customParseFormat)
+dayjs.extend(isSameOrAfter)
+dayjs.extend(isSameOrBefore)
+dayjs.locale('pt-br')
 
 app.use(cors())
 app.use(express.json())

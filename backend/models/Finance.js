@@ -64,6 +64,24 @@ const IncomeSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  isRecurring: {
+    type: Boolean,
+    default: false
+  },
+  recurrenceType: {
+    type: String,
+    enum: ['mensal', 'semanal', 'anual'],
+    default: null
+  },
+  recurrenceEndDate: {
+    type: Date,
+    default: null
+  },
+  recurrenceGroupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Income',
+    default: null
+  }
 })
 
 // Modelo de Despesa

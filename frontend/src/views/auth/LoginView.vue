@@ -1,103 +1,93 @@
 <template>
   <v-container
-    class="d-flex justify-center fill-height"
+    class="d-flex justify-center align-center fill-height"
     fluid
   >
-    <v-row
-      dense
-      align="center"
-      justify="center"
+    <BaseMaterialCard
+      class="pa-6"
+      max-width="500"
+      width="500"
+      elevation="10"
+      rounded="xl"
     >
-      <BaseMaterialCard
-        elevation="5"
-        width="500"
+      <template #title>
+        <div class="text-center mb-4">
+          <img
+            :src="myLogo"
+            alt="Logo"
+            class="mx-auto mb-2"
+            style="height: 75px; width: 200px;"
+          >
+          <h2 class="text-h6 font-weight-medium text-grey-darken-2">
+            Seja bem-vindo
+          </h2>
+        </div>
+      </template>
+
+      <v-form
+        ref="form"
+        v-model="valid"
       >
-        <template #title>
-          <div class="text-center">
-            <img
-              class="mx-auto"
-              :src="myLogo"
-              style="height: 75px; width: 200px;"
-              type="image/svg"
-            >
-            <div>
-              Seja bem vindo
-            </div>
-          </div>
-        </template>
-        <v-form
-          ref="form"
-          v-model="valid"
+        <v-text-field
+          v-model="email"
+          variant="outlined"
+          label="E-mail"
+          name="login-email"
+          prepend-inner-icon="mdi-email-outline"
+          clearable
+          :rules="[() => $validation('required', email), () => $validation('email', email)]"
+          class="mb-4"
+          @keyup.enter="login"
+        />
+
+        <v-text-field
+          v-model="password"
+          type="password"
+          variant="outlined"
+          label="Senha"
+          name="login-pass"
+          prepend-inner-icon="mdi-lock-outline"
+          clearable
+          :rules="[() => $validation('required', password)]"
+          class="mb-4"
+          @keyup.enter="login"
+        />
+
+        <v-btn
+          block
+          color="primary"
+          class="mb-4"
+          name="login"
+          :loading="loading"
+          @click="login"
         >
-          <v-row dense>
-            <v-col class="d-flex align-center justify-center">
-              <v-text-field
-                v-model="email"
-                variant="outlined"
-                label="E-mail"
-                name="login-email"
-                clearable
-                :rules="[() => $validation('required', email), () => $validation('email', email)]"
-                @keyup.enter="login"
-              />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex justify-center">
-              <v-text-field
-                v-model="password"
-                type="password"
-                variant="outlined"
-                clearable
-                label="Senha"
-                name="login-pass"
-                :rules="[() => $validation('required', password)]"
-                @keyup.enter="login"
-              />
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col class="d-flex justify-center">
-              <v-btn
-                color="primary"
-                :loading="loading"
-                name="login"
-                @click="login"
-              >
-                <span> Entrar </span>
-                <v-icon class="ml-2">
-                  mdi-login
-                </v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-form>
-        <template #actions>
-          <v-row dense>
-            <v-col class="d-flex align-center justify-center">
-              <v-btn
-                class="mx-4"
-                variant="text"
-                :to="{
-                  name: 'register'
-                }"
-              >
-                Registre-se
-              </v-btn>
-              <v-btn
-                class="mx-4"
-                variant="text"
-                :to="{
-                  name: 'forgotPassword'
-                }"
-              >
-                Esqueceu a senha?
-              </v-btn>
-            </v-col>
-          </v-row>
-        </template>
-      </BaseMaterialCard>
-    </v-row>
+          Entrar
+          <v-icon
+            end
+            class="ml-2"
+          >
+            mdi-login
+          </v-icon>
+        </v-btn>
+
+        <div class="d-flex justify-space-between">
+          <v-btn
+            variant="text"
+            size="small"
+            :to="{ name: 'register' }"
+          >
+            Criar conta
+          </v-btn>
+          <v-btn
+            variant="text"
+            size="small"
+            :to="{ name: 'forgotPassword' }"
+          >
+            Esqueceu a senha?
+          </v-btn>
+        </div>
+      </v-form>
+    </BaseMaterialCard>
   </v-container>
 </template>
 

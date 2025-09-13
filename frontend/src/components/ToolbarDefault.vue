@@ -63,12 +63,22 @@
           :to="{ name: 'manager.launch' }"
           active-class="text-primary"
         />
+
         <v-list-item
           title="Contas"
           prepend-icon="mdi-bank"
           link
           name="manager.account"
           :to="{ name: 'manager.account' }"
+          active-class="text-primary"
+        />
+
+        <v-list-item
+          title="Usuario"
+          prepend-icon="mdi-account"
+          link
+          name="manager.user"
+          :to="{ name: 'manager.user' }"
           active-class="text-primary"
         />
       </v-list-group>

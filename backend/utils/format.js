@@ -104,7 +104,11 @@ export function formatIncomeItem(income = {}, showType = false) {
     date,
     description,
     account,
-    user
+    user,
+    isRecurring: is_recurring,
+    recurrenceGroupId: recurring_id,
+    recurrenceType: recurring_type,
+    recurrenceEndDate: recurring_end_date
   } = income
 
   return {
@@ -117,6 +121,10 @@ export function formatIncomeItem(income = {}, showType = false) {
     description,
     account,
     user,
+    is_recurring,
+    recurring_id,
+    recurring_type,
+    recurring_end_date,
     ...(showType && { type: 'income' })
   }
 }
